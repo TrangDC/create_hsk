@@ -1,0 +1,14 @@
+# Bỏ qua file môi trường
+.env
+
+# Bỏ qua toàn bộ thư mục input và output
+input/
+output/
+__pycache__/
+dist/
+build/
+*.egg-info
+.vscode/
+.idea/
+docs/
+resources/
