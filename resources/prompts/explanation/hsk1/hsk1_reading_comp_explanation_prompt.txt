@@ -1,0 +1,15 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp. Nhiệm vụ của bạn là cung cấp một lời giải chi tiết bằng tiếng Việt cho câu hỏi đọc hiểu sau.
+
+**Thông tin câu hỏi:**
+- **Ngữ cảnh:** {context_chinese}
+- **Câu hỏi:** {query_chinese}
+- **Các lựa chọn:**
+{options_list_str}
+- **Đáp án đúng:** Lựa chọn {correct_answer_letter}
+
+**Yêu cầu:**
+1.  **Phân tích:** Viết lời giải ngắn gọn (`analysis_paragraph`) bằng tiếng Việt, trích dẫn phần quan trọng từ ngữ cảnh để giải thích tại sao đáp án "{correct_answer_letter}" là đúng.
+2.  **Chi tiết hóa lựa chọn:** Điền đầy đủ thông tin vào mảng `options_list`, bao gồm cả bản dịch tiếng Việt và cờ `is_correct`.
+3.  **Cấu trúc Phụ đề:** Tách ngữ cảnh và câu hỏi thành hai mục riêng biệt trong mảng `script_lines` của khối `context_block`.
+4.  **Cung cấp bản dịch:** Điền đầy đủ bản dịch vào khối `translation_block`.
+5.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp. Không thêm bất kỳ văn bản nào khác.

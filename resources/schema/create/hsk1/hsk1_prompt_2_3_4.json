@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "description": "Một bộ đề thi HSK1 gồm 3 dạng câu hỏi mới, chủ yếu liên quan đến hình ảnh và đọc hiểu ngắn.",
+  "properties": {
+    "individual_image_matching": {
+      "type": "array",
+      "description": "Dạng 1: TN phương án đúng (hình ảnh). Gồm 4 câu, mỗi câu có 3 mô tả ảnh và 1 script. Mỗi mô tả một hình ảnh được trình bày theo cấu trúc Ảnh: {mô tả}",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "image_options": {
+            "type": "array",
+            "description": "Một danh sách gồm 3 chuỗi, đánh thứ tự A., B., C., mỗi chuỗi mô tả một hình ảnh theo cấu trúc Ảnh: {mô tả} bằng Tiếng Việt.",
+            "items": { "type": "string" }
+          },
+          "script_chinese": { "type": "string", "description": "Script tiếng Trung mô tả 1 trong 3 ảnh." },
+          "script_pinyin": { "type": "string", "description": "Phiên âm Pinyin cho script." },
+          "correct_answer": { "type": "integer", "description": "Đáp án đúng, là số thứ tự của ảnh (1, 2, hoặc 3) trong 'image_options' khớp với script." }
+        },
+        "required": ["question_id", "image_options", "script_chinese", "script_pinyin", "correct_answer"]
+      }
+    },
+    "shared_image_comprehension": {
+      "type": "object",
+      "description": "Dạng 2: TN phương án đúng (hình ảnh) (HL). Gồm 1 học liệu 4 ảnh và 4 script.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Một danh sách 4 chuỗi (đánh thứ tự từ A. đến D.) mỗi chuỗi mô tả một hình ảnh theo cấu trúc Ảnh: {mô tả} bằng Tiếng Việt.",
+          "items": { "type": "string" }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách 4 script, mỗi script tương ứng với một ảnh trong học liệu.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "script_chinese": { "type": "string" },
+              "script_pinyin": { "type": "string" },
+              "correct_answer": { "type": "integer", "description": "Đáp án đúng, là số thứ tự của ảnh (1 đến 4) trong 'shared_material'." }
+            },
+            "required": ["question_id", "script_chinese", "script_pinyin", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_material", "questions"]
+    },
+    "reading_comprehension_choice": {
+      "type": "array",
+      "description": "Dạng 3: TN phương án đúng (đọc hiểu). Gồm 4 câu, mỗi câu có script và 3 phương án trả lời.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "context_chinese": { "type": "string", "description": "Câu chứa thông tin." },
+          "query_chinese": { "type": "string", "description": "Câu hỏi về thông tin đã cho." },
+          "answer_options": {
+            "type": "array",
+            "description": "Danh sách 3 phương án trả lời.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "chinese_text": { "type": "string" },
+                "pinyin": { "type": "string" }
+              },
+              "required": ["chinese_text", "pinyin"]
+            }
+          },
+          "correct_answer": { "type": "integer", "description": "Đáp án đúng, là số thứ tự của phương án (1, 2, hoặc 3)." }
+        },
+        "required": ["question_id", "context_chinese", "query_chinese", "answer_options", "correct_answer"]
+      }
+    }
+  },
+  "required": ["individual_image_matching", "shared_image_comprehension", "reading_comprehension_choice"]
+}

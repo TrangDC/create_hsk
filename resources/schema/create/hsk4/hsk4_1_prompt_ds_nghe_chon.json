@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "true_false_listening_choice": {
+      "type": "array",
+      "description": "Danh sách 4 câu hỏi Đúng/Sai nghe chọn cho HSK4.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "statement_chinese": { "type": "string", "description": "Câu nhận định, bắt đầu bằng ★." },
+          "script_chinese": { "type": "string", "description": "Đoạn script thông tin gốc." },
+          "correct_answer": { "type": "integer", "description": "Đáp án: 1 cho Đúng, 0 cho Sai." }
+        },
+        "required": ["question_id", "statement_chinese", "script_chinese", "correct_answer"]
+      }
+    }
+  },
+  "required": ["true_false_listening_choice"]
+}

@@ -16,7 +16,15 @@ from services.question_sheet_processors import (
     populate_true_false_listening_choice, # Dạng 2 - HSK3
     populate_reading_comprehension_v3, # Dạng 7 - HSK3
     populate_sentence_reordering, # Dạng 8 - HSK3
-    populate_word_fill_in_display_answer # Dạng 9 - HSK3
+    populate_word_fill_in_display_answer, # Dạng 9 - HSK3
+    populate_passage_with_multiple_questions, # Dạng 4 (TN Nghe hiểu) và Dạng 8 (TN Đọc hiểu ngắn)
+    populate_sentence_sequence_reordering, # Dạng 6: Sắp xếp các câu (HSK4)
+    populate_passage_cloze,
+    populate_main_idea_comprehension,
+    populate_long_passage_comprehension,
+    populate_image_with_word_tf,
+    populate_writing_from_keywords,
+    populate_writing_from_image
 )
 
 # 2. Định nghĩa cấu hình cho các HSK
@@ -79,15 +87,15 @@ HSK2_PROMPT_CONFIGS = {
             ("image_matching_questions", "TN chọn ảnh (img) (HL) (HSK2)", populate_image_matching_shared),
         ]
     },
-    # Dạng 6: TN chọn từ đúng (HL) (HSK2) - Tái sử dụng hàm của HSK1
-    "hsk2_6_prompt_tn_chon_tu_dung_hl": {
+    # Dạng 7: TN chọn từ đúng (HL) (HSK2) - Tái sử dụng hàm của HSK1
+    "hsk2_7_prompt_tn_chon_tu_dung_hl": {
         "type": "keyed",
         "processors": [
             ("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK2)", populate_word_fill_in_shared),
         ]
     },
-    # Dạng 7: ĐS lựa chọn (HSK2)
-    "hsk2_7_prompt_ds_lua_chon": {
+    # Dạng 6: ĐS lựa chọn (HSK2)
+    "hsk2_6_prompt_ds_lua_chon": {
         "type": "keyed",
         "processors": [
             ("true_false_statement_questions", "ĐS lựa chọn (HSK2)", populate_true_false_statement),
@@ -139,7 +147,7 @@ HSK3_PROMPT_CONFIGS = {
             ("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK3)", populate_word_fill_in_shared),
         ]
     },
-    "hsk3_7_prompt_tn_pa_dung_v3": {
+    "hsk3_7_prompt_tn_pa_dung_no_pinyin_v3": {
         "type": "keyed",
         "processors": [
             ("reading_comprehension_no_pinyin_v3", "TN PA đúng ko pinyin_v3 (HSK3)", populate_reading_comprehension_v3)
@@ -155,9 +163,87 @@ HSK3_PROMPT_CONFIGS = {
     }
 }
 
-HSK4_PROMPT_CONFIGS = {}
+HSK4_PROMPT_CONFIGS = {
+    "hsk4_1_prompt_ds_nghe_chon": {
+        "type": "keyed",
+        "processors": [("true_false_listening_choice", "ĐS nghe chọn (HSK4)", populate_true_false_listening_choice)]
+    },
+    "hsk4_2_prompt_tn_pa_dung": {
+        "type": "keyed",
+        "processors": [("reading_comprehension_dialogue_2_lines", "TN PA đúng (HSK4)", populate_reading_comprehension_dialogue)]
+    },
+    "hsk4_3_prompt_tn_pa_dung_v2": {
+        "type": "keyed",
+        "processors": [("reading_comprehension_dialogue_4_lines", "TN PA đúng_v2 (HSK4)", populate_reading_comprehension_dialogue)]
+    },
+    "hsk4_4_prompt_tn_nghe_hieu": {
+        "type": "keyed",
+        "processors": [("listening_comprehension", "TN Nghe hiểu (HSK4)", populate_passage_with_multiple_questions)]
+    },
+    "hsk4_5_prompt_tn_chon_tu_dung_hl": {
+        "type": "keyed",
+        "processors": [("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK4)", populate_word_fill_in_shared)]
+    },
+    "hsk4_6_prompt_sap_xep_cac_cau": {
+        "type": "keyed",
+        "processors": [("sentence_sequence_reordering", "Sắp xếp các câu (HSK4)", populate_sentence_sequence_reordering)]
+    },
+    "hsk4_7_prompt_tn_pa_dung_no_pinyin_v3": {
+        "type": "keyed",
+        "processors": [("reading_comprehension_no_pinyin_v3", "TN PA đúng ko pinyin_v3 (HSK4)", populate_reading_comprehension_v3)]
+    },
+    "hsk4_8_prompt_tn_doc_hieu_ngan": {
+        "type": "keyed",
+        "processors": [("reading_comprehension_short_passage", "TN Đọc hiểu ngắn (HSK4)", populate_passage_with_multiple_questions)]
+    },
+    "hsk4_9_prompt_sap_xep_cau": {
+        "type": "keyed",
+        "processors": [("sentence_reordering", "Sắp xếp câu (HSK4)", populate_sentence_reordering)]
+    },
+    "hsk4_10_prompt_anh_voi_tu": {
+        "type": "keyed",
+        "processors": [("image_with_word_tf", "Ảnh với từ (img) (HSK4)", populate_image_with_word_tf)]
+    }
+}
 
-HSK5_PROMPT_CONFIGS = {}
+HSK5_PROMPT_CONFIGS = {
+    "hsk5_1_prompt_tn_pa_dung": {
+        "type": "keyed",
+        "processors": [("reading_comprehension_dialogue_2_lines","TN PA đúng (HSK5)",populate_reading_comprehension_dialogue)]
+    },
+    "hsk5_2_prompt_tn_pa_dung_v2": {
+        "type": "keyed",
+        "processors": [("reading_comprehension_dialogue_4_lines","TN PA đúng_v2 (HSK5)",populate_reading_comprehension_dialogue)]
+    },
+    "hsk5_3_prompt_tn_nghe_hieu": {
+        "type": "keyed",
+        "processors": [("listening_comprehension","TN Nghe hiểu (HSK5)",populate_passage_with_multiple_questions)]
+    },
+    "hsk5_4_prompt_dien_tu_doan_van": {
+        "type": "keyed",
+        "processors": [("passage_cloze","Điền từ đoạn văn (HSK5)", populate_passage_cloze)]
+    },
+    "hsk5_5_prompt_chon_chu_de": {
+        "type": "keyed",
+        "processors": [("main_idea_comprehension","Chọn chủ đề đoạn văn (HSK5)", populate_main_idea_comprehension)]
+    },
+    "hsk5_6_prompt_tn_doc_hieu_img": {
+        "type": "keyed",
+        "processors": [("long_passage_comprehension","TN Đọc hiểu (img) (HSK5)", populate_long_passage_comprehension)]
+    },
+    "hsk5_7_prompt_sap_xep_cau": {
+        "type": "keyed",
+        "processors": [("sentence_reordering","Sắp xếp câu (HSK5)",populate_sentence_reordering)]
+    },
+    "hsk5_8_prompt_viet_dua_vao_tu": {
+        "type": "keyed",
+        "processors": [("writing_from_keywords","Viết dựa vào từ (HSK5)",populate_writing_from_keywords)]
+    },
+    "hsk5_9_prompt_viet_dua_vao_anh": {
+        "type": "keyed",
+        "processors": [("writing_from_image","Viết dựa vào ảnh (img) (HSK5)",populate_writing_from_image)]
+    }
+}
 
 # 3. Hàm "nhà máy" để lấy cấu hình đúng
 def get_prompt_config(hsk_level: str):

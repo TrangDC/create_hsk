@@ -60,7 +60,7 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
 
     print("\n--- Bắt đầu gọi Vertex AI API để tạo câu hỏi ---")
     generated_data_map = {}
-    with ThreadPoolExecutor(max_workers=len(PROMPT_CONFIGS)) as executor:
+    with ThreadPoolExecutor(max_workers=len(PROMPT_CONFIGS)/2) as executor:
         future_to_prompt = {
             executor.submit(
                 generate_content_from_pdfs,
@@ -132,7 +132,7 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
 
 # TEST hàm tạo
 if __name__ == '__main__':
-    hsk_level = "hsk3"
-    pdf_folder_path = r"D:\Edmicro\Tools\Test\create_hsk\input"
-    output_folder_path = r"D:\Edmicro\Tools\Test\create_hsk\output"
+    hsk_level = "hsk2"
+    pdf_folder_path = r"D:\Edmicro\Tools\create_hsk\input"
+    output_folder_path = r"D:\Edmicro\Tools\create_hsk\output\test"
     run_question_generation(hsk_level, pdf_folder_path, output_folder_path)

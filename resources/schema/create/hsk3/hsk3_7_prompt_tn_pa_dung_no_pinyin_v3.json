@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "reading_comprehension_no_pinyin_v3": {
+      "type": "array",
+      "description": "Danh sách 4 câu hỏi đọc hiểu không pinyin V3 cho HSK3.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "script_chinese": { "type": "string", "description": "Đoạn văn bản gốc." },
+          "query_chinese": { "type": "string", "description": "Câu hỏi về đoạn văn, bắt đầu bằng ★." },
+          "answer_options": {
+            "type": "array",
+            "description": "Danh sách 3 phương án trả lời bằng tiếng Trung.",
+            "items": { "type": "string" }
+          },
+          "correct_answer": { "type": "integer", "description": "Đáp án đúng (1, 2, hoặc 3)." }
+        },
+        "required": ["question_id", "script_chinese", "query_chinese", "answer_options", "correct_answer"]
+      }
+    }
+  },
+  "required": ["reading_comprehension_no_pinyin_v3"]
+}

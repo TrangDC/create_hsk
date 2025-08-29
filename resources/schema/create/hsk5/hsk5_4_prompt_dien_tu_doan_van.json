@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "passage_cloze": {
+      "type": "object",
+      "description": "Một học liệu là đoạn văn có 4 chỗ trống và 4 bộ phương án trả lời.",
+      "properties": {
+        "shared_material": { "type": "string", "description": "Đoạn văn học liệu có chứa 4 chỗ trống '________'." },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách 4 bộ phương án trả lời, mỗi bộ cho một chỗ trống.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "answer_options": {
+                "type": "array",
+                "description": "Danh sách 4 phương án trả lời.",
+                "items": { "type": "string" }
+              },
+              "correct_answer": { "type": "integer", "description": "Đáp án đúng (1-4)." }
+            },
+            "required": ["question_id", "answer_options", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_material", "questions"]
+    }
+  },
+  "required": ["passage_cloze"]
+}

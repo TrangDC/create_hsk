@@ -1,3 +1,4 @@
+# services/explanation_sheet_formatters.py
 import re
 from openpyxl.cell.rich_text import CellRichText, TextBlock
 from openpyxl.cell.text import InlineFont
@@ -630,4 +631,38 @@ def render_shared_image_comprehension_explanation(cell, explanation_json: dict):
 
 render_individual_img_explanation = render_simple_context_explanation
 render_image_matching_explanation = render_simple_context_explanation
-render_sentence_matching_explanation = render_simple_context_explanation  
+render_sentence_matching_explanation = render_simple_context_explanation
+
+
+# (Dán vào file services/explanation_sheet_formatters.py,
+# có thể đặt gần các hàm render khác)
+
+def render_hsk2_true_false_image_explanation(cell, explanation_json: dict):
+    """
+    Render lời giải cho dạng Đúng/Sai HSK2, bao gồm Phân tích, Phụ đề và Tạm dịch.
+    """
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    rich_text = CellRichText()
+
+    # 1. Phân tích
+    analysis = explanation_json.get('analysis_paragraph', '')
+    rich_text.append(analysis + '\n\n')
+
+    # 2. Phụ đề
+    script_block = explanation_json.get('script_block', {})
+    rich_text.append(TextBlock(bold_font, "Phụ đề:\n"))
+    rich_text.append(script_block.get('chinese_text', '') + '\n')
+    rich_text.append(script_block.get('pinyin', '') + '\n\n')
+
+    # 3. Tạm dịch
+    translation_block = explanation_json.get('translation_block', {})
+    rich_text.append(TextBlock(bold_font, "Tạm dịch:\n"))
+    rich_text.append(TextBlock(italic_font, translation_block.get('vietnamese_text', '')))
+
+    # Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Tự động điều chỉnh kích thước ô
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))

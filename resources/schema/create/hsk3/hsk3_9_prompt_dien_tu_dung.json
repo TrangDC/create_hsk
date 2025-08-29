@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "word_fill_in_display_answer": {
+      "type": "array",
+      "description": "Danh sách 4 câu hỏi điền từ, với đáp án được hiển thị sẵn.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "sentence_part_1": { "type": "string", "description": "Phần câu trước chỗ trống." },
+          "correct_word": { "type": "string", "description": "Từ đúng cần điền." },
+          "correct_word_pinyin": { "type": "string", "description": "Pinyin của từ đúng." },
+          "sentence_part_2": { "type": "string", "description": "Phần câu sau chỗ trống." }
+        },
+        "required": ["question_id", "sentence_part_1", "correct_word", "correct_word_pinyin", "sentence_part_2"]
+      }
+    }
+  },
+  "required": ["word_fill_in_display_answer"]
+}

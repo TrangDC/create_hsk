@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "reading_comprehension_dialogue_4_lines": {
+      "type": "array",
+      "description": "Danh sách 4 câu hỏi đọc hiểu hội thoại 4 lượt lời.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "dialogue": {
+            "type": "array",
+            "description": "Hội thoại gồm 4 lượt lời.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "speaker": { "type": "string", "enum": ["男", "女"] },
+                "line_chinese": { "type": "string" },
+                "line_pinyin": { "type": "string" }
+              },
+              "required": ["speaker", "line_chinese", "line_pinyin"]
+            }
+          },
+          "query_chinese": { "type": "string", "description": "Câu hỏi về nội dung hội thoại." },
+          "answer_options": {
+            "type": "array",
+            "description": "Danh sách 3 phương án trả lời.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "chinese_text": { "type": "string" }
+              },
+              "required": ["chinese_text"]
+            }
+          },
+          "correct_answer": { "type": "integer", "description": "Đáp án đúng (1, 2, hoặc 3)." }
+        },
+        "required": ["question_id", "dialogue", "query_chinese", "answer_options", "correct_answer"]
+      }
+    }
+  },
+  "required": ["reading_comprehension_dialogue_4_lines"]
+}

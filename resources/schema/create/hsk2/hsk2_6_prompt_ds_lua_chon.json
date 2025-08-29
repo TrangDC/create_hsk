@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "true_false_statement_questions": {
+      "type": "array",
+      "description": "Danh sách các câu hỏi phán đoán Đúng/Sai từ một nhận định cho trước.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "script_chinese": { "type": "string", "description": "Câu thông tin gốc." },
+          "script_pinyin": { "type": "string" },
+          "statement_chinese": { "type": "string", "description": "Câu nhận định cần phán đoán." },
+          "statement_pinyin": { "type": "string" },
+          "correct_answer": { "type": "integer", "description": "Đáp án: 1 cho Đúng, 0 cho Sai." }
+        },
+        "required": ["question_id", "script_chinese", "script_pinyin", "statement_chinese", "statement_pinyin", "correct_answer"]
+      }
+    }
+  },
+  "required": ["true_false_statement_questions"]
+}

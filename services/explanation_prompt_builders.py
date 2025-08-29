@@ -126,3 +126,23 @@ def build_word_fill_in_questions_prompt(task: dict, prompt_template: str) -> str
         correct_answer_letter=correct_letter,
         correct_answer_word_chinese=correct_word_str
     )
+
+def build_hsk2_true_false_image_prompt(task: dict, prompt_template: str) -> str:
+    """
+    Xây dựng prompt động cho dạng câu hỏi Đúng/Sai dựa trên hình ảnh của HSK2.
+    """
+    q_data = task.get('data', {})
+    
+    # Chuyển đổi đáp án từ số (1/0) sang chữ ("Đúng"/"Sai")
+    correct_answer_num = q_data.get('correct_answer')
+    answer_text = "Đúng" if correct_answer_num == 1 else "Sai"
+    
+    # Điền thông tin vào template
+    return prompt_template.format(
+        image_description=q_data.get('image_des', ''),
+        script_chinese=q_data.get('script', ''),
+        script_pinyin=q_data.get('pinyin', ''),
+        script_translation=q_data.get('translation', ''),
+        correct_answer_text=answer_text
+    )
+

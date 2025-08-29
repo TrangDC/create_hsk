@@ -1,0 +1,53 @@
+{
+  "type": "array",
+  "minItems": 8,
+  "maxItems": 8,
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "description": "Số thứ tự của câu hỏi."
+      },
+      "kind": {
+        "type": "string",
+        "description": "Phân loại câu hỏi.",
+        "enum": ["script_hinh_anh", "tuvung_hinh_anh"]
+      },
+      "script": {
+        "type": "string",
+        "description": "Nội dung script hoặc từ vựng bằng tiếng Trung."
+      },
+      "pinyin": {
+        "type": "string",
+        "description": "Phiên âm Pinyin cho script hoặc từ vựng."
+      },
+      "translation": {
+        "type": "string",
+        "description": "Bản dịch tiếng Việt của script hoặc từ vựng."
+      },
+      "image_des": {
+        "type": "string",
+        "description": "Mô tả những gì có trong hình ảnh. LƯU Ý KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN"
+      },
+      "correct_answer": {
+        "type": "integer",
+        "description": "Đáp án: 1 cho Đúng, 0 cho Sai."
+      },
+      "explanation":  {
+        "type": "string",
+        "description":  "Lời giải chi tiết được AI tự động tạo ra theo mẫu. (KHÔNG DÙNG TIẾNG ANH NÀO Ở ĐÂY). Ví dụ:\nTrong hình ảnh chúng ta thấy 5 quyển sách. Nội dung là \"三本书\" (Sān běn shū) có nghĩa là \"ba quyển sách\". Vì vậy, đáp án là Sai."
+      }
+    },
+    "required": [
+      "id",
+      "kind",
+      "script",
+      "pinyin",
+      "translation",
+      "image_des",
+      "correct_answer",
+      "explanation"
+    ]
+  }
+}

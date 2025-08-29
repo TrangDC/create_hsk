@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "properties": {
+    "sentence_sequence_reordering": {
+      "type": "array",
+      "description": "Danh sách các câu hỏi sắp xếp 3 câu văn.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "components": {
+            "type": "array",
+            "description": "Danh sách 3 câu văn bị xáo trộn.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string", "enum": ["A", "B", "C"] },
+                "text": { "type": "string", "description": "Nội dung câu văn." }
+              },
+              "required": ["label", "text"]
+            }
+          },
+          "correct_order": { "type": "string", "description": "Chuỗi 3 chữ cái thể hiện thứ tự đúng, ví dụ: 'BCA'." }
+        },
+        "required": ["question_id", "components", "correct_order"]
+      }
+    }
+  },
+  "required": ["sentence_sequence_reordering"]
+}

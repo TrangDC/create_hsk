@@ -1,3 +1,4 @@
+# hsk_explanation_configs.py
 import os
 
 # 1. Import các hàm renderer từ module formatters
@@ -8,6 +9,7 @@ from services.explanation_sheet_formatters import (
     render_image_matching_explanation,
     render_sentence_matching_explanation,
     render_word_fill_explanation,
+    render_hsk2_true_false_image_explanation
 )
 
 # 2. Import các hàm xây dựng prompt từ module explanation_prompt_builders
@@ -20,6 +22,7 @@ from services.explanation_prompt_builders import (
     build_word_fill_in_questions_prompt,
     build_script_hinh_anh_prompt,
     build_tuvung_hinh_anh_prompt,
+    build_hsk2_true_false_image_prompt
 )
 
 # --- CẤU HÌNH ĐƯỜNG DẪN PROMPT VÀ SCHEMA ---
@@ -76,13 +79,25 @@ HSK1_EXPLANATION_CONFIGS = {
     }
 }
 
+# --- CẤU HÌNH CHO HSK2 ---
+HSK2_EXPLANATION_CONFIGS = {
+    "hsk2_1_prompt_ds_img": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_true_false_image_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_true_false_image_schema.json"),
+        "prompt_builder": build_hsk2_true_false_image_prompt,
+        "sheet_name": "ĐS lựa chọn (HSK2)",
+        "renderer": render_hsk2_true_false_image_explanation
+    },
+    # ... Thêm các dạng bài khác của HSK2 vào đây trong tương lai ...
+}
+
 # --- CÁC HÀM "NHÀ MÁY" ĐỂ LẤY CẤU HÌNH ĐÚNG ---
 
 def get_explanation_config(hsk_level: str):
     """Trả về dictionary cấu hình prompt cho cấp độ HSK được chỉ định."""
     if hsk_level == 'hsk1':
         return HSK1_EXPLANATION_CONFIGS
-    # elif hsk_level == 'hsk2':
-    #     return HSK2_EXPLANATION_PROMPTS
+    elif hsk_level == 'hsk2':
+        return HSK2_EXPLANATION_CONFIGS
     print(f"Cảnh báo: Không tìm thấy cấu hình prompt lời giải cho '{hsk_level}'.")
     return None

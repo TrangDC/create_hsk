@@ -441,7 +441,6 @@ def populate_sentence_matching_inverted(worksheet, data: dict):
 
     print(f"   ✅ Hoàn thành điền học liệu và {num_questions} câu hỏi.")
 
-
 # Dạng 2 - HSK3: ĐS nghe chọn (HSK3)  
 def populate_true_false_listening_choice(worksheet, data: list):
     """
@@ -463,7 +462,6 @@ def populate_true_false_listening_choice(worksheet, data: list):
         worksheet[f'H{i}'] = f"đúng sai: {answer}"
 
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
-
 
 # Dạng 7: TN PA đúng ko pinyin_v3 (HSK3)
 def populate_reading_comprehension_v3(worksheet, data: list):
@@ -488,7 +486,6 @@ def populate_reading_comprehension_v3(worksheet, data: list):
         
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
 
-
 # Dạng 8: Sắp xếp câu (HSK3)
 def populate_sentence_reordering(worksheet, data: list):
     """
@@ -506,7 +503,6 @@ def populate_sentence_reordering(worksheet, data: list):
         worksheet[f'H{i}'] = question.get('correct_order')
         
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
-
 
 # Dạng 9: Điền từ đúng (HSK3)
 def populate_word_fill_in_display_answer(worksheet, data: list):
@@ -528,4 +524,241 @@ def populate_word_fill_in_display_answer(worksheet, data: list):
         # Cột G: Điền câu hoàn chỉnh
         worksheet[f'G{i}'] = full_sentence
         
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
+
+# HÀM TÁI SỬ DỤNG cho Dạng 4 (TN Nghe hiểu) và Dạng 8 (TN Đọc hiểu ngắn)
+def populate_passage_with_multiple_questions(worksheet, data: list):
+    """
+    Điền dữ liệu cho các dạng bài có 1 học liệu chung cho nhiều câu hỏi.
+    Hàm này sẽ merge ô ở cột B và điền dữ liệu cho các câu hỏi tương ứng.
+    Key JSON: listening_comprehension / reading_comprehension_short_passage
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    current_row = 2  # Bắt đầu từ hàng 2
+
+    for passage_data in data:
+        questions = passage_data.get('questions', [])
+        num_questions = len(questions)
+        
+        if num_questions == 0:
+            continue
+
+        start_row_for_merge = current_row
+        end_row_for_merge = current_row + num_questions - 1
+
+        # --- Cột B: Merge và điền học liệu ---
+        merge_range = f'B{start_row_for_merge}:B{end_row_for_merge}'
+        worksheet.merge_cells(merge_range)
+        top_left_cell = worksheet[f'B{start_row_for_merge}']
+        top_left_cell.value = passage_data.get('script_chinese', '')
+        top_left_cell.alignment = Alignment(vertical='top', wrap_text=True)
+
+        # --- Cột F, G, H: Điền từng câu hỏi ---
+        for question in questions:
+            worksheet[f'F{current_row}'] = question.get('query_chinese', '')
+            
+            options = question.get('answer_options', [])
+            worksheet[f'G{current_row}'] = "\n".join(options)
+            
+            worksheet[f'H{current_row}'] = question.get('correct_answer')
+            
+            current_row += 1 # Tăng số hàng cho câu hỏi tiếp theo
+
+    print(f"   ✅ Hoàn thành điền {len(data)} học liệu.")
+
+# Hàm cho Dạng 6: Sắp xếp các câu (HSK4)
+def populate_sentence_sequence_reordering(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Sắp xếp các câu (HSK4)'.
+    Key JSON: sentence_sequence_reordering
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    start_row = 2
+    for i, question in enumerate(data, start=start_row):
+        
+        components = question.get('components', [])
+        correct_order = question.get('correct_order', '')
+        
+        # Ghép các thành phần và đáp án thành một chuỗi duy nhất
+        lines = []
+        for comp in components:
+            label = comp.get('label', '')
+            text = comp.get('text', '')
+            lines.append(f"{label}. {text}")
+            
+        lines.append(f"[{correct_order}]")
+        
+        # Cột G: Điền toàn bộ nội dung
+        worksheet[f'G{i}'] = "\n".join(lines)
+        
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
+
+def populate_image_with_word_tf(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Ảnh với từ (img) (HSK4)'.
+    Key JSON: image_with_word_tf
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    start_row = 2
+    for i, question in enumerate(data, start=start_row):
+        # Lấy dữ liệu từ JSON
+        image_des = question.get('image_description', '')
+        vocab = question.get('vocabulary_word', '')
+        answer = question.get('correct_answer')
+
+        # Xây dựng nội dung cho cột E
+        content_e = f"Ảnh: {image_des}\nTừ vựng: {vocab}"
+        
+        # Quy tắc đặc biệt: Thêm đề bài cho câu đầu tiên
+        if i == start_row:
+            header = "看图、用词造句。\n\n"
+            content_e = header + content_e
+            
+        # Điền dữ liệu vào sheet
+        worksheet[f'E{i}'] = content_e
+        worksheet[f'H{i}'] = f"đúng sai: {answer}"
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
+
+# Hàm cho HSK5
+def populate_passage_cloze(worksheet, data: dict):
+    """
+    Điền dữ liệu cho sheet 'Điền từ đoạn văn (HSK5)'.
+    Key JSON: passage_cloze
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    questions = data.get('questions', [])
+    num_questions = len(questions)
+
+    if num_questions == 0:
+        print("   ⚠️ Cảnh báo: Không có câu hỏi nào để điền.")
+        return
+
+    start_row = 2
+    end_row = start_row + num_questions - 1
+
+    # Cột B: Merge ô và điền học liệu
+    merge_range = f'B{start_row}:B{end_row}'
+    worksheet.merge_cells(merge_range)
+    top_left_cell = worksheet[f'B{start_row}']
+    top_left_cell.value = data.get('shared_material', '')
+    top_left_cell.alignment = Alignment(vertical='top', wrap_text=True)
+
+    # Cột G và H: Điền các bộ phương án và đáp án
+    for i, question in enumerate(questions, start=start_row):
+        # Cột G: Phương án trả lời
+        options = question.get('answer_options', [])
+        worksheet[f'G{i}'] = "\n".join(options)
+        
+        # Cột H: Đáp án
+        worksheet[f'H{i}'] = question.get('correct_answer')
+
+    print(f"   ✅ Hoàn thành điền học liệu và {num_questions} câu hỏi.")
+
+def populate_main_idea_comprehension(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Chọn chủ đề đoạn văn (HSK5)'.
+    Key JSON: main_idea_comprehension
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    start_row = 2
+    for i, question in enumerate(data, start=start_row):
+        # Cột F: Đoạn văn
+        worksheet[f'F{i}'] = question.get('passage_chinese', '')
+        
+        # Cột G: Các lựa chọn đáp án
+        options = question.get('answer_options', [])
+        worksheet[f'G{i}'] = "\n".join(options)
+
+        # Cột H: Đáp án đúng
+        worksheet[f'H{i}'] = question.get('correct_answer')
+        
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
+
+def populate_long_passage_comprehension(worksheet, data: dict):
+    """
+    Điền dữ liệu cho sheet 'TN Đọc hiểu (img) (HSK5)'.
+    Key JSON: long_passage_comprehension
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    questions = data.get('questions', [])
+    num_questions = len(questions)
+
+    if num_questions == 0:
+        print("   ⚠️ Cảnh báo: Không có câu hỏi nào để điền.")
+        return
+
+    start_row = 2
+    end_row = start_row + num_questions - 1
+    
+    # --- Cột B: Merge ô và điền học liệu + mô tả ảnh ---
+    passage = data.get('shared_passage', '')
+    image_des = data.get('image_description', '')
+    
+    full_material = f"{passage}\nẢnh : {image_des}"
+    
+    merge_range = f'B{start_row}:B{end_row}'
+    worksheet.merge_cells(merge_range)
+    top_left_cell = worksheet[f'B{start_row}']
+    top_left_cell.value = full_material
+    top_left_cell.alignment = Alignment(vertical='top', wrap_text=True)
+
+    # --- Cột F, G, H: Điền các câu hỏi, phương án, và đáp án ---
+    for i, question in enumerate(questions, start=start_row):
+        worksheet[f'F{i}'] = question.get('query_chinese', '')
+        
+        options = question.get('answer_options', [])
+        worksheet[f'G{i}'] = "\n".join(options)
+        
+        worksheet[f'H{i}'] = question.get('correct_answer')
+
+    print(f"   ✅ Hoàn thành điền học liệu và {num_questions} câu hỏi.")
+
+def populate_writing_from_keywords(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Viết dựa vào từ (HSK5)'.
+    Key JSON: writing_from_keywords
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    start_row = 2
+    for i, question in enumerate(data, start=start_row):
+        # Lấy dữ liệu
+        keywords = question.get('keywords', [])
+        paragraph = question.get('sample_paragraph_marked', '')
+        translation = question.get('translation', '')
+        
+        # Cột E: Đề bài và từ khóa
+        prompt_text = "请结合下列词语(要全部使用,顺序不分先后),写一篇80字左右的短文。"
+        keywords_text = "\t".join(keywords) # Dùng tab để có khoảng cách đẹp
+        content_e = f"{prompt_text}\n\n{keywords_text}"
+        worksheet[f'E{i}'] = content_e
+        
+        # Cột I: Đoạn văn mẫu và bản dịch
+        content_i = f"{paragraph}\n\nTạm dịch:\n{translation}"
+        worksheet[f'I{i}'] = content_i
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
+
+def populate_writing_from_image(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Viết dựa vào ảnh (img) (HSK5)'.
+    Key JSON: writing_from_image
+    """
+    print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
+    start_row = 2
+    for i, question in enumerate(data, start=start_row):
+        # Lấy dữ liệu
+        image_des = question.get('image_description', '')
+        paragraph = question.get('sample_paragraph', '')
+        translation = question.get('translation', '')
+
+        # Cột E: Đề bài và mô tả ảnh
+        prompt_text = "请结合这张图片写一篇80字左右的短文。"
+        content_e = f"Ảnh: {image_des}\n{prompt_text}"
+        worksheet[f'E{i}'] = content_e
+
+        # Cột I: Đoạn văn mẫu, bản dịch và ghi chú AICham
+        content_i = f"{paragraph}\n\nTạm dịch:\n{translation}\nAICham: {image_des}"
+        worksheet[f'I{i}'] = content_i
+
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")

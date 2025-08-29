@@ -7,6 +7,7 @@ from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
 import json
 from typing import List, Dict, Any
 import time
+import threading
 
 # Load environment variables
 load_dotenv()
@@ -152,10 +153,19 @@ def generate_content_from_pdfs(
     prompt_file_path: str,
     schema_file_path: str,
     max_retries: int = 5,
-    retry_delay: int = 5
+    retry_delay: int = 5,
+    timeout_seconds: int = 150  # 2.5 minutes timeout
 ) -> Dict[str, Any] | List[Any]:
     """
     Gọi Vertex AI model với PDF, prompt, và schema để tạo ra nội dung có cấu trúc.
+
+    Args:
+        pdf_file_paths: Danh sách đường dẫn đến các file PDF.
+        prompt_file_path: Đường dẫn đến file prompt.
+        schema_file_path: Đường dẫn đến file schema.
+        max_retries: Số lần thử lại tối đa.
+        retry_delay: Thời gian chờ giữa các lần thử lại (giây).
+        timeout_seconds: Thời gian tối đa cho mỗi lần gọi API (giây).
 
     Returns:
         Dict | List: Dữ liệu đã được phân tích từ JSON do AI trả về.
@@ -163,7 +173,8 @@ def generate_content_from_pdfs(
     Raises:
         ValueError: Nếu AI không trả về nội dung hoặc nội dung không phải là JSON hợp lệ.
         FileNotFoundError: Nếu không tìm thấy file PDF, prompt, hoặc schema.
-        Exception: Các lỗi khác từ Vertex AI.
+        TimeoutError: Nếu API call vượt quá thời gian timeout.
+        ConnectionError: Nếu không thể kết nối với Vertex AI sau max_retries.
     """
     if not is_vertex_initialized:
         raise ConnectionError("Vertex AI chưa được khởi tạo thành công. Vui lòng kiểm tra credentials.")
@@ -195,12 +206,45 @@ def generate_content_from_pdfs(
     for attempt in range(max_retries):
         try:
             print(f"Đang gửi yêu cầu đến Vertex AI... (Lần thử {attempt + 1}/{max_retries})")
-            response = model.generate_content(
-                contents=request_parts,
-                generation_config=generation_config,
-                stream=False
-            )
             
+            # Set up threading event to track completion
+            response_event = threading.Event()
+            response_container = [None]  # To store the response
+            exception_container = [None]  # To store any exception
+
+            def run_api_call():
+                try:
+                    response = model.generate_content(
+                        contents=request_parts,
+                        generation_config=generation_config,
+                        stream=False
+                    )
+                    response_container[0] = response
+                    response_event.set()  # Signal completion
+                except Exception as e:
+                    exception_container[0] = e
+                    response_event.set()  # Signal completion even on error
+
+            # Start the API call in a separate thread
+            api_thread = threading.Thread(target=run_api_call)
+            api_thread.start()
+
+            # Wait for the API call to complete or timeout
+            if not response_event.wait(timeout=timeout_seconds):
+                # Timeout occurred
+                print(f"   ⚠️ API call vượt quá {timeout_seconds} giây.")
+                last_exception = TimeoutError(f"API call timed out after {timeout_seconds} seconds")
+                if attempt < max_retries - 1:
+                    print(f"   -> Thử lại sau {retry_delay} giây...")
+                    time.sleep(retry_delay)
+                continue  # Retry the API call
+
+            # Check if an exception occurred during the API call
+            if exception_container[0]:
+                raise exception_container[0]
+
+            # Process the response
+            response = response_container[0]
             response_text = response.text.strip()
             
             if not response_text:
@@ -230,7 +274,7 @@ def generate_content_from_pdfs(
                 print(f"   -> Đã thử lại {max_retries} lần nhưng không thành công.")
     
     # Nếu vòng lặp kết thúc mà không thành công, raise lỗi cuối cùng gặp phải
-    raise ConnectionError(f"Không thể lấy dữ liệu từ Vertex AI sau {max_retries} lần thử. Lỗi cuối cùng: {last_exception}")
+    raise ConnectionError(f"Không thể lấy dữ liệu từ Vertex AI sau {max_retries} lần thử.")
 
 
 if __name__ == '__main__':

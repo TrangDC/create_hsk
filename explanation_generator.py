@@ -187,8 +187,8 @@ def run_explanation_generation(hsk_level: str, source_data_file: str, excel_outp
 
 # Test hàm xử lý
 if __name__ == "__main__":
-    HSK_LEVEL = "hsk1"
-    SOURCE_DATA_FILE = r"E:\Edmicro\create_hsk\output\hsk1_20250823_203953\generated_question_data.json"
-    EXCEL_OUTPUT_PATH = r"E:\Edmicro\create_hsk\output\hsk1_20250823_203953\hsk1_output.xlsx"
+    HSK_LEVEL = "hsk2"
+    SOURCE_DATA_FILE = r"D:\Edmicro\Tools\create_hsk\output\test\generated_question_data.json"
+    EXCEL_OUTPUT_PATH = r"D:\Edmicro\Tools\create_hsk\output\test\hsk2_output.xlsx"
     
     run_explanation_generation(HSK_LEVEL, SOURCE_DATA_FILE, EXCEL_OUTPUT_PATH)    
