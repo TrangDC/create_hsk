@@ -72,9 +72,10 @@ def extract_image_prompts(cell_content: str) -> List[str]:
     lines = cell_content.split('\n')
     
     for i, line in enumerate(lines):
-        if "Ảnh:" in line:
-            # Lấy nội dung sau "Ảnh:"
-            start_idx = line.index("Ảnh:") + 4
+        if "Ảnh:" in line or "Ảnh :" in line:
+            # Lấy nội dung sau "Ảnh:" hoặc "Ảnh :"
+            keyword = "Ảnh:" if "Ảnh:" in line else "Ảnh :"
+            start_idx = line.index(keyword) + len(keyword)
             prompt = line[start_idx:].strip()
             
             # Nếu prompt trống, kiểm tra dòng tiếp theo
@@ -83,6 +84,18 @@ def extract_image_prompts(cell_content: str) -> List[str]:
             
             if prompt:
                 prompts.append(prompt)
+                
+        # if "Ảnh:" in line or "Ảnh :" in line:
+        #     # Lấy nội dung sau "Ảnh:"
+        #     start_idx = line.index("Ảnh:") + 4
+        #     prompt = line[start_idx:].strip()
+            
+        #     # Nếu prompt trống, kiểm tra dòng tiếp theo
+        #     if not prompt and i + 1 < len(lines):
+        #         prompt = lines[i + 1].strip()
+            
+        #     if prompt:
+        #         prompts.append(prompt)
     
     return prompts
 
@@ -154,10 +167,18 @@ def process_sheet_case(sheet_name: str, excel_path: str, model, output_dir: Path
     Đồng thời cập nhật tên ảnh vào cột K.
     """
     # Xác định chỉ số cột dựa trên sheet_name
-    if sheet_name in ["ĐS (img) HSK1", "TN PA đúng (img) (HSK1)", "ĐS Ko phụ đề (img) HSK1"]:
+    if sheet_name in ["ĐS (img) HSK1", "TN PA đúng (img) (HSK1)", "ĐS Ko phụ đề (img) HSK1","Đúng Sai (img) (HSK1)"]:
         column_to_process = 6  # Cột F
-    elif sheet_name in ["TN PA đúng (img) (HL) (HSK1)", "TN chọn ảnh (img) (HL) (HSK1)"]:
+    elif sheet_name in ["TN PA đúng (img) (HL) (HSK1)", 
+                        "TN chọn ảnh (img) (HL) (HSK1)",
+                        "TN PA đúng (img) (HL) (HSK2)",
+                        "TN chọn ảnh (img) (HL) (HSK2)",
+                        "TN PA đúng (img) (HL) (HSK3)",
+                        "TN Đọc hiểu (img) (HSK5)"]:
         column_to_process = 2  # Cột B
+    elif sheet_name in ["Ảnh với từ (img) (HSK4)",
+                        "Viết dựa vào ảnh (img) (HSK5)"]:
+        column_to_process = 5  # Cột E
     else:
         column_to_process = 6  # Mặc định cột F cho các sheet có (img) khác
     

@@ -57,12 +57,14 @@ class ImageMerger:
             if len(row) >= 11:  # Đảm bảo có đủ cột K (index 10)
                 k_value = row[10]  # Cột K (index 10)
                 f_value = row[5] if len(row) > 5 else ""  # Cột F (index 5)
+                e_value = row[4] if len(row) > 4 else ""  # Cột E (index 4)
                 
                 if k_value:  # Chỉ xử lý nếu cột K có giá trị
                     data.append({
                         'row_number': row_idx,
                         'k_value': str(k_value).strip(),
-                        'f_value': str(f_value) if f_value else ""
+                        'f_value': str(f_value) if f_value else "",
+                        'e_value': str(e_value) if e_value else ""
                     })
         
         return data
@@ -91,12 +93,12 @@ class ImageMerger:
                 return Image.open(image_path)
         
         # Nếu không tìm thấy, tạo ảnh placeholder
-        placeholder = Image.new('RGB', (150, 150), color='lightgray')
+        placeholder = Image.new('RGB', (200, 200), color='lightgray')
         draw = ImageDraw.Draw(placeholder)
         draw.text((10, 70), f"Missing:\n{image_name}", fill='black', font=self.small_font)
         return placeholder
     
-    def resize_image(self, image, max_width=150, max_height=150):
+    def resize_image(self, image, max_width=200, max_height=200):
         """Resize ảnh giữ tỷ lệ"""
         image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
         return image
@@ -171,7 +173,7 @@ class ImageMerger:
         
         for img_name in image_names:
             img = self.load_image(img_name.strip())
-            img = self.resize_image(img, max_width=120, max_height=120)
+            img = self.resize_image(img, max_width=180, max_height=180)
             processed_images.append(img)
             images_total_width += img.width + 10
         
@@ -198,6 +200,51 @@ class ImageMerger:
             text_y += text_height + 20
         
         # Vẽ Từ vựng sau (ở dưới)
+        if "Từ vựng:" in extracted_text:
+            vocab_text = extracted_text["Từ vựng:"]
+            self.draw_multiline_text(
+                draw, vocab_text, text_x, text_y, 
+                self.font, fill='black', max_width=250
+            )
+        
+        background.save(output_path)
+
+    def process_with_number_and_vocab_from_e(self, number, image_names, e_value, output_path):
+        """Xử lý trường hợp có number và có từ khóa 'Từ vựng:' trong cột E"""
+        background = self.create_background()
+        draw = ImageDraw.Draw(background)
+        
+        # 1. Vẽ number ở giữa bên trái
+        number_bbox = draw.textbbox((0, 0), number, font=self.font)
+        number_width = number_bbox[2] - number_bbox[0]
+        number_height = number_bbox[3] - number_bbox[1]
+        number_x = 50
+        number_y = (600 - number_height) // 2
+        draw.text((number_x, number_y), number, fill='black', font=self.font)
+        
+        # 2. Ghép ảnh tiếp theo
+        current_x = number_x + number_width + 30
+        processed_images = []
+        
+        for img_name in image_names:
+            img = self.load_image(img_name.strip())
+            img = self.resize_image(img, max_width=180, max_height=180)
+            processed_images.append(img)
+        
+        # Căn giữa các ảnh theo chiều dọc
+        images_y = (600 - 120) // 2
+        for img in processed_images:
+            background.paste(img, (current_x, images_y))
+            current_x += img.width + 10
+        
+        # 3. Trích xuất và vẽ text từ cột E (chỉ Từ vựng:)
+        keywords = ["Từ vựng:"]
+        extracted_text = self.extract_text_after_keywords(e_value, keywords)
+        
+        text_x = current_x + 20
+        text_y = 250
+        
+        # Vẽ Từ vựng
         if "Từ vựng:" in extracted_text:
             vocab_text = extracted_text["Từ vựng:"]
             self.draw_multiline_text(
@@ -283,7 +330,8 @@ class ImageMerger:
                 row_number = item['row_number']
                 k_value = item['k_value']
                 f_value = item['f_value']
-                
+                e_value = item['e_value']
+
                 # Phân tích k_value
                 parse_type, number, image_names = self.parse_k_value(k_value)
                 
@@ -294,8 +342,11 @@ class ImageMerger:
                 print(f"Đang xử lý dòng {row_number}: {k_value}")
                 
                 if parse_type == 'with_number':
+                    # Kiểm tra từ khóa trong cột E trước
+                    if "Từ vựng:" in e_value:
+                        self.process_with_number_and_vocab_from_e(number, image_names, e_value, output_path)
                     # Kiểm tra có từ khóa trong cột F không
-                    if "Từ vựng:" in f_value and "Pinyin:" in f_value:
+                    elif "Từ vựng:" in f_value and "Pinyin:" in f_value:
                         self.process_with_number_and_keywords(number, image_names, f_value, output_path)
                     else:
                         self.process_with_number_no_keywords(number, image_names, output_path)
