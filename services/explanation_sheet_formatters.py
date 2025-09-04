@@ -231,6 +231,18 @@ def build_plain_text_with_markers(explanation_json: dict) -> str:
         text_parts.append(analysis)
         text_parts.append('\n\n')
 
+    # Thêm option ở dạng 3,4 của HSK2
+    options = explanation_json.get('options_list', [])
+    if options:
+        for opt in options:
+            letter = opt.get('letter', '')
+            chinese = opt.get('chinese_text', '')
+            translation = opt.get('translation', '')
+            pinyin = opt.get('pinyin', '')
+            # Dùng marker <<i>> cho phần dịch nghĩa
+            text_parts.append(f"{letter}. {chinese} <<i>>({translation})<</i>>\n    {pinyin}\n")
+        text_parts.append('\n')
+
     # 2) phụ đề...
     context = explanation_json.get('context_block', {}) or {}
     dialogue = context.get('dialogue', []) or []
@@ -633,10 +645,6 @@ render_individual_img_explanation = render_simple_context_explanation
 render_image_matching_explanation = render_simple_context_explanation
 render_sentence_matching_explanation = render_simple_context_explanation
 
-
-# (Dán vào file services/explanation_sheet_formatters.py,
-# có thể đặt gần các hàm render khác)
-
 def render_hsk2_true_false_image_explanation(cell, explanation_json: dict):
     """
     Render lời giải cho dạng Đúng/Sai HSK2, bao gồm Phân tích, Phụ đề và Tạm dịch.
@@ -659,6 +667,81 @@ def render_hsk2_true_false_image_explanation(cell, explanation_json: dict):
     translation_block = explanation_json.get('translation_block', {})
     rich_text.append(TextBlock(bold_font, "Tạm dịch:\n"))
     rich_text.append(TextBlock(italic_font, translation_block.get('vietnamese_text', '')))
+
+    # Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Tự động điều chỉnh kích thước ô
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+def render_hsk2_dialogue_comprehension_explanation(cell, explanation_json: dict):
+    """
+    Render lời giải chung cho các dạng hội thoại HSK2, sử dụng mẫu thiết kế
+    tạo plain text với markers rồi áp dụng regex formatting.
+    """
+    formatted_content = format_shared_image_comprehension_rich_text(explanation_json)
+    cell.value = formatted_content
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(formatted_content))
+
+def render_hsk2_true_false_statement_explanation(cell, explanation_json: dict):
+    """
+    Render lời giải cho dạng Đúng/Sai từ nhận định HSK2.
+    """
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    rich_text = CellRichText()
+
+    # 1. Phân tích
+    analysis = explanation_json.get('analysis_paragraph', '')
+    rich_text.append(analysis + '\n\n')
+
+    # 2. Khối văn bản gốc
+    original_texts = explanation_json.get('original_texts_block', {})
+    rich_text.append(original_texts.get('script_chinese', '') + '\n')
+    rich_text.append("★ " + original_texts.get('statement_chinese', '') + '\n\n')
+
+    # 3. Khối tạm dịch
+    translation = explanation_json.get('translation_block', {})
+    rich_text.append(TextBlock(bold_font, "Tạm dịch:\n"))
+    rich_text.append(TextBlock(italic_font,translation.get('script_vietnamese', '') + '\n'))
+    rich_text.append(TextBlock(italic_font, "★ " + translation.get('statement_vietnamese', '')))
+
+    # Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Tự động điều chỉnh kích thước ô
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))    
+
+def render_hsk2_sentence_matching_inverted_explanation(cell, explanation_json: dict):
+    """
+    Render lời giải cho dạng ghép cặp câu trả lời HSK2.
+    """
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    rich_text = CellRichText()
+
+    # 1. Phân tích
+    analysis = explanation_json.get('analysis_paragraph', '')
+    # Thêm Pinyin của câu thoại đúng (đáp án) vào sau lời giải thích
+    matched_pair = explanation_json.get('matched_pair_block', {})
+    statement_chinese = matched_pair.get('statement_chinese', '')
+    statement_pinyin = matched_pair.get('statement_pinyin', '')
+    analysis_with_pinyin = f"{analysis} (\"{statement_chinese}\" - {statement_pinyin})"
+    rich_text.append(analysis_with_pinyin + '\n\n')
+
+    # 2. Khối văn bản gốc (đáp án trước, câu hỏi sau)
+    rich_text.append(matched_pair.get('statement_chinese', '') + '\n')
+    rich_text.append(matched_pair.get('response_chinese', '') + '\n\n')
+
+    # 3. Khối tạm dịch
+    translation = explanation_json.get('translation_block', {})
+    rich_text.append(TextBlock(bold_font, "Tạm dịch:\n"))
+    # In nghiêng cả 2 dòng dịch
+    rich_text.append(TextBlock(italic_font, translation.get('statement_vietnamese', '') + '\n'))
+    rich_text.append(TextBlock(italic_font, translation.get('response_vietnamese', '')))
 
     # Gán giá trị và định dạng cho ô
     cell.value = rich_text

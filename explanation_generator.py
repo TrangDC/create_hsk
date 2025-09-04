@@ -191,4 +191,4 @@ if __name__ == "__main__":
     SOURCE_DATA_FILE = r"D:\Edmicro\Tools\create_hsk\output\test\generated_question_data.json"
     EXCEL_OUTPUT_PATH = r"D:\Edmicro\Tools\create_hsk\output\test\hsk2_output.xlsx"
     
-    run_explanation_generation(HSK_LEVEL, SOURCE_DATA_FILE, EXCEL_OUTPUT_PATH)    
+    run_explanation_generation(HSK_LEVEL, SOURCE_DATA_FILE, EXCEL_OUTPUT_PATH)

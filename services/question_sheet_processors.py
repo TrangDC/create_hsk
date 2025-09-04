@@ -61,7 +61,7 @@ def populate_true_false_from_array(workbook, data: list):
             current_row = row_counters["ĐS Ko phụ đề (img) HSK1"]
             row_counters["ĐS Ko phụ đề (img) HSK1"] += 1
             # Định dạng nội dung cột F
-            content_f = f"Ảnh: {item.get('image_des', '')}\nTừ vựng: {item.get('script', '')}"
+            content_f = f"Ảnh: {item.get('image_des', '')}\nTừ vựng: {item.get('script', '')}\nPinyin: {item.get('pinyin', '')}"
         # Nếu tìm thấy loại câu hỏi hợp lệ, điền dữ liệu
         if sheet_to_populate:
             sheet_to_populate.cell(row=current_row, column=3).value = "DS"
@@ -73,7 +73,6 @@ def populate_true_false_from_array(workbook, data: list):
             else:  # tuvung_hinh_anh
                 explanation = f"{item.get('explanation', '')}\n\nTạm dịch: {item.get('translation', '')}"
             sheet_to_populate.cell(row=current_row, column=9).value = explanation
-
     print(f"   ✅ Hoàn thành điền dữ liệu Đúng/Sai.")
 
 # Sheet TN PA đúng (img) (HL) (HSK1)

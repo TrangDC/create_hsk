@@ -31,7 +31,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "line_label": { "type": "string", "description": "Nhãn cho dòng, ví dụ: '问' cho câu hỏi hoặc để trống." },
+              "line_label": { "type": "string", "description": "Nhãn cho dòng, ví dụ: '问' cho câu hỏi, '男' cho Nam,'女' cho Nữ, hoặc để trống." },
               "chinese_text": { "type": "string" },
               "pinyin": { "type": "string" }
             },

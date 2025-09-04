@@ -146,3 +146,82 @@ def build_hsk2_true_false_image_prompt(task: dict, prompt_template: str) -> str:
         correct_answer_text=answer_text
     )
 
+def build_hsk2_dialogue_comprehension_prompt(task: dict, prompt_template: str) -> str:
+    """
+    Xây dựng prompt động chung cho các dạng câu hỏi hội thoại HSK2 (2 và 4 lượt lời).
+    """
+    q_data = task.get('data', {})
+    
+    # 1. Định dạng chuỗi hội thoại cho prompt
+    dialogue_lines = []
+    for turn in q_data.get('dialogue', []):
+        speaker = turn.get('speaker', '')
+        line = turn.get('line_chinese', '')
+        dialogue_lines.append(f"{speaker}: {line}")
+    dialogue_str = "\n".join(dialogue_lines)
+
+    # 2. Định dạng chuỗi các lựa chọn cho prompt
+    options_lines = []
+    options = q_data.get('answer_options', [])
+    for i, opt in enumerate(options):
+        letter = chr(65 + i) # A, B, C
+        chinese_text = opt.get('chinese_text', '')
+        options_lines.append(f"{letter}. {chinese_text}")
+    options_list_str = "\n".join(options_lines)
+    
+    # 3. Chuyển đổi đáp án từ số (1, 2, 3) sang chữ (A, B, C)
+    correct_answer_num = q_data.get('correct_answer')
+    correct_answer_letter = chr(64 + correct_answer_num) if correct_answer_num in [1, 2, 3] else "N/A"
+
+    # 4. Điền thông tin vào template
+    return prompt_template.format(
+        dialogue_str=dialogue_str,
+        query_chinese=q_data.get('query_chinese', ''),
+        options_list_str=options_list_str,
+        correct_answer_letter=correct_answer_letter
+    )
+
+def build_hsk2_true_false_statement_prompt(task: dict, prompt_template: str) -> str:
+    """
+    Xây dựng prompt động cho dạng câu hỏi Đúng/Sai từ nhận định của HSK2.
+    """
+    q_data = task.get('data', {})
+    
+    # Chuyển đổi đáp án từ số (1/0) sang chữ ("Đúng"/"Sai")
+    correct_answer_num = q_data.get('correct_answer')
+    answer_text = "Đúng" if correct_answer_num == 1 else "Sai"
+    
+    # Điền thông tin vào template
+    return prompt_template.format(
+        script_chinese=q_data.get('script_chinese', ''),
+        statement_chinese=q_data.get('statement_chinese', ''),
+        correct_answer_text=answer_text
+    )
+
+def build_hsk2_sentence_matching_inverted_prompt(task: dict, prompt_template: str) -> str:
+    """
+    Xây dựng prompt động cho dạng câu hỏi ghép cặp câu trả lời của HSK2.
+    """
+    q_data = task.get('data', {})
+    shared_material = task.get('shared_material', [])
+    
+    # 1. Định dạng học liệu chung cho prompt
+    material_lines = []
+    for item in shared_material:
+        letter = item.get('option_letter', '')
+        chinese = item.get('chinese_text', '')
+        material_lines.append(f"{letter}. {chinese}")
+    shared_material_str = "\n".join(material_lines)
+
+    # 2. Tìm câu thoại đúng trong học liệu chung
+    correct_letter = q_data.get('correct_answer', '')
+    correct_statement_obj = next((item for item in shared_material if item.get('option_letter') == correct_letter), None)
+    correct_statement_chinese = correct_statement_obj.get('chinese_text', 'N/A') if correct_statement_obj else 'N/A'
+    
+    # 3. Điền thông tin vào template
+    return prompt_template.format(
+        shared_material_str=shared_material_str,
+        question_chinese=q_data.get('question_text_chinese', ''),
+        correct_answer_letter=correct_letter,
+        correct_answer_chinese=correct_statement_chinese
+    )

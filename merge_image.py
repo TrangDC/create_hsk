@@ -260,11 +260,11 @@ class ImageMerger:
         draw = ImageDraw.Draw(background)
         
         # Vẽ number ở bên trái
-        draw.text((50, 300), number, fill='black', font=self.font)
+        draw.text((50, 50), number, fill='black', font=self.font)
         
         # Tải và ghép ảnh
         current_x = 150
-        current_y = 200
+        current_y = 50
         
         if len(image_names) == 1:
             # Chỉ có 1 ảnh
@@ -276,7 +276,7 @@ class ImageMerger:
             for i, img_name in enumerate(image_names):
                 if current_x + 170 > 800:  # Xuống dòng nếu không đủ chỗ
                     current_x = 150
-                    current_y += 200
+                    current_y += 250
                 
                 img = self.load_image(img_name.strip())
                 img = self.resize_image(img)

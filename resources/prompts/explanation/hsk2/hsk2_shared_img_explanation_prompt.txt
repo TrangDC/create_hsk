@@ -1,0 +1,17 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp. Nhiệm vụ của bạn là cung cấp một lời giải chi tiết bằng tiếng Việt cho câu hỏi trắc nghiệm sau đây, dựa trên một học liệu chung.
+
+**Thông tin câu hỏi:**
+- **Học liệu chung (Danh sách mô tả ảnh):**
+{shared_material_list}
+- **Nội dung script cần nghe (đây là một đoạn hội thoại):**
+"{script_chinese}"
+- **Phiên âm:**
+"{script_pinyin}"
+- **Đáp án đúng:** Lựa chọn {correct_answer_number} ("{correct_answer_description}")
+
+**Yêu cầu:**
+1.  **Phân tích:** Viết một lời giải ngắn gọn (`analysis_paragraph`) bằng tiếng Việt. Bắt đầu bằng việc xác định lựa chọn đúng (ví dụ: "Hình A..."). Giải thích tại sao mô tả ảnh của lựa chọn này lại khớp với nội dung của script.
+2.  **Cung cấp ngữ cảnh:**
+    -   Tách script thành các lượt lời của từng người nói và điền vào mảng `dialogue` trong khối `context_block`.
+    -   Dịch hội thoại sang tiếng Việt. Tách bản dịch thành các lượt lời và điền vào mảng `vietnamese_dialogue` trong khối `translation_block`. Mỗi lượt lời dịch phải là một object riêng biệt có `speaker_vi` ('Nam' hoặc 'Nữ') và `dialogue_vi` (nội dung dịch).
+3.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp. Không thêm bất kỳ văn bản nào khác.
