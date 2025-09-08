@@ -132,7 +132,7 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
 
 # TEST hàm tạo
 if __name__ == '__main__':
-    hsk_level = "hsk2"
-    pdf_folder_path = r"D:\Edmicro\Tools\create_hsk\input"
-    output_folder_path = r"D:\Edmicro\Tools\create_hsk\output\test"
+    hsk_level = "hsk5"
+    pdf_folder_path = r"E:\Edmicro\create_hsk\input"
+    output_folder_path = r"E:\Edmicro\create_hsk\output\test"
     run_question_generation(hsk_level, pdf_folder_path, output_folder_path)

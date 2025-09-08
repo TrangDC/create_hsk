@@ -22,7 +22,7 @@ from services.question_sheet_processors import (
     populate_passage_cloze,
     populate_main_idea_comprehension,
     populate_long_passage_comprehension,
-    populate_image_with_word_tf,
+    populate_image_with_word_sentence_creation,
     populate_writing_from_keywords,
     populate_writing_from_image
 )
@@ -202,7 +202,7 @@ HSK4_PROMPT_CONFIGS = {
     },
     "hsk4_10_prompt_anh_voi_tu": {
         "type": "keyed",
-        "processors": [("image_with_word_tf", "Ảnh với từ (img) (HSK4)", populate_image_with_word_tf)]
+        "processors": [("image_with_word_sentence_creation", "Ảnh với từ (img) (HSK4)", populate_image_with_word_sentence_creation)]
     }
 }
 

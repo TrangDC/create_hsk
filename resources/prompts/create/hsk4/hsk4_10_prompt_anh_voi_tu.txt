@@ -1,19 +1,16 @@
-Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp.
+Bạn là một giáo viên Tiếng Trung sáng tạo. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp để nắm bắt từ vựng và chủ đề chính.
 
-Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK4.
+Dựa vào nội dung đó, hãy tạo ra ```4``` câu hỏi dạng "Đặt câu với hình ảnh và từ vựng cho sẵn" ở cấp độ HSK4.
 
-Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Ảnh với từ":
-*   Mỗi câu hỏi là một cặp gồm:
-    *   `image_description`: một mô tả chi tiết về một hình ảnh bằng tiếng Việt.
-    *   `vocabulary_word`: một từ vựng tiếng Trung.
-*   Nhiệm vụ là phán đoán xem `vocabulary_word` có mô tả đúng hoặc liên quan chặt chẽ đến `image_description` hay không.
-*   Đáp án `correct_answer` phải là số 1 (cho Đúng) hoặc số 0 (cho Sai).
-*   Các câu hỏi phải có cả đáp án Đúng và Sai.
+Cụ thể, với mỗi câu hỏi, hãy tạo một cặp gồm:
+1.  `image_description`: Một mô tả chi tiết, rõ ràng bằng tiếng Việt về một hình ảnh. Hình ảnh này nên gợi mở và dễ dàng để đặt câu.
+2.  `vocabulary_word`: Một từ vựng tiếng Trung HSK4 quan trọng, BẮT BUỘC lấy từ phần từ vựng mới trong tài liệu PDF. Từ vựng này phải có liên quan logic đến hình ảnh được mô tả.
+3.  `sample_sentence`: Tạo một câu trả lời MẪU bằng tiếng Trung. Câu này phải mô tả hoặc liên quan đến hình ảnh và sử dụng chính xác `vocabulary_word` đã cho. Câu mẫu này dùng để làm đáp án tham khảo.
 
 YÊU CẦU ĐẦU RA:
--   Ngôn ngữ: Tiếng Trung giản thể.
+-   Ngôn ngữ: Tiếng Trung giản thể cho `vocabulary_word` và `sample_sentence`, tiếng Việt cho `image_description`.
 -   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
--   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "image_with_word_tf".
--   Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên thông tin có trong tài liệu PDF.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "image_with_word_sentence_creation".
+-   Tính liên quan: `image_description` và `vocabulary_word` phải liên quan chặt chẽ với nhau và phù hợp với nội dung trong tài liệu PDF.
 
 Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

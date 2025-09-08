@@ -592,10 +592,10 @@ def populate_sentence_sequence_reordering(worksheet, data: list):
         
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
 
-def populate_image_with_word_tf(worksheet, data: list):
+def populate_image_with_word_sentence_creation(worksheet, data: list):
     """
     Điền dữ liệu cho sheet 'Ảnh với từ (img) (HSK4)'.
-    Key JSON: image_with_word_tf
+    Key JSON: image_with_word_sentence_creation
     """
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
@@ -603,19 +603,19 @@ def populate_image_with_word_tf(worksheet, data: list):
         # Lấy dữ liệu từ JSON
         image_des = question.get('image_description', '')
         vocab = question.get('vocabulary_word', '')
-        answer = question.get('correct_answer')
+        sample_sentence = question.get('sample_sentence', '') # Đáp án mẫu
 
-        # Xây dựng nội dung cho cột E
+        # Xây dựng nội dung cho cột E (Câu hỏi cho người học)
         content_e = f"Ảnh: {image_des}\nTừ vựng: {vocab}"
         
-        # Quy tắc đặc biệt: Thêm đề bài cho câu đầu tiên
+        # Quy tắc đặc biệt: Thêm đề bài chung cho câu đầu tiên
         if i == start_row:
-            header = "看图、用词造句。\n\n"
+            header = "看图，用词造句。\n\n" # Đề bài: Nhìn hình, dùng từ đặt câu.
             content_e = header + content_e
             
         # Điền dữ liệu vào sheet
         worksheet[f'E{i}'] = content_e
-        worksheet[f'H{i}'] = f"đúng sai: {answer}"
+        worksheet[f'H{i}'] = sample_sentence # Cột H giờ là câu trả lời mẫu
 
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
 

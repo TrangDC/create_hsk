@@ -13,6 +13,17 @@ from services.explanation_sheet_formatters import (
     render_hsk2_dialogue_comprehension_explanation,
     render_hsk2_true_false_statement_explanation,
     render_hsk2_sentence_matching_inverted_explanation,
+    render_hsk3_true_false_listening_choice_explanation,
+    render_hsk3_reading_comprehension_no_pinyin_v3_explanation_with_markers,
+    render_hsk3_sentence_reordering_explanation,
+    render_hsk4_listening_comprehension_explanation,
+    render_hsk4_sentence_sequence_reordering_explanation,
+    render_hsk4_reading_passage_explanation,
+    render_hsk4_image_word_sentence_creation_explanation,
+    render_hsk5_passage_cloze_explanation,
+    render_hsk5_main_idea_comprehension_explanation,
+    render_hsk5_long_passage_comprehension_explanation,
+    render_hsk5_writing_from_keywords, render_hsk5_writing_from_image
 )
 
 # 2. Import các hàm xây dựng prompt từ module explanation_prompt_builders
@@ -26,7 +37,18 @@ from services.explanation_prompt_builders import (
     build_hsk2_true_false_image_prompt,
     build_hsk2_dialogue_comprehension_prompt,
     build_hsk2_true_false_statement_prompt,
-    build_hsk2_sentence_matching_inverted_prompt
+    build_hsk2_sentence_matching_inverted_prompt,
+    build_hsk3_true_false_listening_choice_prompt,
+    build_hsk3_reading_comprehension_no_pinyin_v3_prompt,
+    build_hsk3_sentence_reordering_prompt,
+    build_hsk3_word_fill_in_display_answer_prompt,
+    build_hsk4_listening_comprehension_prompt,
+    build_hsk4_sentence_sequence_reordering_prompt,
+    build_hsk4_reading_passage_prompt,
+    build_hsk4_image_word_sentence_creation_prompt,
+    build_hsk5_passage_cloze_prompt,
+    build_hsk5_main_idea_comprehension_prompt,
+    build_hsk5_long_passage_comprehension_prompt
 )
 
 # --- CẤU HÌNH ĐƯỜNG DẪN PROMPT VÀ SCHEMA ---
@@ -141,7 +163,145 @@ HSK2_EXPLANATION_CONFIGS = {
         "sheet_name": "TN câu trả lời đúng (HL) (HSK2)",
         "renderer": render_hsk2_sentence_matching_inverted_explanation
     }
-    # ... Thêm các dạng bài khác của HSK2 vào đây trong tương lai ...
+}
+
+HSK3_EXPLANATION_CONFIGS={
+    "shared_image_comprehension": {
+
+    },
+    "true_false_listening_choice": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_true_false_listening_choice_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_true_false_listening_choice_schema.json"),
+        "prompt_builder": build_hsk3_true_false_listening_choice_prompt,
+        "sheet_name": "ĐS nghe chọn (HSK3)",
+        "renderer": render_hsk3_true_false_listening_choice_explanation
+    },
+    "reading_comprehension_dialogue_2_lines": {
+
+    },
+    "reading_comprehension_dialogue_4_lines": {
+
+    },
+    "sentence_matching_inverted_questions": {
+
+    },
+    "word_fill_in_questions": {
+
+    },
+    "reading_comprehension_no_pinyin_v3": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_reading_comprehension_no_pinyin_v3_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_reading_comprehension_no_pinyin_v3_schema.json"),
+        "prompt_builder": build_hsk3_reading_comprehension_no_pinyin_v3_prompt,
+        "sheet_name": "TN PA đúng ko pinyin_v3 (HSK3)",
+        "renderer": render_hsk3_reading_comprehension_no_pinyin_v3_explanation_with_markers
+    },
+    "sentence_reordering": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_sentence_reordering_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_sentence_reordering_schema.json"),
+        "prompt_builder": build_hsk3_sentence_reordering_prompt,
+        "sheet_name": "Sắp xếp câu (HSK3)",
+        "renderer": render_hsk3_sentence_reordering_explanation
+    },
+    "word_fill_in_display_answer": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_word_fill_in_display_answer_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_word_fill_in_display_answer_schema.json"),
+        "prompt_builder": build_hsk3_word_fill_in_display_answer_prompt,
+        "sheet_name": "Điền từ đúng (HSK3)",
+        "renderer": render_word_fill_explanation
+    }
+}
+
+HSK4_EXPLANATION_CONFIGS={
+    "true_false_listening_choice": {
+
+    },
+    "reading_comprehension_dialogue_2_lines": {
+
+    },
+    "reading_comprehension_dialogue_4_lines": {
+
+    },
+    "listening_comprehension": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_listening_comprehension.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk4", "hsk4_listening_comprehension_schema.json"),
+        "prompt_builder": build_hsk4_listening_comprehension_prompt,
+        "sheet_name": "TN Nghe hiểu (HSK4)",
+        "renderer": render_hsk4_listening_comprehension_explanation
+    },
+    "word_fill_in_questions": {
+
+    },
+    "sentence_sequence_reordering": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_sentence_sequence_reordering.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk4", "hsk4_sentence_sequence_reordering_schema.json"),
+        "prompt_builder": build_hsk4_sentence_sequence_reordering_prompt,
+        "sheet_name": "Sắp xếp các câu (HSK4)", # Tên sheet này cần khớp với file Excel template
+        "renderer": render_hsk4_sentence_sequence_reordering_explanation
+    },
+    "reading_comprehension_no_pinyin_v3": {
+
+    },
+    "reading_comprehension_short_passage": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_reading_short_passage.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk4", "hsk4_reading_short_passage_schema.json"),
+        "prompt_builder": build_hsk4_reading_passage_prompt,
+        "sheet_name": "TN Đọc hiểu ngắn (HSK4)", # Cần khớp với file Excel
+        "renderer": render_hsk4_reading_passage_explanation
+    },
+    "sentence_reordering": {
+
+    },
+    "image_with_word_sentence_creation": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_image_with_word_sentence_creation.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk4", "hsk4_image_with_word_sentence_creation_schema.json"),
+        "prompt_builder": build_hsk4_image_word_sentence_creation_prompt,
+        "sheet_name": "Ảnh với từ (img) (HSK4)", # Cần khớp với file Excel
+        "renderer": render_hsk4_image_word_sentence_creation_explanation
+    }
+}
+
+HSK5_EXPLANATION_CONFIGS={
+    "reading_comprehension_dialogue_2_lines": {
+
+    },
+    "reading_comprehension_dialogue_4_lines": {
+
+    },
+    "listening_comprehension": {
+
+    },
+    "passage_cloze": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk5", "hsk5_passage_cloze.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk5", "hsk5_passage_cloze_schema.json"),
+        "prompt_builder": build_hsk5_passage_cloze_prompt,
+        "sheet_name": "Điền từ đoạn văn (HSK5)",
+        "renderer": render_hsk5_passage_cloze_explanation
+    },
+    "main_idea_comprehension": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk5", "hsk5_main_idea_comprehension.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk5", "hsk5_main_idea_comprehension_schema.json"),
+        "prompt_builder": build_hsk5_main_idea_comprehension_prompt,
+        "sheet_name": "Chọn chủ đề đoạn văn (HSK5)",
+        "renderer": render_hsk5_main_idea_comprehension_explanation
+    },
+    "long_passage_comprehension": {
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk5", "hsk5_long_passage_comprehension.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk5", "hsk5_long_passage_comprehension_schema.json"),
+        "prompt_builder": build_hsk5_long_passage_comprehension_prompt,
+        "sheet_name": "TN Đọc hiểu (img) (HSK5)",
+        "renderer": render_hsk5_long_passage_comprehension_explanation
+    },
+    "sentence_reordering": {
+
+    },
+    "writing_from_keywords": {
+        "sheet_name": "Viết dựa vào từ (HSK5)",
+        "renderer": render_hsk5_writing_from_keywords
+    },
+    "writing_from_image": {
+        "sheet_name": "Viết dựa vào ảnh (img) (HSK5)",
+        "renderer": render_hsk5_writing_from_image
+    },
 }
 
 # --- CÁC HÀM "NHÀ MÁY" ĐỂ LẤY CẤU HÌNH ĐÚNG ---
@@ -151,5 +311,11 @@ def get_explanation_config(hsk_level: str):
         return HSK1_EXPLANATION_CONFIGS
     elif hsk_level == 'hsk2':
         return HSK2_EXPLANATION_CONFIGS
+    elif hsk_level == 'hsk3':
+        return HSK3_EXPLANATION_CONFIGS
+    elif hsk_level == 'hsk4':
+        return HSK4_EXPLANATION_CONFIGS
+    elif hsk_level == 'hsk5':
+        return HSK5_EXPLANATION_CONFIGS
     print(f"Cảnh báo: Không tìm thấy cấu hình prompt lời giải cho '{hsk_level}'.")
     return None

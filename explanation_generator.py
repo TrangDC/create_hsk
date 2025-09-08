@@ -7,6 +7,7 @@ from config.hsk_explanation_configs import get_explanation_config
 from config.hsk_question_configs import get_prompt_config as get_question_gen_config
 from services.explanation_sheet_formatters import render_ds_vocab_explanation # Import hàm đặc biệt này
 from call_vertexai import generate_content_from_pdfs
+import inspect
 
 
 def create_dynamic_prompt(task: dict, hsk_level: str) -> str:
@@ -44,40 +45,68 @@ def load_source_data(filepath: str) -> dict:
         print(f"❌ Lỗi: File '{filepath}' không chứa dữ liệu JSON hợp lệ.")
         return None
 
+# Trong file explanation_generator.py, hàm flatten_question_data
+
 def flatten_question_data(data_map: dict, hsk_level: str) -> list:
-    """Chuyển đổi cấu trúc dữ liệu lồng nhau thành một danh sách phẳng các câu hỏi."""
     print("--- Đang chuẩn hóa và làm phẳng dữ liệu câu hỏi ---")
     flat_list = []
-    # 1. Lấy config động từ module question_generator
     question_gen_config = get_question_gen_config(hsk_level)
     if not question_gen_config:
-        print(f"❌ Lỗi: Không tìm thấy cấu hình TẠO CÂU HỎI cho '{hsk_level}'. Không thể làm phẳng dữ liệu.")
+        print(f"❌ Lỗi: Không tìm thấy cấu hình TẠO CÂU HỎI cho '{hsk_level}'.")
         return []
-    # 2. Xóa bỏ prompt_mapping và dùng config để tra cứu
+
     for prompt_name, data in data_map.items():
         prompt_details = question_gen_config.get(prompt_name)
         if not prompt_details:
-            print(f"   ⚠️ Cảnh báo: Không tìm thấy chi tiết cho prompt '{prompt_name}' trong config. Bỏ qua.")
+            print(f"   ⚠️ Cảnh báo: Không tìm thấy chi tiết cho prompt '{prompt_name}'. Bỏ qua.")
             continue
-        data_type = prompt_details.get("type") # <-- Tra cứu "type" trực tiếp
+        
+        data_type = prompt_details.get("type")
         if data_type == "keyed":
             for json_key, content in data.items():
-                questions = content.get('questions', []) if isinstance(content, dict) else content
-                shared_material = content.get('shared_material') if isinstance(content, dict) else None
-                for question in questions:
+                
+                # ==========================================================
+                # === ĐÂY LÀ ĐOẠN CODE CẦN THAY ĐỔI/XÁC NHẬN LẠI ===
+                # ==========================================================
+                
+                if json_key == "listening_comprehension":
+                    # 'content' ở đây là một danh sách các học liệu
+                    # Mỗi học liệu giờ đây chính là một "task"
+                    for material_block in content:
+                        task = {
+                            "prompt_name": prompt_name,
+                            "question_type": json_key,
+                            "data": material_block # 'data' bây giờ chứa TOÀN BỘ học liệu
+                        }
+                        flat_list.append(task)
+                if json_key in ["passage_cloze", "long_passage_comprehension"]:
                     task = {
                         "prompt_name": prompt_name,
                         "question_type": json_key,
-                        "data": question
+                        "data": content # 'data' chứa toàn bộ object passage_cloze
                     }
-                    if shared_material:
-                        task['shared_material'] = shared_material
                     flat_list.append(task)
+                else:
+                    # Logic cũ cho các dạng 'keyed' khác
+                    questions = content.get('questions', []) if isinstance(content, dict) else content
+                    shared_material = content.get('shared_material') if isinstance(content, dict) else None
+                    for question in questions:
+                        task = {
+                            "prompt_name": prompt_name,
+                            "question_type": json_key,
+                            "data": question
+                        }
+                        if shared_material:
+                            task['shared_material'] = shared_material
+                        flat_list.append(task)
+                # ==========================================================
+                # ==========================================================
+
         elif data_type == "array":
             for question in data:
                 flat_list.append({ "prompt_name": prompt_name, "question_type": question.get('kind'), "data": question })
 
-    print(f"✅ Đã tìm thấy tổng cộng {len(flat_list)} câu hỏi.")
+    print(f"✅ Đã tìm thấy tổng cộng {len(flat_list)} task.") # Chú ý, đây là số task, không phải câu hỏi
     return flat_list
 
 def generate_explanations_concurrently(flat_question_list: list, hsk_level: str) -> list:
@@ -92,6 +121,11 @@ def generate_explanations_concurrently(flat_question_list: list, hsk_level: str)
     with ThreadPoolExecutor(max_workers=10) as executor:
         future_to_task = {}
         for task in flat_question_list:
+            if task['question_type'] in ["writing_from_keywords", "writing_from_image"]:
+                # Không cần gọi API, lời giải đã có trong task['data']
+                task['explanation_details'] = task['data'] # Gán trực tiếp
+                print(f"   - ✅ Lấy lời giải có sẵn cho dạng: {task['question_type']}")
+                continue # Chuyển sang task tiếp theo            
             if task['question_type'] in explanation_configs:
                 prompt_text = create_dynamic_prompt(task, hsk_level)
                 if prompt_text:
@@ -148,9 +182,26 @@ def update_excel_with_explanations(excel_path: str, enriched_question_list: list
             if sheet_name and renderer_func and explanation_data and sheet_name in workbook.sheetnames:
                 worksheet = workbook[sheet_name]
                 current_row = row_counters[sheet_name]
-                cell = worksheet[f'I{current_row}']
-                renderer_func(cell, explanation_data)
-                row_counters[sheet_name] += 1
+                
+                # Xử lý đặc biệt cho các renderer xử lý theo cụm
+                if q_type in ["listening_comprehension", "reading_comprehension_short_passage", "passage_cloze", "long_passage_comprehension"]: # <-- THÊM DẠNG MỚI
+                    # Cần truyền vào: worksheet, dòng bắt đầu, dữ liệu lời giải, và dữ liệu câu hỏi gốc
+                    rows_written = renderer_func(worksheet, current_row, explanation_data, task)
+                    row_counters[sheet_name] += rows_written
+                elif q_type in ["sentence_sequence_reordering", "image_with_word_sentence_creation", "main_idea_comprehension"]: # <-- THÊM DẠNG MỚI
+                    cell = worksheet[f'I{current_row}']
+                    renderer_func(cell, explanation_data, task) # Gọi với 3 tham số
+                    row_counters[sheet_name] += 1
+                # elif q_type in ["writing_from_keywords", "writing_from_image"]:
+                #     # Các hàm này chỉ cần dữ liệu gốc, chính là explanation_details
+                #     cell = worksheet[f'I{current_row}']
+                #     renderer_func(cell, explanation_data)
+                #     row_counters[sheet_name] += 1    
+                else:
+                    # Logic cũ cho các renderer ghi 1 dòng
+                    cell = worksheet[f'I{current_row}']
+                    renderer_func(cell, explanation_data) # Sửa đổi nếu cần
+                    row_counters[sheet_name] += 1
         # Xử lý đặc biệt cho sheet "ĐS (img) HSK1" và "ĐS Ko phụ đề (img) HSK1"
         if "ĐS (img) HSK1" in workbook.sheetnames:
             ds_worksheet = workbook["ĐS (img) HSK1"]
@@ -187,8 +238,8 @@ def run_explanation_generation(hsk_level: str, source_data_file: str, excel_outp
 
 # Test hàm xử lý
 if __name__ == "__main__":
-    HSK_LEVEL = "hsk2"
-    SOURCE_DATA_FILE = r"D:\Edmicro\Tools\create_hsk\output\test\generated_question_data.json"
-    EXCEL_OUTPUT_PATH = r"D:\Edmicro\Tools\create_hsk\output\test\hsk2_output.xlsx"
+    HSK_LEVEL = "hsk5"
+    SOURCE_DATA_FILE = r"E:\Edmicro\create_hsk\output\test\generated_question_data.json"
+    EXCEL_OUTPUT_PATH = r"E:\Edmicro\create_hsk\output\test\hsk5_output.xlsx"
     
     run_explanation_generation(HSK_LEVEL, SOURCE_DATA_FILE, EXCEL_OUTPUT_PATH)

@@ -581,7 +581,7 @@ def render_word_fill_explanation(cell, explanation_json: dict):
     if vt.startswith("**Nam:**") or vt.startswith("**Nữ:**"):
         cell_value += "Tạm dịch:\n"
     else:
-        cell_value += "Tạm dịch: "
+        cell_value += "Tạm dịch:\n"
     cell_value += vt
 
     cell.value = apply_rich_text_formatting_with_chinese(cell_value)
@@ -748,4 +748,873 @@ def render_hsk2_sentence_matching_inverted_explanation(cell, explanation_json: d
     cell.alignment = Alignment(wrap_text=True, vertical='top')
     
     # Tự động điều chỉnh kích thước ô
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+def render_hsk3_true_false_listening_choice_explanation(cell, explanation_json: dict):
+    """
+    Render lời giải cho dạng Đúng/Sai nghe chọn HSK3.
+    """
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    rich_text = CellRichText()
+
+    # 1. Phân tích
+    analysis = explanation_json.get('analysis_paragraph', '')
+    rich_text.append(analysis + '\n\n')
+
+    # 2. Khối Phụ đề
+    original_texts = explanation_json.get('original_texts_block', {})
+    rich_text.append(TextBlock(bold_font, "Phụ đề:\n"))
+    rich_text.append(original_texts.get('script_chinese', '') + '\n')
+    # Loại bỏ dấu ★ nếu có sẵn trong dữ liệu và thêm lại để đảm bảo nhất quán
+    statement = original_texts.get('statement_chinese', '').lstrip('★ ').strip()
+    rich_text.append("★ " + statement + '\n\n')
+
+    # 3. Khối Tạm dịch
+    translation = explanation_json.get('translation_block', {})
+    rich_text.append(TextBlock(bold_font, "Tạm dịch:\n"))
+    # In nghiêng cả 2 dòng dịch
+    rich_text.append(TextBlock(italic_font, translation.get('script_vietnamese', '') + '\n'))
+    statement_vi = translation.get('statement_vietnamese', '').lstrip('★ ').strip()
+    rich_text.append(TextBlock(italic_font, "★ " + statement_vi))
+
+    # Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Tự động điều chỉnh kích thước ô
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+def render_hsk3_reading_comprehension_no_pinyin_v3_explanation(cell, explanation_json: dict):
+    """
+    Render lời giải cho dạng đọc hiểu không pinyin V3 của HSK3 với rich text formatting.
+    """
+    from openpyxl.cell.text import InlineFont
+    from openpyxl.cell.rich_text import TextBlock, CellRichText
+    from openpyxl.styles import Alignment
+    
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    rich_text = CellRichText()
+
+    # 1. Phân tích
+    analysis = explanation_json.get('analysis_paragraph', '')
+    if analysis:
+        rich_text.append(analysis)
+        rich_text.append('\n\n')
+
+    # 2. Khối Tạm dịch
+    translation = explanation_json.get('translation_block', {})
+    if translation:
+        rich_text.append(TextBlock(bold_font, "Tạm dịch:\n"))
+        script_chinese = translation.get('script_chinese', '')
+        if script_chinese:
+            rich_text.append(script_chinese + '\n')
+        script_vietnamese = translation.get('script_vietnamese', '')
+        if script_vietnamese:
+            rich_text.append(TextBlock(italic_font, f"({script_vietnamese})"))
+            rich_text.append('\n\n')
+
+    # 3. Khối Câu hỏi và Lựa chọn
+    query_options = explanation_json.get('query_and_options_block', {})
+    
+    # Câu hỏi
+    query = query_options.get('query', {})
+    if query:
+        query_chinese = query.get('chinese_text', '').lstrip('★ ').strip()
+        query_vietnamese = query.get('vietnamese_translation', '')
+        if query_chinese:
+            rich_text.append("★ " + query_chinese + '\n')
+        if query_vietnamese:
+            rich_text.append(TextBlock(italic_font, f"({query_vietnamese})"))
+            rich_text.append('\n')
+
+    # Các lựa chọn
+    options = query_options.get('options', [])
+    for opt in options:
+        letter = opt.get('letter', '')
+        chinese = opt.get('chinese_text', '')
+        vietnamese = opt.get('vietnamese_translation', '')
+        if letter and chinese:
+            rich_text.append(f"{letter}. {chinese}\n")
+        if vietnamese:
+            rich_text.append(TextBlock(italic_font, f"({vietnamese})"))
+            rich_text.append('\n')
+
+    # Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Tự động điều chỉnh kích thước ô
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+def build_hsk3_plain_text_with_markers(explanation_json: dict) -> str:
+    """
+    Tạo plain text với markers cho HSK3 reading comprehension (fallback method).
+    """
+    parts = []
+    
+    # 1. Phân tích
+    analysis = explanation_json.get('analysis_paragraph', '')
+    if analysis:
+        parts.append(analysis)
+        parts.append('\n\n')
+    
+    # 2. Tạm dịch
+    translation = explanation_json.get('translation_block', {})
+    if translation:
+        parts.append('**Tạm dịch:**\n')
+        script_chinese = translation.get('script_chinese', '')
+        if script_chinese:
+            parts.append(script_chinese + '\n')
+        script_vietnamese = translation.get('script_vietnamese', '')
+        if script_vietnamese:
+            parts.append(f'<<i>>({script_vietnamese})<</i>>')
+            parts.append('\n\n')
+    
+    # 3. Câu hỏi và lựa chọn
+    query_options = explanation_json.get('query_and_options_block', {})
+    query = query_options.get('query', {})
+    if query:
+        query_chinese = query.get('chinese_text', '').lstrip('★ ').strip()
+        query_vietnamese = query.get('vietnamese_translation', '')
+        if query_chinese:
+            parts.append(f"★ {query_chinese}\n")
+        if query_vietnamese:
+            parts.append(f'<<i>>({query_vietnamese})<</i>>')
+            parts.append('\n')
+    
+    options = query_options.get('options', [])
+    for opt in options:
+        letter = opt.get('letter', '')
+        chinese = opt.get('chinese_text', '')
+        vietnamese = opt.get('vietnamese_translation', '')
+        if letter and chinese:
+            parts.append(f"{letter}. {chinese}\n")
+        if vietnamese:
+            parts.append(f'<<i>>({vietnamese})<</i>>')
+            parts.append('\n')
+    
+    return ''.join(parts)
+
+def render_hsk3_reading_comprehension_no_pinyin_v3_explanation_with_markers(cell, explanation_json: dict):
+    """
+    Alternative renderer sử dụng marker system (tương tự các hàm khác trong file).
+    """
+    plain_text_with_markers = build_hsk3_plain_text_with_markers(explanation_json)
+    rich_text = apply_regex_formatting(plain_text_with_markers)
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+def render_hsk3_sentence_reordering_explanation(cell, explanation_json: dict):
+    """
+    Render lời giải cho dạng sắp xếp thành phần câu HSK3.
+    """
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    rich_text = CellRichText()
+
+    # 1. Phân tích ngữ pháp
+    analysis = explanation_json.get('grammar_analysis', '')
+    rich_text.append(analysis + '\n\n')
+
+    # 2. Khối Tạm dịch
+    correct_sentence = explanation_json.get('correct_sentence_block', {})
+    rich_text.append(TextBlock(bold_font, "Tạm dịch:\n"))
+    rich_text.append(TextBlock(italic_font, correct_sentence.get('vietnamese_translation', '')))
+
+    # Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Tự động điều chỉnh kích thước ô
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+def apply_hsk4_rich_text_formatting(text: str) -> CellRichText:
+    """
+    Áp dụng định dạng rich text cho dạng DS vocab với các quy tắc:
+    - Bôi đậm: "Phụ đề:", "Tạm dịch:"
+    - In nghiêng: Text sau "Tạm dịch:"
+    """
+    # Define fonts
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    
+    rich_text = CellRichText()
+    
+    # Define keywords để bôi đậm
+    bold_keywords = ["Phụ đề:", "Tạm dịch:"]
+    
+    # Tạo pattern regex
+    escaped_keywords = [re.escape(kw) for kw in bold_keywords]
+    pattern = '(' + '|'.join(escaped_keywords) + ')'
+    
+    # Split text theo keywords, giữ lại các keywords
+    parts = re.split(pattern, text)
+    
+    in_tam_dich_section = False
+    
+    for part in parts:
+        if not part:  # Skip empty parts
+            continue
+            
+        if part in bold_keywords:
+            rich_text.append(TextBlock(bold_font, part))
+            if part == "Tạm dịch:":
+                in_tam_dich_section = True
+        else:
+            # Normal text
+            if in_tam_dich_section:
+                rich_text.append(TextBlock(italic_font, part))
+            else:
+                rich_text.append(part)
+    
+    return rich_text
+
+def build_hsk4_listening_text_with_markers(single_explanation: dict, shared_translation: dict, question_index: int, material_block: dict) -> str:
+    """
+    Tạo plain text với markers cho MỘT lời giải trong cụm nghe hiểu HSK4.
+    (Phiên bản đã sửa lỗi Regex Greedy và đảm bảo tách biệt các khối)
+    """
+    # 1. Xây dựng từng khối văn bản riêng lẻ
+    
+    # Khối 1: Phân tích
+    analysis_block = single_explanation.get('analysis_paragraph', '')
+
+    # Khối 2: Các lựa chọn
+    options_block_lines = []
+    options = single_explanation.get('options_list', [])
+    if options:
+        for opt in options:
+            letter = opt.get('letter', '')
+            chinese = opt.get('chinese_text', '')
+            translation = opt.get('translation', '')
+            # Đảm bảo mỗi lựa chọn là một khối khép kín
+            options_block_lines.append(f"{letter}. {chinese} <<i>>({translation})<</i>>")
+    options_block = "\n".join(options_block_lines)
+
+    # Khối 3: Phụ đề
+    phude_block = ""
+    script_chinese = material_block.get('script_chinese', '')
+    if script_chinese:
+        phude_block = f"Phụ đề:\n{script_chinese}\n"
+
+    # Khối 4: Tạm dịch
+    tamdich_block = ""
+    translation = shared_translation or {}
+    script_vi = translation.get('script_vietnamese', '')
+    query_vi = translation.get(f'query_vietnamese_{question_index + 1}', '')
+    if script_vi or query_vi:
+        translation_content = f"{script_vi}\n{query_vi}".strip()
+        # Đảm bảo khối tạm dịch là một khối khép kín
+        tamdich_block = f"Tạm dịch:\n{translation_content}"
+
+    # 2. Ghép các khối lại với nhau, đảm bảo chúng được tách biệt bằng `\n\n`
+    
+    final_parts = [
+        analysis_block,
+        options_block,
+        phude_block,
+        tamdich_block
+    ]
+    
+    # Lọc ra các khối rỗng và nối chúng lại
+    return "\n\n".join(part for part in final_parts if part)
+
+def render_hsk4_listening_comprehension_explanation(worksheet, start_row: int, explanation_json: dict, task_data: dict):
+    """
+    Render lời giải cho một cụm nghe hiểu HSK4, ghi ra 2 dòng liên tiếp.
+    Sử dụng cùng pipeline như format_shared_image_comprehension_rich_text.
+    """
+    explanations = explanation_json.get('explanations', [])
+    shared_translation = explanation_json.get('shared_translation', {})
+    material_block = task_data.get('data', {}) # Lấy dữ liệu câu hỏi gốc
+
+    # Đảm bảo có đúng 2 lời giải để xử lý
+    if len(explanations) != 2:
+        print(f"   ⚠️ Cảnh báo: Nhận được {len(explanations)} lời giải thay vì 2. Bỏ qua.")
+        return 0 # Trả về 0 vì không ghi dòng nào
+
+    # Lặp qua 2 lời giải và ghi vào 2 dòng
+    for i, single_explanation in enumerate(explanations):
+        current_row = start_row + i
+        cell = worksheet[f'I{current_row}']
+        
+        # 1. Tạo plain text với markers (tương tự build_plain_text_with_markers)
+        plain_text_with_markers = build_hsk4_listening_text_with_markers(single_explanation, shared_translation, i, material_block)
+
+        print("--------------Plain text---------------")
+        print(plain_text_with_markers)
+        print("---------------------------------------")
+        
+        # 2. Áp dụng định dạng bằng regex (tương tự format_shared_image_comprehension_rich_text)
+        rich_text = apply_hsk4_rich_text_formatting(plain_text_with_markers)
+        
+        cell.value = rich_text
+        cell.alignment = Alignment(wrap_text=True, vertical='top')
+        auto_size_cell(worksheet, cell, plain_text_from_rich_text(rich_text))
+
+    return 2 # Trả về 2 vì đã ghi thành công 2 dòng
+
+# --- Cập nhật hàm builder text này ---
+def build_hsk4_reordering_text_with_markers(explanation_json: dict, task_data: dict) -> str:
+    """Tạo plain text với markers cho dạng sắp xếp câu HSK4. (Phiên bản đã sửa)"""
+    parts = []
+    
+    # Lấy dữ liệu gốc để có nội dung câu
+    components = task_data.get('data', {}).get('components', [])
+    component_map = {comp['label']: comp['text'] for comp in components}
+    correct_order = task_data.get('data', {}).get('correct_order', '')
+    
+    # 1. Khối giải thích logic
+    logical_steps = explanation_json.get('logical_steps', [])
+    step_lines = []
+    for step in logical_steps:
+        label = step.get('label', '')
+        translation = step.get('translation', '')
+        explanation = step.get('explanation', '')
+        chinese_text = component_map.get(label, '')
+        
+        # Cấu trúc: - Câu [Label]: "[Tiếng Trung]" <<i>>([Bản dịch])<</i>> [Giải thích].
+        step_lines.append(f"- Câu {label}: \"{chinese_text}\" <<i>>({translation})<</i>> {explanation}")
+    
+    if step_lines:
+        parts.append("\n".join(step_lines))
+
+    # 2. Khối đoạn văn hoàn chỉnh
+    full_passage_parts = [component_map.get(letter, '') for letter in correct_order]
+    full_passage_chinese = " ".join(filter(None, full_passage_parts))
+    if full_passage_chinese:
+        parts.append(f'\n\n{full_passage_chinese}')
+
+    # 3. Khối tạm dịch
+    full_translation = explanation_json.get('full_passage_translation', '')
+    if full_translation:
+        parts.append('\nTạm dịch:\n')
+        parts.append(f'{full_translation}')
+
+    # Dùng join để đảm bảo các phần được nối đúng cách
+    return "".join(parts)
+
+# --- Hàm renderer chính không cần thay đổi ---
+def render_hsk4_sentence_sequence_reordering_explanation(cell, explanation_json: dict, task_data: dict):
+    """
+    Render lời giải cho dạng sắp xếp câu HSK4 bằng marker system.
+    Cần task_data để lấy lại nội dung các câu gốc.
+    """
+    plain_text = build_hsk4_reordering_text_with_markers(explanation_json, task_data)
+    rich_text = apply_rich_text_formatting(plain_text) # Tái sử dụng hàm formatter mạnh
+    
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+# --- Thêm hàm builder text này ---
+def build_hsk4_reading_passage_text_with_markers(single_explanation: dict, shared_translation: dict, question_index: int, material_block: dict) -> str:
+    """Tạo plain text với markers cho MỘT lời giải trong cụm đọc hiểu ngắn HSK4."""
+    
+    # Lấy dữ liệu cần thiết
+    analysis = single_explanation.get('analysis_paragraph', '')
+    options = single_explanation.get('options_list', [])
+    script_chinese = material_block.get('script_chinese', '')
+    questions_data = material_block.get('questions', [{}, {}])
+    current_question = questions_data[question_index]
+    query_chinese = current_question.get('query_chinese', '')
+
+    passage_vi = shared_translation.get('script_vietnamese', '')
+    query_vi = shared_translation.get(f'query_vietnamese_{question_index + 1}', '')
+
+    # --- Xây dựng các khối ---
+    
+    # Khối 1: Phân tích
+    analysis_block = analysis
+
+    # Khối 2: Tạm dịch học liệu
+    tamdich_passage_block = ""
+    if script_chinese:
+        tamdich_passage_block = f"**Tạm dịch:**\n{script_chinese}\n<<i>>({passage_vi})<</i>>"
+
+    # Khối 3: Câu hỏi và các lựa chọn
+    question_block_lines = []
+    if query_chinese:
+        question_block_lines.append(f"{query_chinese}")
+        question_block_lines.append(f"<<i>>({query_vi})<</i>>")
+    
+    if options:
+        for opt in options:
+            letter, chinese, translation = opt.get('letter', ''), opt.get('chinese_text', ''), opt.get('translation', '')
+            question_block_lines.append(f"{letter}. {chinese}\n<<i>>({translation})<</i>>")
+    
+    question_block = "\n".join(question_block_lines)
+
+    # --- Ghép các khối ---
+    final_parts = [
+        analysis_block,
+        tamdich_passage_block,
+        question_block
+    ]
+    
+    return "\n\n".join(part for part in final_parts if part)
+
+# --- Thêm hàm renderer chính này ---
+def render_hsk4_reading_passage_explanation(worksheet, start_row: int, explanation_json: dict, task_data: dict):
+    """Render lời giải cho một cụm đọc hiểu ngắn HSK4, ghi ra 2 dòng liên tiếp."""
+    explanations = explanation_json.get('explanations', [])
+    shared_translation = explanation_json.get('shared_translation', {})
+    material_block = task_data.get('data', {})
+
+    if len(explanations) != 2:
+        print(f"   ⚠️ Cảnh báo: Nhận được {len(explanations)} lời giải thay vì 2. Bỏ qua.")
+        return 0
+
+    for i, single_explanation in enumerate(explanations):
+        current_row = start_row + i
+        cell = worksheet[f'I{current_row}']
+        
+        plain_text = build_hsk4_reading_passage_text_with_markers(single_explanation, shared_translation, i, material_block)
+        rich_text = apply_regex_formatting(plain_text)
+        
+        cell.value = rich_text
+        cell.alignment = Alignment(wrap_text=True, vertical='top')
+        auto_size_cell(worksheet, cell, plain_text_from_rich_text(rich_text))
+
+    return 2
+
+# --- Thêm hàm builder text này ---
+def build_hsk4_image_word_sentence_text_with_markers(explanation_json: dict, task_data: dict) -> str:
+    """Tạo plain text với markers cho lời giải dạng Đặt câu với ảnh và từ HSK4."""
+    
+    # Lấy dữ liệu từ AI
+    translation = explanation_json.get('sample_sentence_translation', '')
+    explanation = explanation_json.get('explanation_paragraph', '')
+
+    # Lấy dữ liệu gốc từ task_data
+    sample_sentence = task_data.get('data', {}).get('sample_sentence', '')
+
+    # --- Xây dựng các khối ---
+    
+    # Khối 1: Đáp án
+    dapan_block = f"**Đáp án:** {sample_sentence}"
+
+    # Khối 2: Tạm dịch
+    tamdich_block = f"**Tạm dịch:** <<i>>{translation}<</i>>"
+    
+    # Khối 3: Giải thích
+    giaithich_block = f"**Giải thích:** {explanation}"
+
+    # --- Ghép các khối ---
+    final_parts = [
+        dapan_block,
+        tamdich_block,
+        giaithich_block
+    ]
+    
+    return "\n\n".join(part for part in final_parts if part)
+
+# --- Thêm hàm renderer chính này ---
+def render_hsk4_image_word_sentence_creation_explanation(cell, explanation_json: dict, task_data: dict):
+    """
+    Render lời giải cho dạng Đặt câu với ảnh và từ HSK4 bằng cách xây dựng RichText trực tiếp.
+    - In đậm: "Đáp án:", "Tạm dịch:", "Giải thích:"
+    - In nghiêng: Nội dung sau "Tạm dịch:"
+    """
+    # 1. Định nghĩa các kiểu font
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+
+    # 2. Lấy dữ liệu cần thiết
+    # Dữ liệu từ AI
+    translation = explanation_json.get('sample_sentence_translation', '')
+    explanation = explanation_json.get('explanation_paragraph', '')
+    # Dữ liệu gốc từ task_data
+    sample_sentence = task_data.get('data', {}).get('sample_sentence', '')
+    
+    # 3. Xây dựng đối tượng CellRichText từng phần
+    rich_text = CellRichText()
+
+    # Phần 1: Đáp án
+    if sample_sentence:
+        rich_text.append(TextBlock(bold_font, 'Đáp án: '))
+        rich_text.append(f'{sample_sentence}\n\n')
+
+    # Phần 2: Tạm dịch
+    if translation:
+        rich_text.append(TextBlock(bold_font, 'Tạm dịch: '))
+        rich_text.append(TextBlock(italic_font, f'{translation}\n\n'))
+
+    # Phần 3: Giải thích
+    if explanation:
+        rich_text.append(TextBlock(bold_font, 'Giải thích: '))
+        rich_text.append(explanation)
+
+    # 4. Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Lấy văn bản thô để tính toán kích thước
+    plain_text_for_sizing = plain_text_from_rich_text(rich_text)
+    auto_size_cell(cell.parent, cell, plain_text_for_sizing)
+
+
+# --- Thêm hàm builder text này ---
+def build_hsk5_passage_cloze_text_with_markers(single_explanation: dict, shared_translation: dict, full_passage_chinese: str) -> str:
+    """Tạo plain text với markers cho MỘT lời giải trong cụm điền từ HSK5."""
+
+    # Lấy dữ liệu cần thiết
+    analysis = single_explanation.get('analysis_paragraph', '')
+    options = single_explanation.get('options_list', [])
+    full_translation = shared_translation.get('full_passage_vietnamese', '')
+
+    # --- Xây dựng các khối ---
+    
+    # Khối 1: Phân tích
+    analysis_block = analysis
+
+    # Khối 2: Tạm dịch (chung cho cả 4 câu)
+    tamdich_block = ""
+    if full_passage_chinese and full_translation:
+        tamdich_block = (
+            f"**Tạm dịch:**\n{full_passage_chinese}\n"
+            f"<<i>>({full_translation})<</i>>"
+        )
+
+    # Khối 3: Các lựa chọn
+    options_block_lines = []
+    if options:
+        for opt in options:
+            letter, chinese, translation = opt.get('letter', ''), opt.get('chinese_text', ''), opt.get('translation', '')
+            options_block_lines.append(f"{letter}. {chinese} \n<<i>>({translation})<</i>>")
+    options_block = "\n".join(options_block_lines)
+
+    # --- Ghép các khối ---
+    final_parts = [analysis_block, tamdich_block, options_block]
+    return "\n\n".join(part for part in final_parts if part)
+
+def apply_regex_formatting_with_highlight(plain_text: str) -> CellRichText:
+    """
+    Parse các marker và build CellRichText.
+    Xử lý:
+    - <<bi>>...<</bi>> (In đậm + nghiêng)
+    - <<i>>...<</i>> (In nghiêng)
+    - **...** (In đậm)
+    - __...__ (Màu xanh lá cây)
+    """
+    bold_font        = InlineFont(b=True)
+    italic_font      = InlineFont(i=True)
+    bold_italic_font = InlineFont(b=True, i=True)
+    green_font       = InlineFont(color="008000") # Màu xanh lá cây đậm
+
+    rich = CellRichText()
+
+    # Regex kết hợp tất cả các loại marker
+    # (?s) để cho phép '.' khớp với ký tự xuống dòng
+    # (?:...) là non-capturing group
+    token_re = re.compile(r'(?s)(?:(<<bi>>.*?<<\/bi>>)|(<<i>>.*?<<\/i>>)|(\*\*[^*]+\*\*)|(__.*?__))')
+
+    pos = 0
+    for m in token_re.finditer(plain_text):
+        # 1. Thêm phần text thường nằm trước token
+        if m.start() > pos:
+            rich.append(plain_text[pos:m.start()])
+
+        # 2. Xử lý token đã tìm thấy
+        # Lấy token từ group khớp đầu tiên không phải None
+        tok = next(g for g in m.groups() if g is not None)
+        
+        if tok.startswith('<<bi>>'):
+            content = tok[6:-7] # Bỏ <<bi>> và <</bi>>
+            rich.append(TextBlock(bold_italic_font, content))
+        elif tok.startswith('<<i>>'):
+            content = tok[5:-6] # Bỏ <<i>> và <</i>>
+            rich.append(TextBlock(italic_font, content))
+        elif tok.startswith('**'):
+            content = tok[2:-2] # Bỏ **
+            rich.append(TextBlock(bold_font, content))
+        elif tok.startswith('__'):
+            content = tok[2:-2] # Bỏ __
+            rich.append(TextBlock(green_font, content))
+
+        pos = m.end()
+
+    # 3. Thêm phần text còn lại sau token cuối cùng
+    if pos < len(plain_text):
+        rich.append(plain_text[pos:])
+
+    return rich
+
+# --- Thêm hàm renderer chính này ---
+def render_hsk5_passage_cloze_explanation(worksheet, start_row: int, explanation_json: dict, task_data: dict):
+    """Render lời giải cho một cụm điền từ HSK5, ghi ra 4 dòng liên tiếp."""
+    
+    # Dữ liệu từ AI
+    explanations = explanation_json.get('explanations', [])
+    shared_translation = explanation_json.get('shared_translation', {})
+    
+    # Dữ liệu gốc
+    passage_block = task_data.get('data', {})
+    passage_with_blanks = passage_block.get('shared_material', '')
+    questions = passage_block.get('questions', [])
+
+    if len(explanations) != 4 or len(questions) != 4:
+        print(f"   ⚠️ Cảnh báo: Dữ liệu HSK5 Cloze không đủ. Bỏ qua.")
+        return 0
+
+    # Tái tạo lại đoạn văn hoàn chỉnh một lần
+    correct_words = [q.get('answer_options', [])[q.get('correct_answer', 1)-1] for q in questions]
+    full_passage_chinese = passage_with_blanks
+    for word in correct_words:
+        full_passage_chinese = full_passage_chinese.replace('________', f'__{word}__', 1)
+
+    # Lặp qua 4 lời giải và ghi vào 4 dòng
+    for i, single_explanation in enumerate(explanations):
+        current_row = start_row + i
+        cell = worksheet[f'I{current_row}']
+        
+        plain_text = build_hsk5_passage_cloze_text_with_markers(single_explanation, shared_translation, full_passage_chinese)
+        rich_text = apply_regex_formatting_with_highlight(plain_text)
+        
+        cell.value = rich_text
+        cell.alignment = Alignment(wrap_text=True, vertical='top')
+        auto_size_cell(worksheet, cell, plain_text_from_rich_text(rich_text))
+
+    return 4
+
+# --- Thêm hàm builder text này ---
+def build_hsk5_main_idea_text_with_markers(explanation_json: dict, task_data: dict) -> str:
+    """Tạo plain text với markers cho dạng chọn chủ đề đoạn văn HSK5."""
+
+    # Lấy dữ liệu từ AI
+    analysis = explanation_json.get('analysis_paragraph', '')
+    passage_translation = explanation_json.get('passage_translation', '')
+    options = explanation_json.get('options_list_with_translation', [])
+    
+    # Lấy dữ liệu gốc
+    passage_chinese = task_data.get('data', {}).get('passage_chinese', '')
+
+    # --- Xây dựng các khối ---
+    
+    # Khối 1: Phân tích
+    analysis_block = analysis
+
+    # Khối 2: Tạm dịch
+    tamdich_block = ""
+    if passage_chinese and passage_translation:
+        tamdich_block = (
+            f"**Tạm dịch:**\n{passage_chinese}\n"
+            f"<<i>>({passage_translation})<</i>>"
+        )
+
+    # Khối 3: Các lựa chọn
+    options_block_lines = []
+    if options:
+        for opt in options:
+            letter, chinese, translation = opt.get('letter', ''), opt.get('chinese_text', ''), opt.get('translation', '')
+            options_block_lines.append(f"{letter}. {chinese} \n<<i>>({translation})<</i>>")
+    options_block = "\n".join(options_block_lines)
+
+    # --- Ghép các khối ---
+    final_parts = [analysis_block, tamdich_block, options_block]
+    return "\n\n".join(part for part in final_parts if part)
+
+# --- Thêm hàm renderer chính này ---
+def render_hsk5_main_idea_comprehension_explanation(cell, explanation_json: dict, task_data: dict):
+    """
+    Render lời giải cho dạng chọn chủ đề đoạn văn HSK5.
+    """
+    plain_text = build_hsk5_main_idea_text_with_markers(explanation_json, task_data)
+    rich_text = apply_regex_formatting(plain_text) # Tái sử dụng hàm formatter mạnh
+    
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+# --- Thêm hàm builder text này ---
+def build_hsk5_long_passage_text_with_markers(single_explanation: dict, shared_translation: dict, passage_chinese: str) -> str:
+    """Tạo plain text với markers cho MỘT lời giải trong cụm đọc hiểu dài HSK5."""
+
+    # Lấy dữ liệu cần thiết
+    analysis = single_explanation.get('analysis_paragraph', '')
+    options = single_explanation.get('options_list', [])
+    passage_translation = shared_translation.get('passage_vietnamese', '')
+
+    # --- Xây dựng các khối ---
+    
+    # Khối 1: Phân tích
+    analysis_block = analysis
+
+    # Khối 2: Tạm dịch (chung cho cả 4 câu)
+    tamdich_block = ""
+    if passage_chinese and passage_translation:
+        tamdich_block = (
+            f"**Tạm dịch:**\n{passage_chinese}\n"
+            f"<<i>>({passage_translation})<</i>>"
+        )
+
+    # Khối 3: Các lựa chọn
+    options_block_lines = []
+    if options:
+        for opt in options:
+            letter, chinese, translation = opt.get('letter', ''), opt.get('chinese_text', ''), opt.get('translation', '')
+            options_block_lines.append(f"{letter}. {chinese} \n<<i>>({translation})<</i>>")
+    options_block = "\n".join(options_block_lines)
+
+    # --- Ghép các khối ---
+    final_parts = [analysis_block, tamdich_block, options_block]
+    return "\n\n".join(part for part in final_parts if part)
+
+# --- Thêm hàm renderer chính này ---
+def render_hsk5_long_passage_comprehension_explanation(worksheet, start_row: int, explanation_json: dict, task_data: dict):
+    """Render lời giải cho một cụm đọc hiểu dài HSK5, ghi ra 4 dòng liên tiếp."""
+    
+    explanations = explanation_json.get('explanations', [])
+    shared_translation = explanation_json.get('shared_translation', {})
+    passage_block = task_data.get('data', {})
+    passage_chinese = passage_block.get('shared_passage', '')
+
+    if len(explanations) != 4:
+        print(f"   ⚠️ Cảnh báo: Dữ liệu HSK5 Long Passage không đủ. Bỏ qua.")
+        return 0
+
+    # Lặp qua 4 lời giải và ghi vào 4 dòng
+    for i, single_explanation in enumerate(explanations):
+        current_row = start_row + i
+        cell = worksheet[f'I{current_row}']
+        
+        plain_text = build_hsk5_long_passage_text_with_markers(single_explanation, shared_translation, passage_chinese)
+        rich_text = apply_regex_formatting(plain_text)
+        
+        cell.value = rich_text
+        cell.alignment = Alignment(wrap_text=True, vertical='top')
+        auto_size_cell(worksheet, cell, plain_text_from_rich_text(rich_text))
+
+    return 4
+
+def apply_formatting_with_highlight_and_headings(text: str) -> CellRichText:
+    """
+    Áp dụng định dạng rich text:
+    - Bôi đậm các tiêu đề "Tạm dịch:", "Phụ đề:", v.v.
+    - In nghiêng text sau "Tạm dịch:".
+    - Tô màu xanh lá cây cho text trong __...__ (và xóa __).
+    """
+    # 1. Định nghĩa các kiểu font
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    green_font = InlineFont(color="008000")
+
+    rich_text = CellRichText()
+    
+    # 2. Định nghĩa các tiêu đề cần bôi đậm
+    bold_headings = ["Tạm dịch:", "Phụ đề:"] # Có thể mở rộng danh sách này
+    
+    # 3. Tạo pattern regex - SỬA LẠI ĐỂ TRÁNH NESTED GROUPS
+    # Không cần group cho headings_pattern nữa
+    headings_pattern = '|'.join(re.escape(kw) for kw in bold_headings)
+    highlight_pattern = r'__.*?__'
+    # Kết hợp pattern
+    split_pattern = f'({headings_pattern}|{highlight_pattern})'
+
+    # 4. Tách chuỗi theo cả tiêu đề và highlight
+    parts = re.split(split_pattern, text)
+    
+    in_tam_dich_section = False # Cờ để theo dõi trạng thái in nghiêng
+    
+    for part in filter(None, parts): # Lọc ra các chuỗi rỗng
+        is_heading = part in bold_headings
+        is_highlight = part.startswith('__') and part.endswith('__')
+
+        if is_heading:
+            rich_text.append(TextBlock(bold_font, part))
+            if part == "Tạm dịch:":
+                in_tam_dich_section = True
+            else:
+                # Reset cờ nếu là tiêu đề khác (ví dụ "Phụ đề:")
+                in_tam_dich_section = False
+        elif is_highlight:
+            content = part[2:-2] # Bỏ dấu __
+            rich_text.append(TextBlock(green_font, content))
+        else:
+            # Đây là văn bản thường
+            if in_tam_dich_section:
+                rich_text.append(TextBlock(italic_font, part))
+            else:
+                rich_text.append(part)
+    
+    return rich_text
+
+def build_hsk5_writing_from_keywords_text_with_markers(question_data: dict) -> str:
+    """Tạo plain text với markers cho lời giải dạng Viết dựa vào từ HSK5."""
+    
+    # Lấy dữ liệu cần thiết từ question_data (vì lời giải đã có sẵn)
+    paragraph_marked = question_data.get('sample_paragraph_marked', '')
+    translation = question_data.get('translation', '')
+
+    # --- Xây dựng các khối ---
+    
+    # Khối 1: Đoạn văn mẫu (đã có sẵn marker __...__)
+    paragraph_block = paragraph_marked
+
+    # Khối 2: Tạm dịch - KIỂM TRA XEM ĐÃ CÓ "Tạm dịch:" CHƯA
+    tamdich_block = ""
+    if translation:
+        # Kiểm tra nếu translation đã có "Tạm dịch:" thì không thêm nữa
+        if translation.strip().startswith("Tạm dịch:"):
+            tamdich_block = translation
+        else:
+            tamdich_block = f"Tạm dịch:\n{translation}"
+        
+    # --- Ghép các khối ---
+    final_parts = [paragraph_block, tamdich_block]
+    return "\n\n".join(part for part in final_parts if part)
+
+def render_hsk5_writing_from_keywords(cell, question_data: dict):
+    """
+    Render lời giải cho dạng Viết dựa vào từ HSK5 bằng marker system.
+    """
+    # 1. Tạo plain text với các marker
+    plain_text = build_hsk5_writing_from_keywords_text_with_markers(question_data)
+    
+    # 2. Áp dụng định dạng bằng formatter đa năng
+    rich_text = apply_formatting_with_highlight_and_headings(plain_text)
+    
+    # 3. Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
+    auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+def build_hsk5_writing_from_image_text_with_markers(question_data: dict) -> str:
+    """Tạo plain text với markers cho lời giải dạng Viết dựa vào ảnh HSK5."""
+
+    # Lấy dữ liệu cần thiết từ question_data
+    sample_paragraph = question_data.get('sample_paragraph', '')
+    translation = question_data.get('translation', '')
+
+    # --- Xây dựng các khối ---
+
+    # Khối 1: Đoạn văn mẫu
+    paragraph_block = sample_paragraph
+    
+    # Khối 2: Tạm dịch
+    tamdich_block = ""
+    if translation:
+        tamdich_block = f"Tạm dịch:\n {translation}"
+        
+    # --- Ghép các khối ---
+    final_parts = [paragraph_block, tamdich_block]
+    return "\n\n".join(part for part in final_parts if part)    
+
+def render_hsk5_writing_from_image(cell, question_data: dict):
+    """
+    Render lời giải cho dạng Viết dựa vào ảnh HSK5 bằng marker system.
+    """
+    # 1. Tạo plain text với các marker
+    plain_text = build_hsk5_writing_from_image_text_with_markers(question_data)
+
+    # 2. Áp dụng định dạng
+    # Dùng hàm apply_regex_formatting là đủ vì không có highlight xanh
+    rich_text = apply_ds_vocab_rich_text_formatting(plain_text)
+    
+    # 3. Gán giá trị và định dạng cho ô
+    cell.value = rich_text
+    cell.alignment = Alignment(wrap_text=True, vertical='top')
     auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
