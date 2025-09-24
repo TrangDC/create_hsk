@@ -4,7 +4,7 @@
   "properties": {
     "analysis_paragraph": {
       "type": "string",
-      "description": "Lời giải thích logic bằng tiếng Việt. Luôn bắt đầu bằng 'Trong câu nói \"[câu gốc]\", ...' và giải thích tại sao nhận định là Đúng hoặc Sai."
+      "description": "Lời giải thích ngắn gọn, logic bằng tiếng Việt. Luôn bắt đầu bằng 'Trong câu nói \"[câu gốc]\", ...' và giải thích tại sao nhận định là Đúng hoặc Sai."
     },
     "original_texts_block": {
       "type": "object",

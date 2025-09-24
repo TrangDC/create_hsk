@@ -9,7 +9,7 @@ Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo m�
 **Câu trả lời mẫu (Đáp án):**
 {sample_sentence}
 
-Hãy tạo lời giải thích theo đúng cấu trúc JSON được cung cấp.
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp.
 1.  **sample_sentence_translation**: Dịch chính xác câu trả lời mẫu sang tiếng Việt.
 2.  **explanation_paragraph**: Viết một đoạn giải thích ngắn gọn. Đoạn này cần:
     -   Liên kết mô tả hình ảnh với câu trả lời mẫu.

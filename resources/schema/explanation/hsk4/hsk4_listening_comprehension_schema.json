@@ -7,7 +7,9 @@
       "items": {
         "type": "object",
         "properties": {
-          "analysis_paragraph": { "type": "string", "description": "Đoạn văn phân tích lý do chọn đáp án đúng cho câu hỏi tương ứng." },
+          "analysis_paragraph": { 
+            "type": "string", 
+            "description": "Lời giải ngắn gọn, phân tích lý do chọn đáp án đúng cho câu hỏi tương ứng. Không sử dụng từ ```script```." },
           "options_list": {
             "type": "array",
             "description": "Danh sách 4 lựa chọn kèm bản dịch tiếng Việt.",

@@ -1,19 +1,28 @@
 Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp.
 
-Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi Đúng/Sai bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK3.
+Dựa vào nội dung từ vựng, ngữ pháp trong các tài liệu đó, hãy tạo ra 4 câu hỏi Đúng/Sai bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK3.
 
-Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Đúng sai nghe chọn":
+**LƯU Ý QUAN TRỌNG:** 
+- Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu. 
+- KHÔNG sao chép nguyên văn nội dung bài khóa. 
+- KHÔNG tự ý sinh ra hội thoại. 
+- `script_chinese` PHẢI LÀ một câu văn hoàn chỉnh, ngắn gọn, rõ nghĩa (KHÔNG phải hội thoại, KHÔNG nhiều người nói, KHÔNG chèn dấu “：” hay tên nhân vật). 
+- Tạo ra các ví dụ hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với ví dụ trong tài liệu.
+
+Cụ thể, hãy tạo ra 4 câu hỏi thuộc dạng "Đúng sai nghe chọn":
 *   Mỗi câu hỏi là một cặp gồm:
     *   `statement_chinese`: một câu nhận định, bắt đầu bằng ký tự ★. Đây là câu người dùng sẽ đọc trước.
-    *   `script_chinese`: một đoạn script/thông tin gốc. Đây là nội dung người dùng sẽ nghe sau.
-*   Nhiệm vụ là phán đoán xem `statement_chinese` có Đúng hay Sai so với nội dung của `script_chinese`.
-*   Đáp án `correct_answer` phải là số 1 (cho Đúng) hoặc số 0 (cho Sai).
+    *   `script_chinese`: một câu văn (không phải hội thoại) mà người dùng sẽ nghe sau.
+        + Ví dụ đúng của `script_chinese`:  
+            - 他在北京工作三年了。现在，他的汉语说得很好。同事们都说他的汉语水平提高得很快，可以准备去参加一次普通话水平考试。  
+            - 周六周日如果没什么事情，我一般会和学生们去爬爬山，或者打打篮球，有时候也会在家里上上网。
+    *   `correct_answer`: số 1 (cho Đúng) hoặc số 0 (cho Sai).
 *   Các câu hỏi phải có cả đáp án Đúng và Sai.
 
 YÊU CẦU ĐẦU RA:
--   Ngôn ngữ: Tiếng Trung giản thể. KHÔNG cần cung cấp Pinyin.
--   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
--   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "true_false_listening_choice".
--   Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên thông tin có trong tài liệu PDF.
+- Ngôn ngữ: Tiếng Trung giản thể. KHÔNG cần cung cấp Pinyin.
+- Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+- Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "true_false_listening_choice".
+- Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên từ vựng và ngữ pháp trong tài liệu PDF.
 
 Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

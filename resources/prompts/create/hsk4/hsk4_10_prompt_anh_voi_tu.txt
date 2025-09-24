@@ -2,6 +2,8 @@ Bạn là một giáo viên Tiếng Trung sáng tạo. Nhiệm vụ của bạn 
 
 Dựa vào nội dung đó, hãy tạo ra ```4``` câu hỏi dạng "Đặt câu với hình ảnh và từ vựng cho sẵn" ở cấp độ HSK4.
 
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
 Cụ thể, với mỗi câu hỏi, hãy tạo một cặp gồm:
 1.  `image_description`: Một mô tả chi tiết, rõ ràng bằng tiếng Việt về một hình ảnh. Hình ảnh này nên gợi mở và dễ dàng để đặt câu.
 2.  `vocabulary_word`: Một từ vựng tiếng Trung HSK4 quan trọng, BẮT BUỘC lấy từ phần từ vựng mới trong tài liệu PDF. Từ vựng này phải có liên quan logic đến hình ảnh được mô tả.

@@ -357,12 +357,6 @@ def apply_rich_text_formatting(text: str) -> CellRichText:
     escaped_keywords = [re.escape(kw) for kw in sorted(all_keywords, key=len, reverse=True)]
     pattern = '(' + '|'.join(escaped_keywords) + ')'
     parts = re.split(pattern, text)
-    
-    # DEBUG: In ra các parts để kiểm tra
-    print("DEBUG - Parts:")
-    for i, part in enumerate(parts):
-        print(f"Part {i}: '{part}'")
-    print("---")
 
     # NEW: bắt token **...** và <<i>>...<<\/i>> (non-greedy, đa dòng)
     bold_token_re = re.compile(r'(?s)(<<bi>>.*?<<\/bi>>|<<i>>.*?<<\/i>>|\*\*[^*]+\*\*)')
@@ -931,131 +925,140 @@ def render_hsk3_sentence_reordering_explanation(cell, explanation_json: dict):
     # Tự động điều chỉnh kích thước ô
     auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
 
-def apply_hsk4_rich_text_formatting(text: str) -> CellRichText:
+def build_hsk4_text_simple(single_explanation: dict, shared_translation: dict, question_index: int, material_block: dict) -> str:
     """
-    Áp dụng định dạng rich text cho dạng DS vocab với các quy tắc:
-    - Bôi đậm: "Phụ đề:", "Tạm dịch:"
-    - In nghiêng: Text sau "Tạm dịch:"
+    Tạo plain text đơn giản, đảm bảo markers được balance
     """
-    # Define fonts
-    bold_font = InlineFont(b=True)
-    italic_font = InlineFont(i=True)
-    
-    rich_text = CellRichText()
-    
-    # Define keywords để bôi đậm
-    bold_keywords = ["Phụ đề:", "Tạm dịch:"]
-    
-    # Tạo pattern regex
-    escaped_keywords = [re.escape(kw) for kw in bold_keywords]
-    pattern = '(' + '|'.join(escaped_keywords) + ')'
-    
-    # Split text theo keywords, giữ lại các keywords
-    parts = re.split(pattern, text)
-    
-    in_tam_dich_section = False
-    
-    for part in parts:
-        if not part:  # Skip empty parts
-            continue
-            
-        if part in bold_keywords:
-            rich_text.append(TextBlock(bold_font, part))
-            if part == "Tạm dịch:":
-                in_tam_dich_section = True
-        else:
-            # Normal text
-            if in_tam_dich_section:
-                rich_text.append(TextBlock(italic_font, part))
-            else:
-                rich_text.append(part)
-    
-    return rich_text
-
-def build_hsk4_listening_text_with_markers(single_explanation: dict, shared_translation: dict, question_index: int, material_block: dict) -> str:
-    """
-    Tạo plain text với markers cho MỘT lời giải trong cụm nghe hiểu HSK4.
-    (Phiên bản đã sửa lỗi Regex Greedy và đảm bảo tách biệt các khối)
-    """
-    # 1. Xây dựng từng khối văn bản riêng lẻ
     
     # Khối 1: Phân tích
     analysis_block = single_explanation.get('analysis_paragraph', '')
 
-    # Khối 2: Các lựa chọn
-    options_block_lines = []
+    # Khối 2: Các lựa chọn - SAFE formatting
+    options_lines = []
     options = single_explanation.get('options_list', [])
-    if options:
-        for opt in options:
-            letter = opt.get('letter', '')
-            chinese = opt.get('chinese_text', '')
-            translation = opt.get('translation', '')
-            # Đảm bảo mỗi lựa chọn là một khối khép kín
-            options_block_lines.append(f"{letter}. {chinese} <<i>>({translation})<</i>>")
-    options_block = "\n".join(options_block_lines)
+    for opt in options:
+        letter = opt.get('letter', '')
+        chinese = opt.get('chinese_text', '')
+        translation = opt.get('translation', '').strip()
+        if chinese and translation:
+            options_lines.append(f"{letter}. {chinese} **({translation})")
+    
+    options_block = "\n".join(options_lines)
 
     # Khối 3: Phụ đề
     phude_block = ""
     script_chinese = material_block.get('script_chinese', '')
     if script_chinese:
-        phude_block = f"Phụ đề:\n{script_chinese}\n"
+        phude_block = f"**Phụ đề:\n{script_chinese}"
 
-    # Khối 4: Tạm dịch
+    # Khối 4: Tạm dịch  
     tamdich_block = ""
-    translation = shared_translation or {}
-    script_vi = translation.get('script_vietnamese', '')
-    query_vi = translation.get(f'query_vietnamese_{question_index + 1}', '')
+    translation_dict = shared_translation or {}
+    script_vi = translation_dict.get('script_vietnamese', '')
+    query_vi = translation_dict.get(f'query_vietnamese_{question_index + 1}', '')
+    
     if script_vi or query_vi:
         translation_content = f"{script_vi}\n{query_vi}".strip()
-        # Đảm bảo khối tạm dịch là một khối khép kín
-        tamdich_block = f"Tạm dịch:\n{translation_content}"
+        tamdich_block = f"**Tạm dịch:\n{translation_content}"
 
-    # 2. Ghép các khối lại với nhau, đảm bảo chúng được tách biệt bằng `\n\n`
-    
-    final_parts = [
-        analysis_block,
-        options_block,
-        phude_block,
-        tamdich_block
-    ]
-    
-    # Lọc ra các khối rỗng và nối chúng lại
-    return "\n\n".join(part for part in final_parts if part)
+    # Ghép các khối
+    final_parts = [analysis_block, options_block, phude_block, tamdich_block]
+    return "\n\n".join(part for part in final_parts if part.strip())
+
+def apply_hsk4_rich_text_formatting(text: str) -> CellRichText:
+    """
+    Quy tắc:
+      - Bold: 'Phụ đề:' và 'Tạm dịch:'
+      - Toàn bộ sau 'Tạm dịch:' -> italic
+      - Bất kỳ (...) -> italic (bao gồm dấu ngoặc)
+    Implementation: không append str trực tiếp, chỉ append TextBlock(InlineFont,...)
+    """
+    bold_font = InlineFont(b=True)
+    italic_font = InlineFont(i=True)
+    normal_font = InlineFont()
+
+    rich = CellRichText()
+
+    # Tokenize: tìm các keyword hoặc nhóm ngoặc đơn
+    token_re = re.compile(r'(Phụ đề:|Tạm dịch:|\([^\)]*\))', flags=re.S)
+    pos = 0
+    in_tam_dich = False
+
+    for m in token_re.finditer(text):
+        before = text[pos:m.start()]
+        if before:
+            # append phần trước token theo trạng thái (italic nếu trong Tạm dịch)
+            font = italic_font if in_tam_dich else normal_font
+            rich.append(TextBlock(font, before))
+
+        token = m.group(0)
+        if token == "Phụ đề:":
+            rich.append(TextBlock(bold_font, token))
+        elif token == "Tạm dịch:":
+            rich.append(TextBlock(bold_font, token))
+            in_tam_dich = True
+        else:
+            # token là một nhóm ngoặc như "(...)" => luôn italic
+            rich.append(TextBlock(italic_font, token))
+
+        pos = m.end()
+
+    # Phần còn lại sau token cuối
+    tail = text[pos:]
+    if tail:
+        font = italic_font if in_tam_dich else normal_font
+        rich.append(TextBlock(font, tail))
+
+    return rich
 
 def render_hsk4_listening_comprehension_explanation(worksheet, start_row: int, explanation_json: dict, task_data: dict):
     """
-    Render lời giải cho một cụm nghe hiểu HSK4, ghi ra 2 dòng liên tiếp.
-    Sử dụng cùng pipeline như format_shared_image_comprehension_rich_text.
+    Sử dụng build_hsk4_text_simple(...) để tạo plain text sạch (không có marker).
+    Sau đó apply_hsk4_rich_text_formatting để gán CellRichText an toàn.
     """
-    explanations = explanation_json.get('explanations', [])
-    shared_translation = explanation_json.get('shared_translation', {})
-    material_block = task_data.get('data', {}) # Lấy dữ liệu câu hỏi gốc
+    try:
+        explanations = explanation_json.get('explanations', [])
+        shared_translation = explanation_json.get('shared_translation', {})
+        material_block = task_data.get('data', {})
 
-    # Đảm bảo có đúng 2 lời giải để xử lý
-    if len(explanations) != 2:
-        print(f"   ⚠️ Cảnh báo: Nhận được {len(explanations)} lời giải thay vì 2. Bỏ qua.")
-        return 0 # Trả về 0 vì không ghi dòng nào
+        if len(explanations) != 2:
+            print(f"⚠️ Cảnh báo: Nhận được {len(explanations)} lời giải thay vì 2.")
+            # vẫn tiếp tục nếu muốn, hoặc return 0; giữ giống flow bạn dùng
+            # return 0
 
-    # Lặp qua 2 lời giải và ghi vào 2 dòng
-    for i, single_explanation in enumerate(explanations):
-        current_row = start_row + i
-        cell = worksheet[f'I{current_row}']
-        
-        # 1. Tạo plain text với markers (tương tự build_plain_text_with_markers)
-        plain_text_with_markers = build_hsk4_listening_text_with_markers(single_explanation, shared_translation, i, material_block)
+        for i, single_explanation in enumerate(explanations):
+            current_row = start_row + i
+            cell = worksheet[f'I{current_row}']
 
-        print("--------------Plain text---------------")
-        print(plain_text_with_markers)
-        print("---------------------------------------")
-        
-        # 2. Áp dụng định dạng bằng regex (tương tự format_shared_image_comprehension_rich_text)
-        rich_text = apply_hsk4_rich_text_formatting(plain_text_with_markers)
-        
-        cell.value = rich_text
-        cell.alignment = Alignment(wrap_text=True, vertical='top')
-        auto_size_cell(worksheet, cell, plain_text_from_rich_text(rich_text))
+            print(f"\n=== PROCESSING EXPLANATION {i+1} ===")
 
-    return 2 # Trả về 2 vì đã ghi thành công 2 dòng
+            # Lưu ý: dùng build_hsk4_text_simple (phiên bản bạn đang dùng)
+            plain_text = build_hsk4_text_simple(single_explanation, shared_translation, i, material_block)
+
+            # (Không replace marker ở đây — build_hsk4_text_simple phải trả về text sạch)
+            print("Plain text preview:")
+            print(plain_text[:200] + "..." if len(plain_text) > 200 else plain_text)
+
+            # Apply rich text (rất quan trọng: luôn trả về TextBlock-only runs)
+            rich_text = apply_hsk4_rich_text_formatting(plain_text)
+
+            # Gán vào ô
+            cell.value = rich_text
+            cell.alignment = Alignment(wrap_text=True, vertical='top')
+
+        return len(explanations)
+
+    except Exception as e:
+        print(f"❌ Error in render_hsk4_listening_comprehension_explanation: {e}")
+        # Fallback: ghi plain text (loại bỏ marker nếu có)
+        for i, single_explanation in enumerate(explanations):
+            current_row = start_row + i
+            cell = worksheet[f'I{current_row}']
+            plain_text = build_hsk4_text_simple(single_explanation, shared_translation, i, material_block)
+            clean = plain_text.replace("**", "").replace("<<i>>", "").replace("<</i>>", "")
+            cell.value = clean
+            cell.alignment = Alignment(wrap_text=True, vertical='top')
+        return len(explanations)
 
 # --- Cập nhật hàm builder text này ---
 def build_hsk4_reordering_text_with_markers(explanation_json: dict, task_data: dict) -> str:
@@ -1255,7 +1258,6 @@ def render_hsk4_image_word_sentence_creation_explanation(cell, explanation_json:
     # Lấy văn bản thô để tính toán kích thước
     plain_text_for_sizing = plain_text_from_rich_text(rich_text)
     auto_size_cell(cell.parent, cell, plain_text_for_sizing)
-
 
 # --- Thêm hàm builder text này ---
 def build_hsk5_passage_cloze_text_with_markers(single_explanation: dict, shared_translation: dict, full_passage_chinese: str) -> str:

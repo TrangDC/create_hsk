@@ -4,7 +4,7 @@
   "properties": {
     "analysis_paragraph": {
       "type": "string",
-      "description": "Đoạn văn phân tích logic bằng tiếng Việt."
+      "description": "Lời giải ngắn gọn phân tích logic bằng tiếng Việt."
     },
     "context_block": {
       "type": "object",

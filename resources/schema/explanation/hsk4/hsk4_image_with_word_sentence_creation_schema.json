@@ -7,7 +7,7 @@
     },
     "explanation_paragraph": {
       "type": "string",
-      "description": "Đoạn văn giải thích tại sao câu trả lời mẫu lại phù hợp."
+      "description": "Lời giải thích tại sao câu trả lời mẫu lại phù hợp."
     }
   },
   "required": ["sample_sentence_translation", "explanation_paragraph"]

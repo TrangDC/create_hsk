@@ -4,7 +4,7 @@
   "properties": {
     "analysis_paragraph": {
       "type": "string",
-      "description": "Lời giải thích logic bằng tiếng Việt, trích dẫn thông tin quan trọng từ đoạn văn để giải thích tại sao đáp án là đúng."
+      "description": "Lời giải thích thật ngắn gọn bằng tiếng Việt, trích dẫn thông tin quan trọng từ đoạn văn để giải thích tại sao đáp án là đúng."
     },
     "translation_block": {
       "type": "object",

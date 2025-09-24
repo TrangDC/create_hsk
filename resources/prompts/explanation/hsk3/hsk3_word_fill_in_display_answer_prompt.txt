@@ -6,7 +6,7 @@ Bạn là một chuyên gia từ vựng tiếng Trung, đang soạn lời giải
 - **Câu hoàn chỉnh:** "{full_sentence_chinese}"
 
 **Yêu cầu:**
-1.  **Phân tích từ (`word_analysis`):** Viết một đoạn văn giải thích chi tiết bằng tiếng Việt.
+1.  **Phân tích từ (`word_analysis`):** Viết một lời giải thích ngắn gọn bằng tiếng Việt.
     -   Bắt đầu bằng việc phân tích nghĩa của từng Hán tự riêng lẻ cấu thành nên từ "{correct_word}" (nếu nó là từ ghép).
     -   Tiếp theo, giải thích nghĩa và cách dùng của cả từ "{correct_word}".
     -   Cuối cùng, giải thích ý nghĩa chung của cả câu hoàn chỉnh "{full_sentence_chinese}".

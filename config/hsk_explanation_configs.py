@@ -87,7 +87,6 @@ HSK1_EXPLANATION_CONFIGS = {
         "prompt_builder": build_image_matching_questions_prompt,
         "sheet_name": "TN chọn ảnh (img) (HL) (HSK1)",
         "renderer": render_image_matching_explanation
-
     },
     "sentence_matching_questions": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk1", "hsk1_sentence_match_explanation_prompt.txt"),
@@ -167,7 +166,11 @@ HSK2_EXPLANATION_CONFIGS = {
 
 HSK3_EXPLANATION_CONFIGS={
     "shared_image_comprehension": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_shared_img_explanation_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_shared_img_explanation_schema.json"),
+        "prompt_builder": build_shared_image_comprehension_prompt,
+        "sheet_name": "TN PA đúng (img) (HL) (HSK3)",
+        "renderer": render_shared_image_comprehension_explanation
     },
     "true_false_listening_choice": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_true_false_listening_choice_prompt.txt"),
@@ -177,16 +180,32 @@ HSK3_EXPLANATION_CONFIGS={
         "renderer": render_hsk3_true_false_listening_choice_explanation
     },
     "reading_comprehension_dialogue_2_lines": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_dialogue_comprehension_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_dialogue_comprehension_schema.json"),
+        "prompt_builder": build_hsk2_dialogue_comprehension_prompt,
+        "sheet_name": "TN PA đúng ko pinyin (HSK3)",
+        "renderer": render_hsk2_dialogue_comprehension_explanation
     },
     "reading_comprehension_dialogue_4_lines": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_dialogue_comprehension_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_dialogue_comprehension_schema.json"),
+        "prompt_builder": build_hsk2_dialogue_comprehension_prompt,
+        "sheet_name": "TN PA đúng ko pinyin_v2 (HSK3)",
+        "renderer": render_hsk2_dialogue_comprehension_explanation
     },
     "sentence_matching_inverted_questions": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_sentence_matching_inverted_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_sentence_matching_inverted_schema.json"),
+        "prompt_builder": build_hsk2_sentence_matching_inverted_prompt,
+        "sheet_name": "TN câu trả lời đúng (HL) (HSK3)",
+        "renderer": render_hsk2_sentence_matching_inverted_explanation
     },
     "word_fill_in_questions": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk1", "hsk1_word_fill_explanation_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk1", "hsk1_word_fill_explanation_schema.json"),
+        "prompt_builder": build_word_fill_in_questions_prompt,
+        "sheet_name": "TN chọn từ đúng (HL) (HSK3)",
+        "renderer": render_word_fill_explanation
     },
     "reading_comprehension_no_pinyin_v3": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_reading_comprehension_no_pinyin_v3_prompt.txt"),
@@ -213,13 +232,25 @@ HSK3_EXPLANATION_CONFIGS={
 
 HSK4_EXPLANATION_CONFIGS={
     "true_false_listening_choice": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_true_false_listening_choice_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_true_false_listening_choice_schema.json"),
+        "prompt_builder": build_hsk3_true_false_listening_choice_prompt,
+        "sheet_name": "ĐS nghe chọn (HSK4)",
+        "renderer": render_hsk3_true_false_listening_choice_explanation
     },
     "reading_comprehension_dialogue_2_lines": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_dialogue_comprehension_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_dialogue_comprehension_schema.json"),
+        "prompt_builder": build_hsk2_dialogue_comprehension_prompt,
+        "sheet_name": "TN PA đúng (HSK4)",
+        "renderer": render_hsk2_dialogue_comprehension_explanation
     },
     "reading_comprehension_dialogue_4_lines": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_dialogue_comprehension_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_dialogue_comprehension_schema.json"),
+        "prompt_builder": build_hsk2_dialogue_comprehension_prompt,
+        "sheet_name": "TN PA đúng_v2 (HSK4)",
+        "renderer": render_hsk2_dialogue_comprehension_explanation
     },
     "listening_comprehension": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_listening_comprehension.txt"),
@@ -229,7 +260,11 @@ HSK4_EXPLANATION_CONFIGS={
         "renderer": render_hsk4_listening_comprehension_explanation
     },
     "word_fill_in_questions": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk1", "hsk1_word_fill_explanation_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk1", "hsk1_word_fill_explanation_schema.json"),
+        "prompt_builder": build_word_fill_in_questions_prompt,
+        "sheet_name": "TN chọn từ đúng (HL) (HSK4)",
+        "renderer": render_word_fill_explanation
     },
     "sentence_sequence_reordering": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_sentence_sequence_reordering.txt"),
@@ -239,7 +274,11 @@ HSK4_EXPLANATION_CONFIGS={
         "renderer": render_hsk4_sentence_sequence_reordering_explanation
     },
     "reading_comprehension_no_pinyin_v3": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_reading_comprehension_no_pinyin_v3_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_reading_comprehension_no_pinyin_v3_schema.json"),
+        "prompt_builder": build_hsk3_reading_comprehension_no_pinyin_v3_prompt,
+        "sheet_name": "TN PA đúng ko pinyin_v3 (HSK4)",
+        "renderer": render_hsk3_reading_comprehension_no_pinyin_v3_explanation_with_markers
     },
     "reading_comprehension_short_passage": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_reading_short_passage.txt"),
@@ -249,7 +288,11 @@ HSK4_EXPLANATION_CONFIGS={
         "renderer": render_hsk4_reading_passage_explanation
     },
     "sentence_reordering": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_sentence_reordering_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_sentence_reordering_schema.json"),
+        "prompt_builder": build_hsk3_sentence_reordering_prompt,
+        "sheet_name": "Sắp xếp câu (HSK4)",
+        "renderer": render_hsk3_sentence_reordering_explanation
     },
     "image_with_word_sentence_creation": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_image_with_word_sentence_creation.txt"),
@@ -262,13 +305,25 @@ HSK4_EXPLANATION_CONFIGS={
 
 HSK5_EXPLANATION_CONFIGS={
     "reading_comprehension_dialogue_2_lines": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_dialogue_comprehension_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_dialogue_comprehension_schema.json"),
+        "prompt_builder": build_hsk2_dialogue_comprehension_prompt,
+        "sheet_name": "TN PA đúng (HSK5)",
+        "renderer": render_hsk2_dialogue_comprehension_explanation
     },
     "reading_comprehension_dialogue_4_lines": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_dialogue_comprehension_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk2", "hsk2_dialogue_comprehension_schema.json"),
+        "prompt_builder": build_hsk2_dialogue_comprehension_prompt,
+        "sheet_name": "TN PA đúng_v2 (HSK5)",
+        "renderer": render_hsk2_dialogue_comprehension_explanation
     },
     "listening_comprehension": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk4", "hsk4_listening_comprehension.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk4", "hsk4_listening_comprehension_schema.json"),
+        "prompt_builder": build_hsk4_listening_comprehension_prompt,
+        "sheet_name": "TN Nghe hiểu (HSK5)",
+        "renderer": render_hsk4_listening_comprehension_explanation
     },
     "passage_cloze": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk5", "hsk5_passage_cloze.txt"),
@@ -292,7 +347,11 @@ HSK5_EXPLANATION_CONFIGS={
         "renderer": render_hsk5_long_passage_comprehension_explanation
     },
     "sentence_reordering": {
-
+        "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk3", "hsk3_sentence_reordering_prompt.txt"),
+        "schema_path": os.path.join(EXPLANATION_SCHEMAS_DIR, "hsk3", "hsk3_sentence_reordering_schema.json"),
+        "prompt_builder": build_hsk3_sentence_reordering_prompt,
+        "sheet_name": "Sắp xếp câu (HSK5)",
+        "renderer": render_hsk3_sentence_reordering_explanation
     },
     "writing_from_keywords": {
         "sheet_name": "Viết dựa vào từ (HSK5)",

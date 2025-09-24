@@ -17,7 +17,7 @@ Bạn là một chuyên gia Hán ngữ. Nhiệm-vụ của bạn là tạo một
 - Đáp án đúng: {correct_answer_letter_2}. {correct_answer_text_2}
 ---
 
-Hãy tạo lời giải thích theo đúng cấu trúc JSON được cung cấp.
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp.
 1.  **explanations**: Tạo một danh sách chứa đúng 2 đối tượng lời giải.
     -   Trong mỗi đối tượng, cung cấp `analysis_paragraph` (phân-tích đáp-án) và `options_list` (danh-sách 4 lựa-chọn kèm bản-dịch).
 2.  **shared_translation**: Cung cấp MỘT bản-dịch chung cho cả học-liệu.

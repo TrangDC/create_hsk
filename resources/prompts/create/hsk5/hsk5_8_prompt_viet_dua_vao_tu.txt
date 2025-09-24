@@ -6,7 +6,7 @@ Cụ thể, hãy thực hiện các bước sau:
 2.  Xác định đúng danh sách từ vựng cần học, Chọn ra 5 từ vựng (`keywords`) quan trọng thuộc cấp độ HSK5 từ tài liệu được cung cấp.
 2.  Viết một đoạn văn mẫu (`sample_paragraph_marked`) khoảng 80 chữ thuộc chủ đề từ tài liệu PDF, SỬ DỤNG TẤT CẢ 5 từ vựng đó.
 3.  **QUAN TRỌNG:** Khi sử dụng một từ khóa trong đoạn văn, hãy bọc nó trong cặp dấu gạch dưới, ví dụ: `__từ khóa__`.
-4.  Cung cấp bản dịch tiếng Việt (`translation`) cho đoạn văn mẫu.
+4.  Cung cấp bản dịch tiếng Việt (`translation`) cho đoạn văn mẫu. Lưu ý bản dịch là bản dịch với các từ khóa không cần có cặp `__...__`
 
 YÊU CẦU ĐẦU RA:
 -   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.

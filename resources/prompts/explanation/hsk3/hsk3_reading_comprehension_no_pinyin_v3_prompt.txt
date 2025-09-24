@@ -8,7 +8,7 @@ Bạn là một giáo viên tiếng Trung chuyên nghiệp, đang soạn lời g
 - **Đáp án đúng:** Lựa chọn {correct_answer_letter}
 
 **Yêu cầu:**
-1.  **Phân tích (`analysis_paragraph`):** Viết một đoạn văn giải thích bằng tiếng Việt. Bắt đầu bằng "Đoạn văn nói rằng...", sau đó trích dẫn thông tin liên quan để giải thích tại sao đáp án "{correct_answer_letter}" là đúng.
+1.  **Phân tích (`analysis_paragraph`):** Viết một lời giải thích ngắn gọn bằng tiếng Việt. Bắt đầu bằng "Đoạn văn nói rằng...", sau đó trích dẫn thông tin liên quan để giải thích tại sao đáp án "{correct_answer_letter}" là đúng.
 2.  **Cung cấp Tạm dịch (`translation_block`):** Điền chính xác đoạn văn gốc và bản dịch tiếng Việt tương ứng của nó.
 3.  **Cung cấp Câu hỏi và Lựa chọn (`query_and_options_block`):**
     -   Điền câu hỏi gốc và **bản dịch tiếng Việt** của câu hỏi vào `query`.

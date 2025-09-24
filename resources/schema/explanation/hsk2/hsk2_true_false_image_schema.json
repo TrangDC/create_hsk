@@ -4,7 +4,7 @@
   "properties": {
     "analysis_paragraph": {
       "type": "string",
-      "description": "Lời giải thích bằng tiếng Việt, so sánh nội dung mô tả hình ảnh với nội dung câu script để kết luận tại sao đáp án là Đúng hoặc Sai."
+      "description": "Lời giải thích ngắn gọn bằng tiếng Việt, so sánh nội dung mô tả hình ảnh với nội dung câu script để kết luận tại sao đáp án là Đúng hoặc Sai."
     },
     "script_block": {
       "type": "object",

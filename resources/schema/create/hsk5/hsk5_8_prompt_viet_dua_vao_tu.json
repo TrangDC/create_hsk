@@ -14,7 +14,7 @@
             "items": { "type": "string" }
           },
           "sample_paragraph_marked": { "type": "string", "description": "Đoạn văn mẫu có các từ khóa được đánh dấu bằng __từ khóa__." },
-          "translation": { "type": "string", "description": "Bản dịch tiếng Việt của đoạn văn mẫu." }
+          "translation": { "type": "string", "description": "Bản dịch tiếng Việt của đoạn văn mẫu, không có __từ khóa__" }
         },
         "required": ["question_id", "keywords", "sample_paragraph_marked", "translation"]
       }

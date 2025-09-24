@@ -328,10 +328,6 @@ def build_hsk4_listening_comprehension_prompt(task: dict, prompt_template: str) 
     material_block = task.get('data', {})
     script_chinese = material_block.get('script_chinese', '')
     questions = material_block.get('questions', [])
-    
-    print(f"1.----------\n{script_chinese}\n----------------\n\n\n")
-    print(f"2.----------\n{material_block}\n----------------\n\n\n")
-    print(f"3..----------\n{questions}\n----------------\n\n\n")
 
     # Đảm bảo có đúng 2 câu hỏi để xử lý
     if len(questions) != 2:

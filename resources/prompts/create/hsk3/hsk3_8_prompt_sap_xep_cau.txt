@@ -2,6 +2,8 @@ Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc v
 
 Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi sắp xếp câu bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK3.
 
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
 Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Sắp xếp câu":
 *   Mỗi câu hỏi gồm một danh sách các thành phần câu (`components`) bị xáo trộn.
 *   Số lượng thành phần trong mỗi câu hỏi phải từ 5 đến 7.

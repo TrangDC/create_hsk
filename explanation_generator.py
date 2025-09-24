@@ -9,7 +9,6 @@ from services.explanation_sheet_formatters import render_ds_vocab_explanation # 
 from call_vertexai import generate_content_from_pdfs
 import inspect
 
-
 def create_dynamic_prompt(task: dict, hsk_level: str) -> str:
     """Tạo prompt động bằng cách gọi hàm builder từ config."""
     q_type = task['question_type']
@@ -45,8 +44,6 @@ def load_source_data(filepath: str) -> dict:
         print(f"❌ Lỗi: File '{filepath}' không chứa dữ liệu JSON hợp lệ.")
         return None
 
-# Trong file explanation_generator.py, hàm flatten_question_data
-
 def flatten_question_data(data_map: dict, hsk_level: str) -> list:
     print("--- Đang chuẩn hóa và làm phẳng dữ liệu câu hỏi ---")
     flat_list = []
@@ -64,14 +61,7 @@ def flatten_question_data(data_map: dict, hsk_level: str) -> list:
         data_type = prompt_details.get("type")
         if data_type == "keyed":
             for json_key, content in data.items():
-                
-                # ==========================================================
-                # === ĐÂY LÀ ĐOẠN CODE CẦN THAY ĐỔI/XÁC NHẬN LẠI ===
-                # ==========================================================
-                
                 if json_key == "listening_comprehension":
-                    # 'content' ở đây là một danh sách các học liệu
-                    # Mỗi học liệu giờ đây chính là một "task"
                     for material_block in content:
                         task = {
                             "prompt_name": prompt_name,
@@ -79,7 +69,7 @@ def flatten_question_data(data_map: dict, hsk_level: str) -> list:
                             "data": material_block # 'data' bây giờ chứa TOÀN BỘ học liệu
                         }
                         flat_list.append(task)
-                if json_key in ["passage_cloze", "long_passage_comprehension"]:
+                elif json_key in ["passage_cloze", "long_passage_comprehension"]:
                     task = {
                         "prompt_name": prompt_name,
                         "question_type": json_key,
@@ -99,8 +89,6 @@ def flatten_question_data(data_map: dict, hsk_level: str) -> list:
                         if shared_material:
                             task['shared_material'] = shared_material
                         flat_list.append(task)
-                # ==========================================================
-                # ==========================================================
 
         elif data_type == "array":
             for question in data:
@@ -192,11 +180,6 @@ def update_excel_with_explanations(excel_path: str, enriched_question_list: list
                     cell = worksheet[f'I{current_row}']
                     renderer_func(cell, explanation_data, task) # Gọi với 3 tham số
                     row_counters[sheet_name] += 1
-                # elif q_type in ["writing_from_keywords", "writing_from_image"]:
-                #     # Các hàm này chỉ cần dữ liệu gốc, chính là explanation_details
-                #     cell = worksheet[f'I{current_row}']
-                #     renderer_func(cell, explanation_data)
-                #     row_counters[sheet_name] += 1    
                 else:
                     # Logic cũ cho các renderer ghi 1 dòng
                     cell = worksheet[f'I{current_row}']
@@ -238,8 +221,8 @@ def run_explanation_generation(hsk_level: str, source_data_file: str, excel_outp
 
 # Test hàm xử lý
 if __name__ == "__main__":
-    HSK_LEVEL = "hsk5"
-    SOURCE_DATA_FILE = r"E:\Edmicro\create_hsk\output\test\generated_question_data.json"
-    EXCEL_OUTPUT_PATH = r"E:\Edmicro\create_hsk\output\test\hsk5_output.xlsx"
+    HSK_LEVEL = "hsk3"
+    SOURCE_DATA_FILE = r"D:\Edmicro\Tools\create_hsk\output\hsk3_20250918_134052\generated_question_data.json"
+    EXCEL_OUTPUT_PATH = r"D:\Edmicro\Tools\create_hsk\output\hsk3_20250918_134052\hsk3_output.xlsx"
     
     run_explanation_generation(HSK_LEVEL, SOURCE_DATA_FILE, EXCEL_OUTPUT_PATH)

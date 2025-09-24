@@ -4,7 +4,7 @@
   "properties": {
     "grammar_analysis": {
       "type": "string",
-      "description": "Lời giải thích chi tiết bằng tiếng Việt về cấu trúc ngữ pháp của câu đúng. Phân tích rõ các thành phần như chủ ngữ, vị ngữ, tân ngữ, trạng ngữ và giải thích tại sao chúng phải được xếp theo thứ tự đó. Trong lời giải, các thành phần tiếng Trung cần được trích dẫn trong dấu ngoặc kép."
+      "description": "Lời giải thích ngắn gọn bằng tiếng Việt về cấu trúc ngữ pháp của câu đúng. Phân tích thành phần như chủ ngữ, vị ngữ, tân ngữ, trạng ngữ và giải thích tại sao chúng phải được xếp theo thứ tự đó. Trong lời giải, các thành phần tiếng Trung cần được trích dẫn trong dấu ngoặc kép."
     },
     "correct_sentence_block": {
       "type": "object",

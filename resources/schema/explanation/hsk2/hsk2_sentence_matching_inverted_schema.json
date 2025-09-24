@@ -4,7 +4,7 @@
   "properties": {
     "analysis_paragraph": {
       "type": "string",
-      "description": "Lời giải thích logic bằng tiếng Việt. Bắt đầu bằng 'Câu trả lời \"[câu trả lời]\" ...', sau đó giải thích tại sao nó phù hợp với câu thoại \"[câu thoại]\"."
+      "description": "Lời giải thích logic ngắn gọn bằng tiếng Việt. Bắt đầu bằng 'Câu trả lời \"[câu trả lời]\" ...', sau đó giải thích ngắn gọn tại sao nó phù hợp với câu thoại \"[câu thoại]\"."
     },
     "matched_pair_block": {
       "type": "object",

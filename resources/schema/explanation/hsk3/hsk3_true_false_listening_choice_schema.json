@@ -4,7 +4,7 @@
   "properties": {
     "analysis_paragraph": {
       "type": "string",
-      "description": "Lời giải thích logic bằng tiếng Việt. So sánh thông tin từ đoạn script với câu nhận định để kết luận tại sao đáp án là Đúng hoặc Sai."
+      "description": "Lời giải thích thật ngắn gọn bằng tiếng Việt. So sánh thông tin từ đoạn nghe với câu nhận định để kết luận tại sao đáp án là Đúng hoặc Sai. Không dùng từ script mà thay bằng 'Nội dung nghe'."
     },
     "original_texts_block": {
       "type": "object",

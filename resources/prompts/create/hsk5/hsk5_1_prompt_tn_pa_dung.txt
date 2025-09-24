@@ -2,6 +2,8 @@ Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc v
 
 Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi trắc nghiệm bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK5.
 
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
 Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Đọc hiểu hội thoại và chọn đáp án":
 *   Mỗi câu hỏi phải bao gồm:
     *   `dialogue`: một đoạn hội thoại giữa `男` và `女` (2 lượt lời).

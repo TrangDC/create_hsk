@@ -2,6 +2,8 @@ Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc v
 
 Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra một danh sách ```4``` câu hỏi Đúng/Sai bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK2.
 
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
 Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Đúng sai dựa trên nội dung script kèm hình ảnh":
 *   Mỗi câu hỏi phải có một `script` (câu nói) và một `image_des` (mô tả ảnh bằng tiếng Việt).
 *   Nội dung script và mô tả ảnh phải liên quan đến nhau để có thể phán đoán Đúng/Sai.
