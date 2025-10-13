@@ -5,7 +5,7 @@ import vertexai
 from dotenv import load_dotenv
 from vertexai.preview.generative_models import GenerativeModel, GenerationConfig, Part
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import time
 import threading
 
@@ -148,49 +148,68 @@ def validate_vertex_ai_config() -> bool:
         
     return True
 
-def generate_content_from_pdfs(
-    pdf_file_paths: List[str], 
+# --- HÀM MỚI ---
+def extract_structured_data_from_pdf(
+    pdf_path: str,
     prompt_file_path: str,
     schema_file_path: str,
+    max_retries: int = 3,
+    retry_delay: int = 5,
+    timeout_seconds: int = 180
+) -> Dict[str, Any]:
+    """
+    Hàm chuyên dụng để bóc tách một file PDF bài khóa thành dữ liệu có cấu trúc.
+    """
+    print(f"   [Tiền xử lý] Bắt đầu bóc tách dữ liệu từ file: {os.path.basename(pdf_path)}")
+    # Hàm này là một trường hợp đặc biệt của `generate_content`, nên ta gọi nó
+    return generate_content(
+        pdf_file_paths=[pdf_path],
+        text_content=None,
+        prompt_file_path=prompt_file_path,
+        schema_file_path=schema_file_path,
+        max_retries=max_retries,
+        retry_delay=retry_delay,
+        timeout_seconds=timeout_seconds
+    )
+
+def generate_content(
+    prompt_file_path: str,
+    schema_file_path: str,
+    pdf_file_paths: Optional[List[str]] = None, 
+    text_content: Optional[str] = None,
     max_retries: int = 5,
     retry_delay: int = 5,
-    timeout_seconds: int = 150  # 2.5 minutes timeout
+    timeout_seconds: int = 150
 ) -> Dict[str, Any] | List[Any]:
     """
-    Gọi Vertex AI model với PDF, prompt, và schema để tạo ra nội dung có cấu trúc.
-
-    Args:
-        pdf_file_paths: Danh sách đường dẫn đến các file PDF.
-        prompt_file_path: Đường dẫn đến file prompt.
-        schema_file_path: Đường dẫn đến file schema.
-        max_retries: Số lần thử lại tối đa.
-        retry_delay: Thời gian chờ giữa các lần thử lại (giây).
-        timeout_seconds: Thời gian tối đa cho mỗi lần gọi API (giây).
-
-    Returns:
-        Dict | List: Dữ liệu đã được phân tích từ JSON do AI trả về.
-        
-    Raises:
-        ValueError: Nếu AI không trả về nội dung hoặc nội dung không phải là JSON hợp lệ.
-        FileNotFoundError: Nếu không tìm thấy file PDF, prompt, hoặc schema.
-        TimeoutError: Nếu API call vượt quá thời gian timeout.
-        ConnectionError: Nếu không thể kết nối với Vertex AI sau max_retries.
+    Gọi Vertex AI model với prompt, schema và nội dung (từ PDF hoặc text) để tạo câu hỏi.
+    LƯU Ý: Phải cung cấp `pdf_file_paths` HOẶC `text_content`, không phải cả hai.
     """
     if not is_vertex_initialized:
         raise ConnectionError("Vertex AI chưa được khởi tạo thành công. Vui lòng kiểm tra credentials.")
+    
+    if pdf_file_paths is None and text_content is None:
+        raise ValueError("Phải cung cấp hoặc 'pdf_file_paths' hoặc 'text_content'.")
+    if pdf_file_paths and text_content:
+        raise ValueError("Chỉ cung cấp một trong hai: 'pdf_file_paths' hoặc 'text_content'.")
 
     # --- Tải cấu hình (chỉ cần làm một lần) ---
     prompt_text = load_prompt_from_txt(prompt_file_path)
     response_schema = load_schema_from_json(schema_file_path)
 
     request_parts = [prompt_text]
-    for pdf_path in pdf_file_paths:
-        try:
-            with open(pdf_path, "rb") as f:
-                pdf_bytes = f.read()
-                request_parts.append(Part.from_data(data=pdf_bytes, mime_type="application/pdf"))
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Không tìm thấy file PDF tại: {pdf_path}")
+    # Xây dựng nội dung yêu cầu dựa trên đầu vào
+    if pdf_file_paths:
+        for pdf_path in pdf_file_paths:
+            try:
+                with open(pdf_path, "rb") as f:
+                    pdf_bytes = f.read()
+                    request_parts.append(Part.from_data(data=pdf_bytes, mime_type="application/pdf"))
+            except FileNotFoundError:
+                raise FileNotFoundError(f"Không tìm thấy file PDF tại: {pdf_path}")
+    elif text_content:
+        # Nếu là nội dung text, coi nó như một tài liệu duy nhất
+        request_parts.append(Part.from_text(text_content))
 
     generation_config = GenerationConfig(
         temperature=0.3,
@@ -302,7 +321,7 @@ if __name__ == '__main__':
         print(f"Sử dụng schema từ: '{test_schema_path}'")
         
         # Gọi hàm chính của module
-        generated_data = generate_content_from_pdfs(
+        generated_data = generate_content(
             pdf_file_paths=test_pdf_files,
             prompt_file_path=test_prompt_path,
             schema_file_path=test_schema_path

@@ -117,6 +117,9 @@ def build_word_fill_in_questions_prompt(task: dict, prompt_template: str) -> str
         for line in q_data.get('lines', [])
     ]
     question_context_str = "\n".join(question_context_lines)
+    print("--- DEBUG: question_context_str ---\n\n")
+    print(question_context_str)
+    print("--- DEBUG END: question_context_str ---\n\n")
     correct_letter = q_data.get('correct_answer', '')
     correct_word_obj = next((item for item in shared_material if item.get('option_letter') == correct_letter), None)
     correct_word_str = correct_word_obj.get('chinese_word', 'N/A') if correct_word_obj else 'N/A'

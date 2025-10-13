@@ -16,7 +16,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "speaker": { "type": "string", "description": "Người nói ('男', '女') hoặc chuỗi rỗng." },
+              "speaker": { "type": "string", "description": "Người nói ('男', '女', 'A', 'B') hoặc chuỗi rỗng." },
               "chinese_text": { "type": "string", "description": "Nội dung lời thoại bằng tiếng Trung, bao gồm cả chỗ trống được đánh dấu bằng cấu trúc __từ cần điền__. (từ cần điền ở đây là đáp án của câu)" },
               "pinyin": { "type": "string", "description": "Phiên âm Pinyin cho lời thoại." }
             },
@@ -32,7 +32,7 @@
       "properties": {
         "vietnamese_text": {
           "type": "string",
-          "description": "Bản dịch tiếng Việt của toàn bộ câu hỏi. Với nhãn người nói ('男', '女'), cần dịch thành 'Nam:', 'Nữ:'. Ví dụ: Nam: Tôi thích ăn cơm.\nNữ: Tôi cũng vậy."
+          "description": "Bản dịch tiếng Việt của toàn bộ câu hỏi. \nVới nhãn người nói ('男', '女'), cần dịch thành 'Nam:', 'Nữ:'. Ví dụ: Nam: Tôi thích ăn cơm.\nNữ: Tôi cũng vậy.\n Với nhãn người nói là A, B, để nguyên như vậy. Ví dụ: A: Bạn tên gì?\nB: Tôi tên là Lý Hoa."
         }
       },
       "required": ["vietnamese_text"]

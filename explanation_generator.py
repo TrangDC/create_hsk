@@ -6,7 +6,7 @@ import openpyxl
 from config.hsk_explanation_configs import get_explanation_config
 from config.hsk_question_configs import get_prompt_config as get_question_gen_config
 from services.explanation_sheet_formatters import render_ds_vocab_explanation # Import hàm đặc biệt này
-from call_vertexai import generate_content_from_pdfs
+from call_vertexai import generate_content
 import inspect
 
 def create_dynamic_prompt(task: dict, hsk_level: str) -> str:
@@ -123,8 +123,8 @@ def generate_explanations_concurrently(flat_question_list: list, hsk_level: str)
                         f.write(prompt_text)
                     
                     future = executor.submit(
-                        generate_content_from_pdfs,
-                        pdf_file_paths=[],
+                        generate_content,
+                        text_content="", # Cung cấp text_content rỗng thay vì pdf_file_paths
                         prompt_file_path=temp_prompt_filename,
                         schema_file_path=config['schema_path']
                     )

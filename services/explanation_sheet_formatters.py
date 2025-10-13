@@ -462,9 +462,9 @@ def render_reading_comp_explanation(cell, explanation_json: dict):
     # Auto-size the cell
     auto_size_cell(cell.parent, cell, cell_value)
 
-_CJK_SPEAKER_SET = {"男", "女", "问", "答"}
+_CJK_SPEAKER_SET = {"男", "女", "问", "答", "A", "B"}
 _CJK_LABEL_RE    = re.compile(r'^[\u3400-\u4DBF\u4E00-\u9FFF]{1,3}$')  # 1–3 ký tự CJK
-_VI_SPEAKER_RE   = re.compile(r'^\*{0,2}(Nam|Nữ)\*{0,2}\s*:\s*')
+_VI_SPEAKER_RE   = re.compile(r'^\*{0,2}(Nam|Nữ|A|B)\*{0,2}\s*:\s*')
 
 def is_dialogue_style_word_fill(expl: dict) -> bool:
     ctx = expl.get("context_block", {}) or {}
