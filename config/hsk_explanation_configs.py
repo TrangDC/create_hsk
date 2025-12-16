@@ -23,7 +23,17 @@ from services.explanation_sheet_formatters import (
     render_hsk5_passage_cloze_explanation,
     render_hsk5_main_idea_comprehension_explanation,
     render_hsk5_long_passage_comprehension_explanation,
-    render_hsk5_writing_from_keywords, render_hsk5_writing_from_image
+    render_hsk5_writing_from_keywords, render_hsk5_writing_from_image,
+    render_topik_word_matching_explanation,
+    render_topik_image_matching_explanation,
+    render_topik_image_selection_explanation,
+    render_topik_image_to_word_explanation,
+    render_topik_vocab_selection_explanation,
+    render_topik_reading_shared_explanation,
+    render_topik_listening_vocab_explanation,
+    render_topik_listening_fill_explanation,
+    render_topik_listening_reorder_explanation,
+    render_topik_listening_shared_explanation
 )
 
 # 2. Import các hàm xây dựng prompt từ module explanation_prompt_builders
@@ -48,7 +58,7 @@ from services.explanation_prompt_builders import (
     build_hsk4_image_word_sentence_creation_prompt,
     build_hsk5_passage_cloze_prompt,
     build_hsk5_main_idea_comprehension_prompt,
-    build_hsk5_long_passage_comprehension_prompt
+    build_hsk5_long_passage_comprehension_prompt,
 )
 
 # --- CẤU HÌNH ĐƯỜNG DẪN PROMPT VÀ SCHEMA ---
@@ -104,7 +114,6 @@ HSK1_EXPLANATION_CONFIGS = {
     }
 }
 
-# --- CẤU HÌNH CHO HSK2 ---
 HSK2_EXPLANATION_CONFIGS = {
     "true_false_image_questions": {
         "prompt_path": os.path.join(EXPLANATION_PROMPTS_DIR, "hsk2", "hsk2_true_false_image_prompt.txt"),
@@ -363,6 +372,51 @@ HSK5_EXPLANATION_CONFIGS={
     },
 }
 
+TOPIK_EXPLANATION_CONFIGS = {
+    "topik_word_matching": {
+        # Không cần prompt_path, schema_path vì không gọi AI
+        "sheet_name": "Nối từ với nghĩa",
+        "renderer": render_topik_word_matching_explanation
+    },
+    "topik_image_matching": {
+        # Không cần prompt_path, schema_path vì không gọi AI
+        "sheet_name": "Nối (img)",
+        "renderer": render_topik_image_matching_explanation
+    },
+    "topik_image_selection": {
+        "sheet_name": "Trắc nghiệm chọn ảnh đúng (img)",
+        "renderer": render_topik_image_selection_explanation
+    },
+    "topik_image_to_word": {
+        "sheet_name": "Nhìn hình chọn đáp án (img)",
+        "renderer": render_topik_image_to_word_explanation
+    },
+    "topik_vocab_selection": {
+        "sheet_name": "Chọn đáp án đúng",
+        "renderer": render_topik_vocab_selection_explanation
+    },
+    "topik_reading_shared_list": {
+        "sheet_name": "Đọc hiểu (HL)",
+        "renderer": render_topik_reading_shared_explanation
+    },
+    "topik_listening_vocab": {
+        "sheet_name": "Nghe và chọn đáp án đúng",
+        "renderer": render_topik_listening_vocab_explanation
+    },
+    "topik_listening_fill": {
+        "sheet_name": "Nghe và điền từ thích hợp",
+        "renderer": render_topik_listening_fill_explanation
+    },
+    "topik_listening_reorder": {
+        "sheet_name": "Nghe và Sắp xếp câu",
+        "renderer": render_topik_listening_reorder_explanation
+    },
+    "topik_listening_shared_list": {
+        "sheet_name": "Nghe, hiểu (HL)",
+        "renderer": render_topik_listening_shared_explanation
+    }
+}
+
 # --- CÁC HÀM "NHÀ MÁY" ĐỂ LẤY CẤU HÌNH ĐÚNG ---
 def get_explanation_config(hsk_level: str):
     """Trả về dictionary cấu hình prompt cho cấp độ HSK được chỉ định."""
@@ -376,5 +430,7 @@ def get_explanation_config(hsk_level: str):
         return HSK4_EXPLANATION_CONFIGS
     elif hsk_level == 'hsk5':
         return HSK5_EXPLANATION_CONFIGS
+    elif hsk_level == 'topik1' or hsk_level == 'topik2' or hsk_level == 'topik3':
+        return TOPIK_EXPLANATION_CONFIGS
     print(f"Cảnh báo: Không tìm thấy cấu hình prompt lời giải cho '{hsk_level}'.")
     return None

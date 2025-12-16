@@ -3,6 +3,7 @@
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.styles import Alignment
+import random
 
 # --- CÁC HÀM ĐIỀN DỮ LIỆU VÀO EXCEL ---
 # Sheet TN PA đúng (img) (HSK1)
@@ -761,3 +762,552 @@ def populate_writing_from_image(worksheet, data: list):
         worksheet[f'I{i}'] = content_i
 
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
+
+def populate_topik_word_matching(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Nối từ với nghĩa'.
+    Logic: Giữ nguyên cột tiếng Việt, trộn cột tiếng Hàn, tính toán key nối.
+    """
+    print(f"   -> Đang điền dữ liệu Nối từ (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'D{start_row}'].value is not None:
+        start_row += 1
+
+    for i, question in enumerate(data, start=start_row):
+        pairs = question.get('pairs', [])
+        if len(pairs) < 4: continue
+
+        # 1. Cột D: NB
+        worksheet[f'D{i}'] = "NB"
+
+        # 2. Cột E: Đề bài
+        worksheet[f'E{i}'] = "Nối từ với nghĩa tương tự"
+
+        # 3. Xử lý logic trộn đề (Cột G & H)
+        # Tách danh sách
+        list_vn = [p['vietnamese'] for p in pairs] # [Hàn Quốc, Trung Quốc, Mỹ, Anh]
+        list_kr = [p['korean'] for p in pairs]     # [한국, 중국, 미국, 영국]
+        
+        # Tạo bản sao list_kr để trộn
+        list_kr_shuffled = list_kr.copy()
+        random.shuffle(list_kr_shuffled) # Ví dụ thành: [중국, 한국, 영국, 미국]
+
+        # Tạo nội dung hiển thị cho Cột G
+        # Phần tiếng Việt
+        content_vn = "\n".join(list_vn)
+        # Phần tiếng Hàn (đã trộn)
+        content_kr = "\n".join(list_kr_shuffled)
+        
+        worksheet[f'G{i}'] = f"{content_vn}\n---\n{content_kr}"
+
+        # Tính toán Đáp án (Cột H) - Format: 12,21,34,43
+        # Logic: Tìm xem từ VN ở vị trí k (1-based) nối với từ KR ở vị trí nào trong list đã trộn
+        answer_codes = []
+        for vn_idx, vn_word in enumerate(list_vn, 1):
+            # Tìm từ tiếng Hàn gốc tương ứng với từ VN này
+            original_kr_word = pairs[vn_idx-1]['korean']
+            
+            # Tìm vị trí của từ tiếng Hàn đó trong list đã trộn (1-based)
+            kr_shuffled_idx = list_kr_shuffled.index(original_kr_word) + 1
+            
+            # Tạo mã: Vị trí VN + Vị trí KR (Ví dụ: 12)
+            answer_codes.append(f"{vn_idx}{kr_shuffled_idx}")
+        
+        worksheet[f'H{i}'] = ",".join(answer_codes)
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi nối từ.")
+
+def populate_topik_image_matching(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Nối (img)'.
+    Logic: Giữ nguyên thứ tự từ tiếng Hàn, trộn thứ tự mô tả ảnh.
+    """
+    print(f"   -> Đang điền dữ liệu Nối ảnh (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'G{start_row}'].value is not None:
+        start_row += 1
+
+    for i, question in enumerate(data, start=start_row):
+        pairs = question.get('pairs', [])
+        if len(pairs) < 4: continue
+
+        # 1. Điền các cột định danh
+        worksheet[f'C{i}'] = "N"
+        worksheet[f'D{i}'] = "NB"
+        worksheet[f'E{i}'] = "Nối từ với hình ảnh tương tự"
+
+        # 2. Chuẩn bị dữ liệu
+        list_kr = [p['korean'] for p in pairs]           # Từ gốc
+        list_desc = [p['image_description'] for p in pairs] # Mô tả ảnh gốc
+        
+        # 3. Trộn danh sách ẢNH (Mô tả)
+        # Tạo bản sao và shuffle
+        list_desc_shuffled = list_desc.copy()
+        random.shuffle(list_desc_shuffled) 
+
+        # 4. Tạo nội dung Cột G
+        # Phần text (Từ vựng)
+        content_kr = "\n".join(list_kr)
+        # Phần ảnh (Mô tả)
+        # Thêm prefix "Ảnh: " hoặc [Image prompt] để dễ nhận diện sau này
+        formatted_desc = [f"Ảnh: {desc}" for desc in list_desc_shuffled]
+        content_img = "\n".join(formatted_desc)
+        
+        worksheet[f'G{i}'] = f"{content_kr}\n---\n\n{content_img}"
+
+        # 5. Tính toán Đáp án (Cột H) - Format: 13,24...
+        # Logic: Từ ở vị trí k (1-based) nối với Ảnh ở vị trí nào trong list đã trộn?
+        answer_codes = []
+        for word_idx, word in enumerate(list_kr, 1):
+            # Lấy mô tả ảnh đúng của từ này
+            correct_desc = pairs[word_idx-1]['image_description']
+            
+            # Tìm vị trí của mô tả đó trong list ảnh đã trộn (1-based)
+            shuffled_img_idx = list_desc_shuffled.index(correct_desc) + 1
+            
+            # Key = Vị trí Từ + Vị trí Ảnh
+            answer_codes.append(f"{word_idx}{shuffled_img_idx}")
+        
+        worksheet[f'H{i}'] = ",".join(answer_codes)
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi nối ảnh.")
+
+def populate_topik_image_selection(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'TN chọn ảnh (img)'.
+    Logic: Trộn 4 phương án ảnh, tìm ra vị trí của ảnh đúng.
+    """
+    print(f"   -> Đang điền dữ liệu TN chọn ảnh (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'F{start_row}'].value is not None:
+        start_row += 1
+
+    for i, question in enumerate(data, start=start_row):
+        target_word = question.get('target_vietnamese', '')
+        options = question.get('options', [])
+        
+        if len(options) < 4: continue
+
+        # 1. Điền các cột định danh
+        worksheet[f'C{i}'] = "TN"
+        worksheet[f'D{i}'] = "NB"
+        worksheet[f'E{i}'] = "Chọn đáp án đúng"
+
+        # 2. Cột F: Câu hỏi
+        # Format: Chọn 'Bưu điện'
+        worksheet[f'F{i}'] = f"Chọn '{target_word}'"
+
+        # 3. Xử lý trộn đáp án (Shuffle Options)
+        # Lưu ý: Cần shuffle options để đáp án đúng không luôn nằm ở vị trí đầu tiên
+        random.shuffle(options)
+        
+        # 4. Tìm đáp án đúng và Tạo nội dung mô tả ảnh
+        correct_index = 0
+        img_descriptions = []
+        
+        for idx, opt in enumerate(options, 1):
+            # Thêm mô tả ảnh vào danh sách
+            img_descriptions.append("Ảnh: " + opt['image_description'])
+            
+            # Kiểm tra xem đây có phải đáp án đúng không
+            if opt.get('is_correct') is True:
+                correct_index = idx
+
+        # 5. Cột G: 4 mô tả ảnh (xuống dòng)
+        worksheet[f'G{i}'] = "\n".join(img_descriptions)
+
+        # 6. Cột H: Đáp án đúng (Index 1-4)
+        worksheet[f'H{i}'] = correct_index
+        
+        # LƯU Ý QUAN TRỌNG:
+        # Cập nhật lại danh sách options đã trộn vào object data gốc
+        # Để lát nữa hàm Renderer lời giải lấy được đúng thứ tự đã trộn (nếu cần)
+        question['options'] = options
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi TN chọn ảnh.")
+
+def populate_topik_image_to_word(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Nhìn hình chọn đáp án (img)'.
+    Logic:
+    - 3 câu đầu: E = "Chọn đáp án đúng"
+    - 5 câu sau: E = "Chọn 'Từ tiếng Việt'"
+    - Trộn đáp án ở cột G.
+    """
+    print(f"   -> Đang điền dữ liệu Nhìn hình đoán từ (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'F{start_row}'].value is not None:
+        start_row += 1
+
+    # Loop qua dữ liệu với index đếm (idx) bắt đầu từ 0 để check logic 3 câu đầu
+    for idx, question in enumerate(data):
+        row = start_row + idx # Dòng trong Excel
+        
+        target_kr = question.get('target_korean', '')
+        target_vn = question.get('target_vietnamese', '')
+        options = question.get('options', [])
+        
+        if len(options) < 4: continue
+
+        # 1. Cột C, D
+        worksheet[f'C{row}'] = "TN"
+        worksheet[f'D{row}'] = "NB"
+
+        # 2. Cột E: Logic phân chia đề bài
+        # idx chạy từ 0. Vậy 0, 1, 2 là 3 câu đầu.
+        if idx < 3:
+            worksheet[f'E{row}'] = "Chọn đáp án đúng"
+        else:
+            worksheet[f'E{row}'] = f"Chọn '{target_vn}'"
+
+        # 3. Cột F: Mô tả ảnh (của Target Word)
+        worksheet[f'F{row}'] = "Ảnh: " + question.get('image_description', '')
+
+        # 4. Trộn đáp án (Shuffle)
+        random.shuffle(options)
+        
+        # 5. Cột G: Danh sách 4 từ tiếng Hàn
+        option_koreans = [opt['korean'] for opt in options]
+        worksheet[f'G{row}'] = "\n".join(option_koreans)
+
+        # 6. Cột H: Tìm vị trí đáp án đúng
+        correct_index = 0
+        for i, opt in enumerate(options, 1):
+            if opt['korean'] == target_kr:
+                correct_index = i
+                break
+        worksheet[f'H{row}'] = correct_index
+        
+        # Cập nhật lại options đã trộn vào data gốc để Renderer dùng
+        question['options'] = options
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi nhìn hình đoán từ.")
+
+def populate_topik_vocab_selection(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Chọn đáp án đúng'.
+    Logic:
+    - 2 câu đầu (vn_to_kr): E = Chọn 'Tiếng Việt', G = Tiếng Hàn.
+    - 2 câu sau (kr_to_vn): E = Chọn 'Tiếng Hàn', G = Tiếng Việt.
+    """
+    print(f"   -> Đang điền dữ liệu Chọn từ vựng (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'G{start_row}'].value is not None:
+        start_row += 1
+
+    for idx, question in enumerate(data):
+        row = start_row + idx
+        
+        prompt_text = question.get('prompt_text', '')
+        options = question.get('options', [])
+        
+        if len(options) < 4: continue
+
+        # 1. Cột C, D
+        worksheet[f'C{row}'] = "TN"
+        worksheet[f'D{row}'] = "NB"
+
+        # 2. Cột E: Đề bài "Chọn 'ABC'"
+        worksheet[f'E{row}'] = f"Chọn '{prompt_text}'"
+
+        # 3. Trộn đáp án
+        random.shuffle(options)
+        
+        # 4. Cột G: Danh sách các lựa chọn (display_text)
+        # Type 1: display_text là tiếng Hàn
+        # Type 2: display_text là tiếng Việt
+        option_texts = [opt['display_text'] for opt in options]
+        worksheet[f'G{row}'] = "\n".join(option_texts)
+
+        # 5. Cột H: Vị trí đáp án đúng
+        correct_index = 0
+        for i, opt in enumerate(options, 1):
+            if opt['is_correct'] is True:
+                correct_index = i
+                break
+        worksheet[f'H{row}'] = correct_index
+        
+        # Cập nhật options đã trộn vào data gốc
+        question['options'] = options
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi chọn từ vựng.")
+
+def populate_topik_reading_shared(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Đọc hiểu (HL)'.
+    Data input: List chứa 10 objects bài đọc.
+    """
+    print(f"   -> Đang điền 40 câu Đọc hiểu chung (TOPIK)...")
+
+    # Tìm dòng bắt đầu
+    start_row = 2
+    while worksheet[f'G{start_row}'].value is not None:
+        start_row += 1
+    
+    current_row_cursor = start_row
+
+    # VÒNG LẶP CHÍNH: Duyệt qua từng bài đọc (Passage)
+    for passage_idx, passage_data in enumerate(data):
+        passage_kr = passage_data.get('passage_korean', '')
+        questions = passage_data.get('questions', [])
+        
+        if len(questions) < 4: continue
+
+        # 1. Xử lý Merge Cột B (Học liệu chung)
+        # Mỗi bài đọc chiếm 4 dòng
+        end_row = current_row_cursor + 3
+        worksheet.merge_cells(f'B{current_row_cursor}:B{end_row}')
+        
+        cell_b = worksheet[f'B{current_row_cursor}']
+        cell_b.value = passage_kr
+        cell_b.alignment = Alignment(wrap_text=True, vertical='top')
+
+        # 2. Duyệt qua 4 câu hỏi của bài đọc này
+        for q_idx, q in enumerate(questions):
+            row = current_row_cursor + q_idx
+            
+            # Cột C, D
+            worksheet[f'C{row}'] = "TN"
+            worksheet[f'D{row}'] = "NB"
+
+            # Cột E: Câu hỏi
+            worksheet[f'E{row}'] = q.get('question_text', '')
+
+            # Cột G: Phương án
+            options = q.get('options', [])
+            opts_text = "\n".join([opt['korean'] for opt in options])
+            worksheet[f'G{row}'] = opts_text
+
+            # Cột H: Đáp án
+            worksheet[f'H{row}'] = q.get('correct_index')
+
+            # Lưu lại data cho renderer (Quan trọng cho Pha 2)
+            q['shared_passage_translation'] = passage_data.get('passage_vietnamese', '')
+            # Lưu full data để renderer dùng
+            q['full_passage_data'] = passage_data 
+
+        # Cập nhật con trỏ dòng cho bài đọc tiếp theo
+        current_row_cursor += 4
+
+    print(f"   ✅ Hoàn thành điền {len(data)} bài đọc (tổng {len(data)*4} câu).")
+
+
+def populate_topik_listening_vocab(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Nghe và chọn đáp án đúng'.
+    """
+    print(f"   -> Đang điền dữ liệu Nghe từ vựng (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'G{start_row}'].value is not None:
+        start_row += 1
+
+    for idx, question in enumerate(data):
+        row = start_row + idx
+        
+        target_kr = question.get('target_korean', '')
+        options = question.get('options', [])
+        
+        if len(options) < 4: continue
+
+        # 1. Cột C, D
+        worksheet[f'C{row}'] = "TN"
+        worksheet[f'D{row}'] = "NB"
+
+        # 2. Cột E: Chọn 'Từ Hàn'
+        worksheet[f'E{row}'] = f"Chọn '{target_kr}'"
+
+        # 3. Cột F: Script nghe (chính là từ tiếng Hàn)
+        worksheet[f'F{row}'] = target_kr
+
+        # 4. Trộn đáp án
+        random.shuffle(options)
+        
+        # 5. Cột G: Danh sách 4 nghĩa Tiếng Việt
+        option_texts = [opt['vietnamese'] for opt in options]
+        worksheet[f'G{row}'] = "\n".join(option_texts)
+
+        # 6. Cột H: Vị trí đáp án đúng
+        correct_index = 0
+        for i, opt in enumerate(options, 1):
+            if opt['is_correct'] is True:
+                correct_index = i
+                break
+        worksheet[f'H{row}'] = correct_index
+        
+        # Cập nhật options đã trộn vào data gốc cho renderer
+        question['options'] = options
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi nghe từ vựng.")
+
+def populate_topik_listening_fill(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Nghe và điền từ thích hợp'.
+    """
+    print(f"   -> Đang điền dữ liệu Nghe điền từ (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'G{start_row}'].value is not None:
+        start_row += 1
+
+    for idx, question in enumerate(data):
+        row = start_row + idx
+        
+        full_sentence = question.get('full_sentence', '')
+        target = question.get('target_word', '')
+        
+        if not full_sentence or not target: continue
+
+        # 1. Cột C, D
+        worksheet[f'C{row}'] = "DT"
+        worksheet[f'D{row}'] = "NB"
+
+        # 2. Cột E: Đề bài cố định
+        worksheet[f'E{row}'] = "Điền từ thích hợp vào chỗ trống"
+
+        # 3. Cột F: Script (Câu đục lỗ)
+        # Thay thế từ cần điền bằng ________
+        masked_sentence = full_sentence.replace(target, "________")
+        worksheet[f'F{row}'] = masked_sentence
+
+        # 4. Cột G: Đáp án (Câu có ngoặc vuông)
+        # Thay thế từ cần điền bằng [target]
+        answer_sentence = full_sentence.replace(target, f"[{target}]")
+        worksheet[f'G{row}'] = answer_sentence
+
+        # Lưu lại data cho renderer dùng
+        # (Không cần xử lý cột H vì dạng DT thường ko có đáp án trắc nghiệm số)
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu nghe điền từ.")
+
+def populate_topik_listening_reorder(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Nghe và Sắp xếp câu'.
+    """
+    print(f"   -> Đang điền dữ liệu Sắp xếp câu (TOPIK) vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    while worksheet[f'G{start_row}'].value is not None:
+        start_row += 1
+
+    for idx, question in enumerate(data):
+        row = start_row + idx
+        
+        items = question.get('items', [])
+        if not items: continue
+
+        # 1. Cột C, D
+        worksheet[f'C{row}'] = "XB"
+        worksheet[f'D{row}'] = "NB"
+
+        # 2. Cột E: Đề bài
+        worksheet[f'E{row}'] = "Sắp xếp các từ sau theo thứ tự đúng"
+
+        # 3. Chuẩn bị dữ liệu
+        # Danh sách đúng (Correct List)
+        correct_koreans = [item['korean'] for item in items]
+        
+        # Danh sách trộn (Shuffled List)
+        shuffled_items = items.copy()
+        random.shuffle(shuffled_items)
+        shuffled_koreans = [item['korean'] for item in shuffled_items]
+
+        # 4. Cột F: File nghe (Thứ tự đúng)
+        # Format: từ 1, từ 2, từ 3
+        worksheet[f'F{row}'] = ", ".join(correct_koreans)
+
+        # 5. Cột G: Đề bài (Thứ tự sai)
+        worksheet[f'G{row}'] = ", ".join(shuffled_koreans)
+
+        # 6. Cột H: Đáp án (Key String)
+        # Logic: Duyệt qua từng từ trong danh sách ĐÚNG, tìm vị trí của nó trong danh sách SAI
+        key_sequence = []
+        for word in correct_koreans:
+            # Tìm index trong list trộn (cộng 1 để ra số thứ tự 1-based)
+            try:
+                position = shuffled_koreans.index(word) + 1
+                key_sequence.append(str(position))
+            except ValueError:
+                print(f"Lỗi: Không tìm thấy từ {word} trong danh sách trộn.")
+        
+        worksheet[f'H{row}'] = "".join(key_sequence)
+
+        # Lưu data gốc để renderer dùng
+        question['sorted_items'] = items # List gốc chưa trộn
+
+    print(f"   ✅ Hoàn thành điền {len(data)} câu sắp xếp.")
+
+def populate_topik_listening_shared(worksheet, data: list):
+    """
+    Điền dữ liệu cho sheet 'Nghe, hiểu (HL)'.
+    Input: List 10 objects hội thoại.
+    """
+    print(f"   -> Đang điền 40 câu Nghe hiểu chung (TOPIK)...")
+    
+    # Tìm dòng bắt đầu
+    start_row = 2
+    while worksheet[f'G{start_row}'].value is not None:
+        start_row += 1
+    
+    current_row_cursor = start_row
+
+    # VÒNG LẶP CHÍNH: Duyệt qua 10 đoạn hội thoại
+    for dia_idx, item in enumerate(data):
+        dialogue = item.get('dialogue', [])
+        questions = item.get('questions', [])
+        
+        if len(questions) < 4: continue
+
+        # 1. Xử lý Cột B (Script chung) - Merge 4 dòng
+        # Tạo nội dung Script
+        script_header = "Nghe hội thoại sau và chọn X cho câu có nội dung sai, O cho câu có nội dung đúng\nfile nghe:\n\n"
+        script_content = ""
+        for line in dialogue:
+            script_content += f"{line['korean']}\n\n"
+        full_script = script_header + script_content.strip()
+
+        end_row = current_row_cursor + 3
+        worksheet.merge_cells(f'B{current_row_cursor}:B{end_row}')
+        
+        cell_b = worksheet[f'B{current_row_cursor}']
+        cell_b.value = full_script
+        cell_b.alignment = Alignment(wrap_text=True, vertical='top')
+
+        # 2. Duyệt qua 4 câu hỏi con
+        for q_idx, q in enumerate(questions):
+            row = current_row_cursor + q_idx
+            
+            # Cột C, D
+            worksheet[f'C{row}'] = "TN"
+            worksheet[f'D{row}'] = "NB"
+
+            # Cột E: Nhận định
+            worksheet[f'E{row}'] = q.get('statement_korean', '')
+
+            # Cột G: X/O
+            worksheet[f'G{row}'] = "X\nO"
+
+            # Cột H: Đáp án (1=X, 2=O)
+            if q.get('is_correct'):
+                worksheet[f'H{row}'] = 2
+            else:
+                worksheet[f'H{row}'] = 1
+
+            # LƯU DATA CHO RENDERER (Quan trọng)
+            q['full_dialogue_data'] = dialogue
+            q['explanation_info'] = {
+                'statement_vn': q.get('statement_vietnamese'),
+                'explanation': q.get('explanation'),
+                'evidence': q.get('evidence_korean'),
+                'is_correct': q.get('is_correct')
+            }
+
+        # Tăng con trỏ dòng cho hội thoại tiếp theo
+        current_row_cursor += 4
+
+    print(f"   ✅ Hoàn thành điền {len(data)} đoạn hội thoại (tổng {len(data)*4} câu).")

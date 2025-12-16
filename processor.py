@@ -6,7 +6,7 @@ import traceback
 from question_generator import run_question_generation
 from explanation_generator import run_explanation_generation
 
-def run_full_pipeline(pdf_folder_path: str, hsk_level: str) -> str | None:
+def run_full_pipeline(pdf_folder_path: str, level: str) -> str | None:
     """
     Hàm tổng điều phối toàn bộ quy trình tạo câu hỏi và lời giải.
 
@@ -20,12 +20,28 @@ def run_full_pipeline(pdf_folder_path: str, hsk_level: str) -> str | None:
     # --- 1. CHUẨN BỊ MÔI TRƯỜNG ---
     output_dir = "output"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_folder_with_timestamp = os.path.join(output_dir, f"{hsk_level}_{timestamp}")
+    pdf_files = [os.path.join(pdf_folder_path, f) for f in os.listdir(pdf_folder_path) if f.lower().endswith('.pdf')]
+    if not pdf_files:
+            print(f"❌ Lỗi: Không tìm thấy file PDF nào trong '{pdf_folder_path}'.")
+            return None, None
+    if level in ["topik1", "topik2", "topik3"]:
+        # Ưu tiên tìm file có chữ "Bài"
+        candidate_files = [f for f in pdf_files if "Bài" in os.path.basename(f)]
+        if candidate_files:
+            chosen_pdf = candidate_files[0]
+        else:
+            # Nếu không có file nào chứa chữ "Bài", lấy file đầu tiên bất kỳ
+            chosen_pdf = pdf_files[0]
+    else:
+        chosen_pdf = pdf_files[0]        
+    # Lấy tên file gốc bỏ đuôi .pdf
+    base_name = os.path.splitext(os.path.basename(chosen_pdf))[0]
+    output_folder_with_timestamp = os.path.join(output_dir, f"{base_name}_{level}_{timestamp}")
     os.makedirs(output_folder_with_timestamp, exist_ok=True)
     
     print("="*60)
     print("BẮT ĐẦU TẠO ĐỀ")
-    print(f"Cấp độ HSK: {hsk_level.upper()}")
+    print(f"Cấp độ HSK/TOPIK: {level.upper()}")
     print(f"Thư mục PDF: {os.path.abspath(pdf_folder_path)}")
     print(f"Thư mục Output: {os.path.abspath(output_folder_with_timestamp)}")
     print("="*60)
@@ -34,7 +50,7 @@ def run_full_pipeline(pdf_folder_path: str, hsk_level: str) -> str | None:
     try:
         # ---- QUY TRÌNH 1: TẠO CÂU HỎI ----
         intermediate_file, output_excel = run_question_generation(
-            hsk_level=hsk_level,
+            level=level,
             pdf_folder_path=pdf_folder_path,
             output_folder_path=output_folder_with_timestamp
         )
@@ -43,7 +59,7 @@ def run_full_pipeline(pdf_folder_path: str, hsk_level: str) -> str | None:
         if intermediate_file and output_excel:
             # ---- QUY TRÌNH 2: TẠO LỜI GIẢI ----
             run_explanation_generation(
-                hsk_level=hsk_level,
+                hsk_level=level,
                 source_data_file=intermediate_file,
                 excel_output_path=output_excel
             )

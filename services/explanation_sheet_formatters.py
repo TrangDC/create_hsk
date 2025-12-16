@@ -1620,3 +1620,329 @@ def render_hsk5_writing_from_image(cell, question_data: dict):
     cell.value = rich_text
     cell.alignment = Alignment(wrap_text=True, vertical='top')
     auto_size_cell(cell.parent, cell, plain_text_from_rich_text(rich_text))
+
+
+def render_topik_word_matching_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải nối từ. 
+    Lưu ý: Vì dạng này không gọi AI tạo lời giải, dữ liệu nằm trong original_task['data']
+    """
+    # Lấy dữ liệu từ task gốc (do config HSK5 Writing logic)
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    
+    if not data_source: return 0
+
+    pairs = data_source.get('pairs', [])
+    
+    # Format: 한국: Hàn Quốc (xuống dòng)
+    explanation_lines = []
+    for p in pairs:
+        explanation_lines.append(f"{p['korean']}: {p['vietnamese']}")
+    
+    final_text = "\n".join(explanation_lines)
+    
+    # Ghi vào cột I
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1 # Trả về số dòng đã ghi (1 dòng Excel)
+
+
+def render_topik_image_matching_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải nối ảnh (Hàn - Việt).
+    """
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    if not data_source: return 0
+
+    pairs = data_source.get('pairs', [])
+    
+    # Format: 일본: Nhật Bản
+    explanation_lines = []
+    for p in pairs:
+        explanation_lines.append(f"{p['korean']}: {p['vietnamese']}")
+    
+    final_text = "\n".join(explanation_lines)
+    
+    # Ghi vào cột I
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1
+
+def render_topik_image_selection_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải TN chọn ảnh.
+    Hiển thị danh sách từ vựng của 4 phương án.
+    """
+    # Lấy data từ original_task vì không gọi AI
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    if not data_source: return 0
+
+    options = data_source.get('options', [])
+    
+    # Format: 
+    # 극장: Nhà hát
+    # 은행: Ngân hàng
+    explanation_lines = []
+    for opt in options:
+        line = f"{opt.get('korean', '')}: {opt.get('vietnamese', '')}"
+        explanation_lines.append(line)
+    
+    final_text = "\n".join(explanation_lines)
+    
+    # Ghi vào cột I
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1
+
+def render_topik_image_to_word_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải: Liệt kê nghĩa của 4 phương án.
+    """
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    if not data_source: return 0
+
+    options = data_source.get('options', [])
+    
+    # Format: 
+    # 운동장: Sân vận động
+    explanation_lines = []
+    for opt in options:
+        line = f"{opt.get('korean', '')}: {opt.get('vietnamese', '')}"
+        explanation_lines.append(line)
+    
+    final_text = "\n".join(explanation_lines)
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1
+
+def render_topik_vocab_selection_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải: display_text : meaning
+    Ví dụ Type 1: 그저께: Hôm kia
+    Ví dụ Type 2: Thứ hai: 월요일
+    """
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    if not data_source: return 0
+
+    options = data_source.get('options', [])
+    
+    explanation_lines = []
+    for opt in options:
+        # Cấu trúc: [Hiển thị ở cột G]: [Nghĩa giải thích]
+        line = f"{opt.get('display_text', '')}: {opt.get('meaning', '')}"
+        explanation_lines.append(line)
+    
+    final_text = "\n".join(explanation_lines)
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1
+
+def render_topik_reading_shared_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải Đọc hiểu chung.
+    Format:
+    Câu hỏi: ... (...)
+    + Opt 1: ...
+    => Dựa vào ...
+    
+    Tạm dịch:
+    (Bản dịch bài đọc)
+    """
+    # Vì ta đã lưu dữ liệu vào original_task ở bước populate
+    # explanation_data có thể là None do ta skip API
+    task_data = original_task['data'] if original_task else None
+    if not task_data: return 0
+
+    # Lấy các thông tin đã lưu
+    q_text = task_data.get('question_text', '')
+    q_mean = task_data.get('question_meaning', '')
+    evidence = task_data.get('reasoning_evidence', '')
+    evidence_mean = task_data.get('reasoning_vietnamese', '') # Nếu prompt có sinh ra
+    passage_trans = task_data.get('shared_passage_translation', '')
+    options = task_data.get('options', [])
+
+    # 1. Phần Câu hỏi và Đáp án
+    lines = []
+    lines.append(f"Câu hỏi: {q_text} ({q_mean})")
+    
+    for opt in options:
+        lines.append(f"+ {opt['korean']}: {opt['vietnamese']}")
+    
+    # 2. Phần Dẫn chứng
+    lines.append(f"=> Dựa vào {evidence} ({evidence_mean})")
+    lines.append("") # Dòng trống
+    
+    # 3. Phần Tạm dịch (Học liệu chung)
+    lines.append("Tạm dịch:")
+    lines.append(passage_trans)
+
+    final_text = "\n".join(lines)
+    
+    # Ghi vào cột I
+    worksheet[f'I{current_row}'] = final_text
+    worksheet[f'I{current_row}'].alignment = Alignment(wrap_text=True)
+
+    return 1
+
+def render_topik_listening_vocab_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải: Tiếng Việt: Tiếng Hàn /Note/
+    Ví dụ: Tháng tư: 4월 /사월/
+    """
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    if not data_source: return 0
+
+    options = data_source.get('options', [])
+    
+    explanation_lines = []
+    for opt in options:
+        vn = opt.get('vietnamese', '')
+        kr = opt.get('korean_equiv', '')
+        note = opt.get('note', '') # Có thể rỗng
+        
+        # Xây dựng chuỗi: "Thứ tư: 수요일"
+        line = f"{vn}: {kr}"
+        
+        # Nếu có note thì thêm vào: "Tháng hai: 2월 /이월/"
+        if note:
+            line += f" {note}"
+            
+        explanation_lines.append(line)
+    
+    final_text = "\n".join(explanation_lines)
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1
+
+
+def render_topik_listening_fill_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải:
+    Word: Meaning
+    Full Sentence
+    Tạm dịch: ...
+    """
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    if not data_source: return 0
+
+    target = data_source.get('target_word', '')
+    meaning = data_source.get('target_meaning', '')
+    full_sentence = data_source.get('full_sentence', '')
+    trans = data_source.get('sentence_translation', '')
+
+    lines = []
+    # Dòng 1: Từ vựng
+    lines.append(f"{target}: {meaning}")
+    # Dòng 2: Câu gốc
+    lines.append(full_sentence)
+    # Dòng 3: Dịch
+    lines.append(f"Tạm dịch: {trans}")
+
+    final_text = "\n".join(lines)
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1
+
+def render_topik_listening_reorder_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải:
+    Từ 1: Nghĩa 1
+    Từ 2: Nghĩa 2
+    ...
+    Chuỗi từ đúng hoàn chỉnh
+    """
+    data_source = explanation_data if explanation_data else (original_task['data'] if original_task else None)
+    if not data_source: return 0
+
+    # Lấy danh sách đúng thứ tự
+    items = data_source.get('items', []) # hoặc 'sorted_items'
+    
+    lines = []
+    correct_koreans = []
+
+    # Liệt kê nghĩa
+    for item in items:
+        lines.append(f"{item['korean']}: {item['vietnamese']}")
+        correct_koreans.append(item['korean'])
+    
+    # Dòng cuối: Chuỗi hoàn chỉnh
+    lines.append(", ".join(correct_koreans))
+
+    final_text = "\n".join(lines)
+    worksheet[f'I{current_row}'] = final_text
+    
+    return 1
+
+def render_topik_listening_shared_explanation(worksheet, current_row, explanation_data, original_task=None):
+    """
+    Render lời giải Nghe hiểu O/X.
+    """
+    # Lấy data từ original_task (do Phase 1 tạo ra)
+    task_data = original_task['data'] if original_task else None
+    if not task_data: return 0
+
+    # 1. Lấy dữ liệu (với giá trị mặc định để tránh lỗi None)
+    stmt_kr = task_data.get('statement_korean', '')
+    stmt_vn = task_data.get('statement_vietnamese', '')
+    
+    # Logic Đúng/Sai từ trường is_correct
+    is_correct = task_data.get('is_correct', False) 
+    
+    # Lấy giải thích và dẫn chứng
+    expl = task_data.get('explanation', '')
+    evidence = task_data.get('evidence_korean', '')
+    
+    # Lấy hội thoại (đã được gán ở bước flatten)
+    dialogue = task_data.get('full_dialogue_data', [])
+
+    lines = []
+    
+    # --- PHẦN 1: GIẢI THÍCH ---
+    # In câu nhận định
+    lines.append(f"{stmt_kr} ({stmt_vn})")
+    
+    # In lý do Đúng/Sai
+    # Nếu is_correct = True (Đáp án O) -> Hiển thị "Đúng vì..."
+    # Nếu is_correct = False (Đáp án X) -> Hiển thị "Sai vì..."
+    status_text = "Đúng" if is_correct else "Sai"
+    
+    # Chỉ in dẫn chứng nếu có dữ liệu
+    if evidence or expl:
+        lines.append(f"{status_text} vì {evidence} ({expl})")
+    else:
+        lines.append(f"{status_text}.")
+        
+    lines.append("") # Dòng trống ngăn cách
+
+    # --- PHẦN 2: PHỤ ĐỀ (HÀN) ---
+    lines.append("Phụ đề")
+    if dialogue:
+        for d in dialogue:
+            speaker = d.get('speaker', '')
+            text = d.get('korean', '')
+            lines.append(f"{speaker}: {text}")
+    else:
+        lines.append("(Không có dữ liệu phụ đề)")
+    lines.append("")
+
+    # --- PHẦN 3: TẠM DỊCH (VIỆT) ---
+    lines.append("Tạm dịch")
+    if dialogue:
+        for d in dialogue:
+            # Chuyển đổi tên nhân vật sang tiếng Việt cho thân thiện
+            speaker_kr = d.get('speaker', '')
+            speaker_vn = "Nam" if "남" in speaker_kr else ("Nữ" if "여" in speaker_kr else speaker_kr)
+            
+            text_vn = d.get('vietnamese', '')
+            lines.append(f"{speaker_vn}: {text_vn}")
+    else:
+        lines.append("(Không có dữ liệu dịch)")
+
+    final_text = "\n".join(lines)
+    
+    # Ghi vào cột I
+    worksheet[f'I{current_row}'] = final_text
+    from openpyxl.styles import Alignment
+    worksheet[f'I{current_row}'].alignment = Alignment(wrap_text=True)
+
+    return 1

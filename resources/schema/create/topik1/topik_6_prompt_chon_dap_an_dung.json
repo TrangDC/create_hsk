@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "topik_vocab_selection": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "question_type": { 
+            "type": "string", 
+            "enum": ["vn_to_kr", "kr_to_vn"],
+            "description": "vn_to_kr cho 2 câu đầu, kr_to_vn cho 2 câu sau."
+          },
+          "prompt_text": { 
+            "type": "string", 
+            "description": "Từ vựng dùng để hỏi. Ví dụ: 'Ngày mai' hoặc '금요일'" 
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "display_text": { "type": "string", "description": "Nội dung hiển thị ở đáp án (Cột G)." },
+                "meaning": { "type": "string", "description": "Nghĩa giải thích (dùng cho Cột I)." },
+                "is_correct": { "type": "boolean" }
+              },
+              "required": ["display_text", "meaning", "is_correct"]
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": ["question_id", "question_type", "prompt_text", "options"]
+      }
+    }
+  },
+  "required": ["topik_vocab_selection"]
+}

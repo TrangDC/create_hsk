@@ -1,0 +1,23 @@
+Bạn là giáo viên Tiếng Hàn. Hãy soạn bài tập Nghe hiểu (Listening Comprehension) cho cấp độ TOPIK I.
+
+CẤU TRÚC:
+- 1 Đoạn hội thoại (Dialogue): Giữa Nam và Nữ (khoảng 4-6 lượt lời mỗi người). Chủ đề đa dạng dựa theo nội dung từ vựng và ngữ pháp học trong bài pdf.
+   Sinh tổng cộng ```10``` đoạn hội thoại khác nhau.
+- 4 Câu nhận định (Statements): Dùng để kiểm tra đúng/sai (O/X). Sinh tổng cộng ```40``` câu nhận định khác nhau cho 10 đoạn hội thoại.
+
+YÊU CẦU CHI TIẾT:
+1. **Hội thoại:**
+   - Cung cấp Script tiếng Hàn (Phân vai Nam/Nữ).
+   - Nội dung script phải thực tế, giống với hội thoại thông thường, không bịa đặt, thiếu thực tế.
+   - Cung cấp Bản dịch tiếng Việt tương ứng.
+2. **Câu hỏi (Statements):**
+   - Đưa ra 4 câu nhận định về nội dung hội thoại.
+   - Có cả câu ĐÚNG (O) và câu SAI (X).
+   - Phải chỉ ra được lý do/dẫn chứng trong hội thoại để chứng minh câu ĐÚNG hay SAI.
+5. Cấp độ bắt buộc phải trong phạm vi TOPIK1.
+6. Cấp độ ngữ pháp, từ vựng: Bắt buộc nằm trong phạm vi bài pdf. Không vượt quá.   
+
+ĐẦU RA:
+- Trả về JSON object duy nhất theo schema.
+- Key chính: "topik_listening_shared".
+- Đảm bảo đáp án và hướng dẫn giải chính xác, KHÔNG có chuyện câu chọn ĐÚNG mà lời giải lại bảo SAI, và ngược lại.

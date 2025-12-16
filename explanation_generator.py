@@ -76,6 +76,45 @@ def flatten_question_data(data_map: dict, hsk_level: str) -> list:
                         "data": content # 'data' chứa toàn bộ object passage_cloze
                     }
                     flat_list.append(task)
+                # THÊM LOGIC MỚI CHO TOPIK READING SHARED
+                elif json_key == "topik_reading_shared_list":
+                    # Data là một list các passage object
+                    for passage_item in content:
+                        passage_trans = passage_item.get('passage_vietnamese', '')
+                        questions = passage_item.get('questions', [])
+                        for q in questions:
+                            # Gán thông tin chung vào từng câu hỏi con
+                            q['shared_passage_translation'] = passage_trans
+                            q['full_passage_data'] = passage_item # Gán cha vào con
+                            task = {
+                                "prompt_name": prompt_name,
+                                "question_type": json_key, # Vẫn dùng key này để định danh loại bài
+                                "data": q 
+                            }
+                            flat_list.append(task)
+                elif json_key == "topik_listening_shared_list":
+                    # Content là List 10 hội thoại
+                    for dia_item in content:
+                        dialogue = dia_item.get('dialogue', [])
+                        questions = dia_item.get('questions', [])
+                        
+                        for q in questions:
+                            # Tái tạo lại dữ liệu cần thiết cho Renderer
+                            q['full_dialogue_data'] = dialogue
+                            # Tái tạo cấu trúc explanation_info
+                            q['explanation_info'] = {
+                                'statement_vn': q.get('statement_vietnamese'),
+                                'explanation': q.get('explanation'),
+                                'evidence': q.get('evidence_korean'),
+                                'is_correct': q.get('is_correct')
+                            }
+                            
+                            task = {
+                                "prompt_name": prompt_name,
+                                "question_type": json_key,
+                                "data": q
+                            }
+                            flat_list.append(task)
                 else:
                     # Logic cũ cho các dạng 'keyed' khác
                     questions = content.get('questions', []) if isinstance(content, dict) else content
@@ -109,7 +148,10 @@ def generate_explanations_concurrently(flat_question_list: list, hsk_level: str)
     with ThreadPoolExecutor(max_workers=10) as executor:
         future_to_task = {}
         for task in flat_question_list:
-            if task['question_type'] in ["writing_from_keywords", "writing_from_image"]:
+            if task['question_type'] in ["writing_from_keywords", "writing_from_image", 
+                                         "topik_word_matching", "topik_image_matching", "topik_image_selection", 
+                                         "topik_image_to_word", "topik_vocab_selection", "topik_reading_shared_list", 
+                                         "topik_listening_vocab", "topik_listening_fill", "topik_listening_reorder", "topik_listening_shared_list"]:
                 # Không cần gọi API, lời giải đã có trong task['data']
                 task['explanation_details'] = task['data'] # Gán trực tiếp
                 print(f"   - ✅ Lấy lời giải có sẵn cho dạng: {task['question_type']}")
@@ -172,7 +214,9 @@ def update_excel_with_explanations(excel_path: str, enriched_question_list: list
                 current_row = row_counters[sheet_name]
                 
                 # Xử lý đặc biệt cho các renderer xử lý theo cụm
-                if q_type in ["listening_comprehension", "reading_comprehension_short_passage", "passage_cloze", "long_passage_comprehension"]: # <-- THÊM DẠNG MỚI
+                if q_type in ["listening_comprehension", "reading_comprehension_short_passage", "passage_cloze", "long_passage_comprehension", 
+                              "topik_word_matching", "topik_image_matching", "topik_image_selection","topik_image_to_word", 
+                              "topik_vocab_selection", "topik_reading_shared_list", "topik_listening_vocab", "topik_listening_fill", "topik_listening_reorder", "topik_listening_shared_list"]: # <-- THÊM DẠNG MỚI
                     # Cần truyền vào: worksheet, dòng bắt đầu, dữ liệu lời giải, và dữ liệu câu hỏi gốc
                     rows_written = renderer_func(worksheet, current_row, explanation_data, task)
                     row_counters[sheet_name] += rows_written
@@ -222,7 +266,7 @@ def run_explanation_generation(hsk_level: str, source_data_file: str, excel_outp
 # Test hàm xử lý
 if __name__ == "__main__":
     HSK_LEVEL = "hsk3"
-    SOURCE_DATA_FILE = r"D:\Edmicro\Tools\create_hsk\output\hsk3_20250918_134052\generated_question_data.json"
+    SOURCE_DATA_FILE = r"D:\Edmicro\Tools\create_hsk\output\topik1_20251212_143042\generated_question_data.json"
     EXCEL_OUTPUT_PATH = r"D:\Edmicro\Tools\create_hsk\output\hsk3_20250918_134052\hsk3_output.xlsx"
     
     run_explanation_generation(HSK_LEVEL, SOURCE_DATA_FILE, EXCEL_OUTPUT_PATH)

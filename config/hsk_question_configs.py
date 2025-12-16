@@ -24,7 +24,18 @@ from services.question_sheet_processors import (
     populate_long_passage_comprehension,
     populate_image_with_word_sentence_creation,
     populate_writing_from_keywords,
-    populate_writing_from_image
+    populate_writing_from_image,
+    populate_topik_word_matching,
+    populate_topik_image_matching,
+    populate_topik_image_selection,
+    populate_topik_image_to_word,
+    populate_topik_vocab_selection,
+    populate_topik_reading_shared,
+    populate_topik_listening_vocab,
+    populate_topik_listening_fill,
+    populate_topik_listening_reorder,
+    populate_topik_listening_shared
+
 )
 
 # 2. Định nghĩa cấu hình cho các HSK
@@ -245,6 +256,49 @@ HSK5_PROMPT_CONFIGS = {
     }
 }
 
+TOPIK_PROMPT_CONFIGS = {
+    "topik_1_prompt_noi_co_anh": {
+        "type": "keyed",
+        "processors": [("topik_image_matching","Nối (img)", populate_topik_image_matching)]
+    },
+    "topik_2_prompt_noi": {
+        "type": "keyed",
+        "processors": [("topik_word_matching", "Nối từ với nghĩa", populate_topik_word_matching)]
+    },
+    "topik_3_prompt_tn_chon_anh_dung": {
+        "type": "keyed",
+        "processors": [("topik_image_selection","Trắc nghiệm chọn ảnh đúng (img)",populate_topik_image_selection)]
+    },
+    "topik_4_prompt_tn_nhin_hinh_chon_dap_an": {
+        "type": "keyed",
+        "processors": [("topik_image_to_word","Nhìn hình chọn đáp án (img)",populate_topik_image_to_word)]
+    },
+    "topik_5_prompt_nghe_chon_dap_an_dung": {
+        "type": "keyed",
+        "processors": [("topik_listening_vocab","Nghe và chọn đáp án đúng",populate_topik_listening_vocab)]
+    },
+    "topik_6_prompt_chon_dap_an_dung": {
+        "type": "keyed",
+        "processors": [("topik_vocab_selection","Chọn đáp án đúng",populate_topik_vocab_selection)]
+    },
+    "topik_7_prompt_nghe_dien_tu_cho_trong": {
+        "type": "keyed",
+        "processors": [("topik_listening_fill","Nghe và điền từ thích hợp",populate_topik_listening_fill)]
+    },
+    "topik_8_prompt_nghe_sap_xep_cau": {
+        "type": "keyed",
+        "processors": [("topik_listening_reorder","Nghe và Sắp xếp câu",populate_topik_listening_reorder)]
+    },
+    "topik_9_prompt_tn_nghe_hieu": {
+        "type": "keyed",
+        "processors": [("topik_listening_shared_list","Nghe, hiểu (HL)", populate_topik_listening_shared)]
+    },
+    "topik_10_prompt_tn_doc_hieu": {
+        "type": "keyed",
+        "processors": [("topik_reading_shared_list","Đọc hiểu (HL)",populate_topik_reading_shared)]
+    }
+}
+
 # 3. Hàm "nhà máy" để lấy cấu hình đúng
 def get_prompt_config(hsk_level: str):
     """
@@ -260,8 +314,8 @@ def get_prompt_config(hsk_level: str):
         return HSK4_PROMPT_CONFIGS
     elif hsk_level == 'hsk5':
         return HSK5_PROMPT_CONFIGS
+    elif hsk_level == 'topik1' or hsk_level == 'topik2' or hsk_level == 'topik3':
+        return TOPIK_PROMPT_CONFIGS
     # Thêm các hsk level khác ở đây
-    
-    # Trả về None nếu không tìm thấy
     print(f"Cảnh báo: Không tìm thấy cấu hình cho cấp độ '{hsk_level}'.")
     return None

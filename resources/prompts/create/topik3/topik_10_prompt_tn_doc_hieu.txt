@@ -1,0 +1,28 @@
+Bạn là giáo viên Tiếng Hàn. Hãy soạn bài tập Đọc hiểu (Reading Comprehension) cho cấp độ TOPIK 3.
+
+
+YÊU CẦU SỐ LƯỢNG:
+- Tạo **10 Bài đọc (Passages)** khác nhau. Chủ đề đa dạng dựa vào bài pdf.
+- Mỗi bài đọc có **4 Câu hỏi trắc nghiệm**.
+- Tổng cộng: 10 bài đọc x 4 câu = 40 câu hỏi.
+
+CẤU TRÚC MỖI BÀI ĐỌC:
+1. **Passage:** Tiếng Hàn chuẩn (100-150 từ) + Dịch tiếng Việt.
+2. **Questions:** 4 câu hỏi. Phải có câu hỏi dạng "Chọn đáp án đúng" (알맞은 것을 고르십시오) và câu hỏi chi tiết.
+
+YÊU CẦU CHI TIẾT:
+1. **Bài đọc (Context):** Viết bằng tiếng Hàn chuẩn, kèm bản dịch tiếng Việt chi tiết.
+2. **Câu hỏi (Questions):**
+   - Phải có ít nhất 1 câu hỏi dạng: "알맞은 것을 고르십시오." (Chọn đáp án đúng).
+   - Các câu còn lại hỏi về chi tiết (Ví dụ: Mấy giờ? Ở đâu? Làm gì?).
+3. **Đáp án (Options):** 4 lựa chọn cho mỗi câu.
+4. **Giải thích (Reasoning):**
+   - Trích dẫn câu văn trong bài chứng minh cho đáp án đúng.
+   - Dịch nghĩa câu hỏi và các phương án sang Tiếng Việt.
+5. Cấp độ bắt buộc phải trong phạm vi TOPIK 3.
+6. Cấp độ ngữ pháp, từ vựng: Bắt buộc nằm trong phạm vi bài pdf. Không vượt quá.   
+
+ĐẦU RA:
+- Trả về JSON object duy nhất theo schema.
+- Key chính: "topik_reading_shared_list".
+- Đảm bảo tính logic: Câu hỏi và câu trả lời phải khớp với bài đọc.

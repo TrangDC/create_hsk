@@ -9,6 +9,16 @@ import json
 from call_vertexai import generate_content, extract_structured_data_from_pdf
 import shutil
 from config.hsk_question_configs import get_prompt_config
+import sys
+
+def get_resource_path(relative_path):
+    """Lấy đường dẫn tài nguyên, tương thích với PyInstaller"""
+    try:
+        base_path = os.path.dirname(sys.executable)
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
 
 def format_structured_data_for_prompt(structured_data: Dict[str, Any]) -> str:
     """
@@ -49,7 +59,7 @@ def format_structured_data_for_prompt(structured_data: Dict[str, Any]) -> str:
     return "\n".join(content_parts)
 
 # --- HÀM ĐIỀU PHỐI CHÍNH CỦA MODULE ---
-def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_path: str):
+def run_question_generation(level: str, pdf_folder_path: str, output_folder_path: str):
     """
     Thực hiện toàn bộ quy trình tạo câu hỏi.
     Returns:
@@ -59,25 +69,21 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
     print(" BẮT ĐẦU QUY TRÌNH TẠO CÂU HỎI ".center(58, "="))
     print("==========================================================")
 
-    # 1. Lấy cấu hình động dựa trên hsk_level
-    PROMPT_CONFIGS = get_prompt_config(hsk_level)
+    # 1. Lấy cấu hình động dựa trên level
+    PROMPT_CONFIGS = get_prompt_config(level)
     if not PROMPT_CONFIGS:
-        print(f"❌ Lỗi: Không thể tiếp tục vì không có cấu hình cho '{hsk_level}'.")
+        print(f"❌ Lỗi: Không thể tiếp tục vì không có cấu hình cho '{level}'.")
         return None, None
     
     # --- 1. XÁC ĐỊNH CÁC ĐƯỜNG DẪN ĐỘNG ---
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    RESOURCES_DIR = os.path.join(ROOT_DIR, "resources")
+    RESOURCES_DIR = get_resource_path("resources")
     
-    PROMPTS_FOLDER = os.path.join(RESOURCES_DIR, "prompts", "create", hsk_level)
-    SCHEMAS_FOLDER = os.path.join(RESOURCES_DIR, "schema", "create", hsk_level)
+    PROMPTS_FOLDER = os.path.join(RESOURCES_DIR, "prompts", "create", level)
+    SCHEMAS_FOLDER = os.path.join(RESOURCES_DIR, "schema", "create", level)
     # (MỚI) Đường dẫn cho prompt và schema tiền xử lý
     PREPROCESSING_PROMPT_PATH = os.path.join(RESOURCES_DIR, "prompts", "preprocessing", "extract_lesson_structure.txt")
     PREPROCESSING_SCHEMA_PATH = os.path.join(RESOURCES_DIR, "schema", "preprocessing", "extract_lesson_structure.json")
-    EXCEL_TEMPLATE_PATH = os.path.join(RESOURCES_DIR, "sheet", f"{hsk_level}.xlsx")
-    
-    OUTPUT_EXCEL_PATH = os.path.join(output_folder_path, f"{hsk_level}_output.xlsx")
-    INTERMEDIATE_DATA_FILE = os.path.join(output_folder_path, "generated_question_data.json")
+    EXCEL_TEMPLATE_PATH = os.path.join(RESOURCES_DIR, "sheet", f"{level}.xlsx")
 
     # --- 2. CHUẨN BỊ MÔI TRƯỜNG ---
     # Quét file PDF
@@ -90,28 +96,44 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
     except FileNotFoundError:
         print(f"❌ Lỗi: Thư mục PDF '{pdf_folder_path}' không tồn tại.")
         return None, None
+    if level in ["topik1", "topik2", "topik3"]:
+        # Ưu tiên tìm file có chữ "Bài"
+        candidate_files = [f for f in pdf_files if "Bài" in os.path.basename(f)]
+        if candidate_files:
+            chosen_pdf = candidate_files[0]
+        else:
+            # Nếu không có file nào chứa chữ "Bài", lấy file đầu tiên bất kỳ
+            chosen_pdf = pdf_files[0]
+        # Lấy tên file gốc bỏ đuôi .pdf
+        base_name = os.path.splitext(os.path.basename(chosen_pdf))[0]
+        output_filename = f"{base_name}_{level}.xlsx"    
+    else:
+        output_filename = f"{level}_ouput.xlsx"
+    OUTPUT_EXCEL_PATH = os.path.join(output_folder_path, output_filename)
+    INTERMEDIATE_DATA_FILE = os.path.join(output_folder_path, "generated_question_data.json")
     
     # --- (LOGIC MỚI) BƯỚC TIỀN XỬ LÝ ĐỘNG ---
     preprocessed_text_content: Optional[str] = None
     # Điều kiện: chỉ có 1 file và tên chứa "bài khóa" (không phân biệt hoa thường)
     if len(pdf_files) == 1 or "bài khóa" in os.path.basename(pdf_files[0]).lower():
-        print("\n--- Phát hiện file 'bài khóa' duy nhất. Bắt đầu quy trình tiền xử lý. ---")
-        try:
-            structured_data = extract_structured_data_from_pdf(
-                pdf_path=pdf_files[0],
-                prompt_file_path=PREPROCESSING_PROMPT_PATH,
-                schema_file_path=PREPROCESSING_SCHEMA_PATH
-            )
-            preprocessed_text_content = format_structured_data_for_prompt(structured_data)
-            print("--- ✅ Tiền xử lý thành công. Sử dụng dữ liệu đã bóc tách để tạo câu hỏi. ---")
-            # Lưu lại file text đã bóc tách để debug
-            with open(os.path.join(output_folder_path, "preprocessed_content.txt"), 'w', encoding='utf-8') as f:
-                f.write(preprocessed_text_content)
+        if level in ["hsk1", "hsk4", "hsk5", "hsk2", "hsk3"]:
+            print("\n--- Phát hiện file 'bài khóa' duy nhất. Bắt đầu quy trình tiền xử lý. ---")
+            try:
+                structured_data = extract_structured_data_from_pdf(
+                    pdf_path=pdf_files[0],
+                    prompt_file_path=PREPROCESSING_PROMPT_PATH,
+                    schema_file_path=PREPROCESSING_SCHEMA_PATH
+                )
+                preprocessed_text_content = format_structured_data_for_prompt(structured_data)
+                print("--- ✅ Tiền xử lý thành công. Sử dụng dữ liệu đã bóc tách để tạo câu hỏi. ---")
+                # Lưu lại file text đã bóc tách để debug
+                with open(os.path.join(output_folder_path, "preprocessed_content.txt"), 'w', encoding='utf-8') as f:
+                    f.write(preprocessed_text_content)
 
-        except Exception as e:
-            print(f"❌ Lỗi trong quá trình tiền xử lý: {e}.")
-            print("--- ⚠️ Sẽ tiếp tục tạo câu hỏi bằng file PDF gốc. Kết quả có thể không chính xác. ---")
-            preprocessed_text_content = None # Đảm bảo quay về trạng thái null nếu lỗi
+            except Exception as e:
+                print(f"❌ Lỗi trong quá trình tiền xử lý: {e}.")
+                print("--- ⚠️ Sẽ tiếp tục tạo câu hỏi bằng file PDF gốc. Kết quả có thể không chính xác. ---")
+                preprocessed_text_content = None # Đảm bảo quay về trạng thái null nếu lỗi
 
     # Tạo bản sao file Excel
     try:
@@ -163,9 +185,7 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
             config = PROMPT_CONFIGS.get(prompt_name)
             if not config:
                 continue
-
             print(f"\nBắt đầu xử lý dữ liệu từ prompt '{prompt_name}':")
-            
             # Phân nhánh logic dựa trên loại cấu trúc JSON
             if config["type"] == "keyed":
                 for json_key, sheet_name, processing_func in config["processors"]:
@@ -178,17 +198,14 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
                             print(f"   ⚠️ Cảnh báo: Không tìm thấy key '{json_key}' trong dữ liệu.")
                     else:
                         print(f"   ⚠️ Cảnh báo: Không tìm thấy sheet '{sheet_name}'.")
-            
             elif config["type"] == "array":
                 processing_func = config["processor"]
                 processing_func(workbook, data)
         
         workbook.save(OUTPUT_EXCEL_PATH)
         print(f"\n--- ✅ Đã điền dữ liệu và lưu thành công file: {OUTPUT_EXCEL_PATH} ---")
-        
     except Exception as e:
         print(f"❌ Lỗi nghiêm trọng khi ghi file Excel: {e}")
-
     print("\n==========================================================")
     print(" KẾT THÚC QUY TRÌNH TẠO CÂU HỎI ".center(58, "="))
     print("==========================================================")
@@ -197,7 +214,7 @@ def run_question_generation(hsk_level: str, pdf_folder_path: str, output_folder_
 
 # TEST hàm tạo
 if __name__ == '__main__':
-    hsk_level = "hsk3"
+    level = "hsk3"
     pdf_folder_path = r"D:\Edmicro\Tools\create_hsk\input\hsk3_bk"
     output_folder_path = r"D:\Edmicro\Tools\create_hsk\output\test"
-    run_question_generation(hsk_level, pdf_folder_path, output_folder_path)
+    run_question_generation(level, pdf_folder_path, output_folder_path)

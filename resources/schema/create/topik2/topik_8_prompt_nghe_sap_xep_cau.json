@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "topik_listening_reorder": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "items": {
+            "type": "array",
+            "description": "Danh sách từ vựng theo thứ tự ĐÚNG.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "korean": { "type": "string" },
+                "vietnamese": { "type": "string" }
+              },
+              "required": ["korean", "vietnamese"]
+            }
+          }
+        },
+        "required": ["question_id", "items"]
+      }
+    }
+  },
+  "required": ["topik_listening_reorder"]
+}

@@ -1,0 +1,23 @@
+Bạn là chuyên gia soạn đề thi TOPIK. Nhiệm vụ của bạn là tạo **20 câu hỏi** trắc nghiệm TOPIK2 dạng "Nhìn hình chọn từ vựng".
+
+NGUỒN DỮ LIỆU:
+- Hãy tìm mục **"Từ mới" (New Words / 어휘)** trong file PDF. Chọn ra các từ mới học trong bài để làm dữ liệu cho câu hỏi.
+
+CẤU TRÚC MỖI CÂU HỎI:
+1. **Target Word (Đáp án đúng):** Chọn 1 từ vựng trong bài.
+2. **Options (Phương án):**
+   - Bao gồm Target Word và 3 từ vựng khác (gây nhiễu).
+   - Tổng cộng 4 phương án.
+3. **Image Description (Mô tả ảnh):**
+   - Viết mô tả cho Target Word để AI vẽ ảnh.
+   - Ngôn ngữ: **TIẾNG VIỆT**.
+   - Yêu cầu: Nền trắng, chỉ vẽ vật thể chính, ngắn gọn.
+5. Cấp độ bắt buộc phải trong phạm vi TOPIK2.
+6. Cấp độ ngữ pháp, từ vựng: Bắt buộc nằm trong phạm vi bài pdf. Không vượt quá.   
+
+VÍ DỤ MÔ TẢ ẢNH:
+- Target: "우산" (Cái ô) -> Mô tả: "Một chiếc ô đang mở, màu vàng, nền trắng."
+
+ĐẦU RA:
+- Trả về JSON object duy nhất theo schema.
+- Key chính: "topik_image_to_word".

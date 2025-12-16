@@ -1,0 +1,27 @@
+Bạn là giáo viên Tiếng Hàn. Hãy tìm trong mục "Từ mới" (New Words) của file PDF để tạo ra **20 câu hỏi** trắc nghiệm từ vựng thuộc cấp độ TOPIK 3.
+
+CẤU TRÚC ĐỀ BÀI (Bắt buộc):
+
+Cấp độ bắt buộc phải trong phạm vi TOPIK 3.
+Cấp độ ngữ pháp, từ vựng: Bắt buộc nằm trong phạm vi bài pdf. Không vượt quá.
+
+**PHẦN 1: 10 Câu hỏi tìm từ Tiếng Hàn (Question 1 & 2)**
+- Input: Cho từ Tiếng Việt (Target Vietnamese).
+- Output: Chọn từ Tiếng Hàn đúng.
+- Phương án (Options): 
+  + 1 phương án đúng.
+  + 3 phương án nhiễu (Distractors): Có thể là từ có cách viết gần giống (gây nhầm lẫn chính tả) hoặc từ cùng chủ đề.
+  + Ví dụ Options: 내일 (Đúng), 네일 (Sai chính tả), 내이 (Sai), 네이 (Sai).
+
+**PHẦN 2: 10 Câu hỏi tìm nghĩa Tiếng Việt (Question 3 & 4)**
+- Input: Cho từ Tiếng Hàn (Target Korean).
+- Output: Chọn nghĩa Tiếng Việt đúng.
+- Phương án (Options): 
+  + 1 phương án đúng.
+  + 3 phương án nhiễu là các từ vựng khác cùng chủ đề.
+  + Ví dụ Options: Thứ hai (Đúng), Thứ ba (Sai), Thứ tư (Sai), Thứ năm (Sai).
+
+ĐẦU RA:
+- Trả về JSON object duy nhất theo schema.
+- Key chính: "topik_vocab_selection".
+- Đảm bảo đủ 20 câu hỏi (10 câu đầu loại 1, 10 câu sau loại 2).

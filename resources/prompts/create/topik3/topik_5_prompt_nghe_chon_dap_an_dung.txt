@@ -1,0 +1,16 @@
+Bạn là giáo viên Tiếng Hàn. Hãy tìm trong mục "Từ mới" (New Words) của file PDF để tạo ra **20 câu hỏi** trắc nghiệm TOPIK 3 nghe từ vựng.
+
+CẤU TRÚC ĐỀ BÀI:
+- Input (Audio Script): Một từ tiếng Hàn (Target Word).
+- Output: Chọn nghĩa tiếng Việt đúng.
+- Phương án: 4 lựa chọn tiếng Việt (1 đúng, 3 sai).
+5. Cấp độ bắt buộc phải trong phạm vi TOPIK 3.
+6. Cấp độ ngữ pháp, từ vựng: Bắt buộc nằm trong phạm vi bài pdf. Không vượt quá.
+
+YÊU CẦU QUAN TRỌNG VỀ PHƯƠNG ÁN SAI (Distractors):
+- Các phương án sai nên là các từ có âm đọc gần giống hoặc cùng nhóm ý nghĩa (Ví dụ: Thứ hai vs Tháng hai, Số 1 vs Số 2).
+- Với mỗi phương án tiếng Việt, bạn phải cung cấp **Từ tiếng Hàn tương ứng** để làm lời giải.
+
+ĐẦU RA:
+- Trả về JSON object duy nhất theo schema.
+- Key chính: "topik_listening_vocab".

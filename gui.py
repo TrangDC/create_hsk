@@ -12,7 +12,7 @@ from PyQt5.QtCore import QObject, QThread, pyqtSignal, Qt
 from PyQt5.QtGui import QFont
 from processor import run_full_pipeline
 from image_generator import process_excel_file
-from merge_image import ImageMerger  
+from merge_image import ImageMerger
 
 # Lớp để chuyển hướng stdout sang GUI
 class StreamRedirector(QObject):
@@ -75,7 +75,7 @@ class ImageMergerWorker(QObject):
         self.excel_path = excel_path
         self.images_folder = images_folder
         self.output_folder = output_folder
-
+        
     def run(self):
         try:
             merger = ImageMerger(self.excel_path, self.images_folder, self.output_folder)
@@ -95,7 +95,7 @@ class HSKGeneratorApp(QWidget):
         self.setup_styles()
 
     def initUI(self):
-        self.setWindowTitle('HSK Auto-Generator Pipeline')
+        self.setWindowTitle('Tool sinh câu hỏi và ảnh AI cho HSK/TOPIK')
         self.setGeometry(200, 200, 900, 700)
 
         # Layout chính
@@ -108,7 +108,7 @@ class HSKGeneratorApp(QWidget):
         
         # Tab 1: Pipeline HSK
         self.pipeline_tab = self.create_pipeline_tab()
-        self.tab_widget.addTab(self.pipeline_tab, "HSK Pipeline")
+        self.tab_widget.addTab(self.pipeline_tab, "HSK/TOPIK")
         
         # Tab 2: Tạo ảnh
         self.image_tab = self.create_image_tab()
@@ -261,7 +261,7 @@ class HSKGeneratorApp(QWidget):
         path_layout.setSpacing(15)
         self.path_label = QLabel('Thư mục PDF:')
         self.path_input = QLineEdit()
-        self.path_input.setPlaceholderText("Chọn thư mục chứa các file PDF...")
+        self.path_input.setPlaceholderText("Chọn thư mục chứa các file PDF bài khóa...")
         self.browse_button = QPushButton('Duyệt...')
         self.browse_button.setStyleSheet("background-color: #28a745; min-width: 100px;")
         self.browse_button.clicked.connect(self._browse_folder)
@@ -273,9 +273,9 @@ class HSKGeneratorApp(QWidget):
         # 2. Phần chọn HSK Level
         hsk_layout = QHBoxLayout()
         hsk_layout.setSpacing(15)
-        self.hsk_label = QLabel('Cấp độ HSK:')
+        self.hsk_label = QLabel('Cấp độ HSK/TOPIK:')
         self.hsk_combo = QComboBox()
-        self.hsk_combo.addItems([f'hsk{i}' for i in range(1, 6)])
+        self.hsk_combo.addItems([f'hsk{i}' for i in range(1, 6)] + [f'topik{i}' for i in range(1, 4)])
         self.hsk_combo.setMinimumWidth(150)
         hsk_layout.addWidget(self.hsk_label, 0)
         hsk_layout.addWidget(self.hsk_combo, 0)
@@ -283,7 +283,7 @@ class HSKGeneratorApp(QWidget):
         layout.addLayout(hsk_layout)
         
         # 3. Nút chạy
-        self.run_button = QPushButton('🚀 Bắt đầu chạy Pipeline')
+        self.run_button = QPushButton('🚀 Bắt đầu chạy')
         self.run_button.setStyleSheet("""
             QPushButton {
                 background-color: #dc3545;

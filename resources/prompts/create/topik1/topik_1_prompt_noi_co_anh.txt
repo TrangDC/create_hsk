@@ -1,0 +1,26 @@
+Bạn là giáo viên Tiếng Hàn. Hãy phân tích tài liệu PDF và tạo ra 20 câu hỏi thuộc cấp độ TOPIK dạng "Nối từ vựng với hình ảnh minh họa".
+
+YÊU CẦU:
+1. Chọn ra 4 danh từ cụ thể (concrete nouns) trong bài (ví dụ: đồ vật, phương tiện, hoa quả, con vật).
+2. Cung cấp từ tiếng Hàn.
+3. Cung cấp nghĩa Tiếng Việt.
+4. Cung cấp "mô tả hình ảnh" (image_description) bằng **TIẾNG VIỆT**.
+5. Cấp độ bắt buộc phải trong phạm vi TOPIK1.
+6. Cấp độ ngữ pháp, từ vựng: Bắt buộc nằm trong phạm vi bài pdf. Không vượt quá.
+
+YÊU CẦU ĐẶC BIỆT VỀ MÔ TẢ ẢNH (QUAN TRỌNG):
+- Mục đích: Dùng để AI vẽ hình minh họa/icon cho bài trắc nghiệm.
+- Ngôn ngữ: **Tiếng Việt**.
+- Bối cảnh: **Nền trắng (tách nền)** nếu chỉ là vật thể.
+- Nội dung: Chỉ mô tả vật thể chính. KHÔNG mô tả bối cảnh xung quanh (đường phố, nhà cửa, mây trời...), KHÔNG có người (trừ khi từ vựng là nghề nghiệp), KHÔNG chứa chữ viết trong ảnh.
+- Độ chính xác: Mô tả ảnh cần chính xác tuyệt đối với từ vựng được nối. Không mô tả ảnh chung chung, trừu tượng, gây nhầm lẫn với các mô tả ảnh, từ vựng khác.
+- Độ dài: Ngắn gọn, súc tích (dưới 15 từ).
+
+Ví dụ:
+- Sai (Quá dài): "Một chiếc xe buýt màu xanh đang chạy trên đường phố Seoul tấp nập với ánh nắng chiều tà."
+- Đúng (Chuẩn): "Một chiếc xe buýt màu xanh lá cây, nhìn từ bên hông, phong cách minh họa vector, nền trắng."
+
+ĐẦU RA:
+- Trả về JSON object duy nhất theo schema.
+- Key chính: "topik_image_matching".
+- Mỗi câu hỏi chứa danh sách 4 cặp (pairs).
