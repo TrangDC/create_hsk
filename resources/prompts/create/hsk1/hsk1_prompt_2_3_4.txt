@@ -23,6 +23,7 @@ Hãy tạo chính xác 3 dạng câu hỏi sau đây, mỗi dạng gồm 4 câu 
     *   Tạo ra 4 câu hỏi.
     *   Mỗi câu hỏi phải bao gồm:
         *   `context_chinese`: một câu cung cấp thông tin (ví dụ: "下个月，我去北京。").
+            * Lưu ý về `context_chinese`: BẮT BUỘC là một câu, không phải 2 câu lời thoại để 1 dòng (A: ...), không phải hội thoại.
         *   `query_chinese`: một câu hỏi liên quan trực tiếp đến câu thông tin (ví dụ: "她什么时候去北京？").
         *   `answer_options`: một danh sách 3 phương án trả lời, trong đó chỉ có một phương án đúng. Mỗi phương án phải có cả `chinese_text` và `pinyin`.
     *   Đáp án `correct_answer` phải là số thứ tự (1, 2, hoặc 3) của câu trả lời đúng.

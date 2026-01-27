@@ -108,7 +108,7 @@ def run_question_generation(level: str, pdf_folder_path: str, output_folder_path
         base_name = os.path.splitext(os.path.basename(chosen_pdf))[0]
         output_filename = f"{base_name}_{level}.xlsx"    
     else:
-        output_filename = f"{level}_ouput.xlsx"
+        output_filename = f"{level}_output.xlsx"
     OUTPUT_EXCEL_PATH = os.path.join(output_folder_path, output_filename)
     INTERMEDIATE_DATA_FILE = os.path.join(output_folder_path, "generated_question_data.json")
     

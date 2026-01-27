@@ -54,7 +54,7 @@
         "type": "object",
         "properties": {
           "question_id": { "type": "integer" },
-          "context_chinese": { "type": "string", "description": "Câu chứa thông tin." },
+          "context_chinese": { "type": "string", "description": "Câu chứa thông tin. BẮT BUỘC chỉ là một câu, không phải 2 câu lời thoại để 1 dòng, không phải hội thoại." },
           "query_chinese": { "type": "string", "description": "Câu hỏi về thông tin đã cho." },
           "answer_options": {
             "type": "array",

@@ -1646,7 +1646,6 @@ def render_topik_word_matching_explanation(worksheet, current_row, explanation_d
     
     return 1 # Trả về số dòng đã ghi (1 dòng Excel)
 
-
 def render_topik_image_matching_explanation(worksheet, current_row, explanation_data, original_task=None):
     """
     Render lời giải nối ảnh (Hàn - Việt).
@@ -1813,7 +1812,6 @@ def render_topik_listening_vocab_explanation(worksheet, current_row, explanation
     worksheet[f'I{current_row}'] = final_text
     
     return 1
-
 
 def render_topik_listening_fill_explanation(worksheet, current_row, explanation_data, original_task=None):
     """

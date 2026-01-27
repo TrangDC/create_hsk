@@ -26,3 +26,4 @@ YÊU CẦU CHI TIẾT:
 - Trả về JSON object duy nhất theo schema.
 - Key chính: "topik_reading_shared_list".
 - Đảm bảo tính logic: Câu hỏi và câu trả lời phải khớp với bài đọc.
+- Key "correct_index": Bốn phương án ứng với index là 1,2,3,4.

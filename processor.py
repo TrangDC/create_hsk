@@ -36,7 +36,7 @@ def run_full_pipeline(pdf_folder_path: str, level: str) -> str | None:
         chosen_pdf = pdf_files[0]        
     # Lấy tên file gốc bỏ đuôi .pdf
     base_name = os.path.splitext(os.path.basename(chosen_pdf))[0]
-    output_folder_with_timestamp = os.path.join(output_dir, f"{base_name}_{level}_{timestamp}")
+    output_folder_with_timestamp = os.path.join(output_dir, "excel", f"{base_name}_{level}_{timestamp}")
     os.makedirs(output_folder_with_timestamp, exist_ok=True)
     
     print("="*60)
@@ -54,7 +54,6 @@ def run_full_pipeline(pdf_folder_path: str, level: str) -> str | None:
             pdf_folder_path=pdf_folder_path,
             output_folder_path=output_folder_with_timestamp
         )
-
         # Kiểm tra nếu bước 1 thành công thì mới chạy bước 2
         if intermediate_file and output_excel:
             # ---- QUY TRÌNH 2: TẠO LỜI GIẢI ----

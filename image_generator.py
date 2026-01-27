@@ -137,9 +137,10 @@ def update_topik_cell_inplace(excel_path: str, sheet_name: str, row_number: int,
         print(f"❌ [TOPIK] Lỗi update Excel: {e}")
         return False
 
-def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGenerationService, output_dir: Path, parent_drive_id: str, pdf_name: str):
+def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGenerationService, 
+                        output_dir: Path, parent_drive_id: str, pdf_name: str, sheet_number: int):
     """
-    Xử lý sheet TOPIK với logic đặt tên file mới: {pdf_name}_{question_num}{suffix}.png
+    Xử lý sheet TOPIK với logic đặt tên file mới: {pdf_name}_S{sheet_number}_{question_num}{suffix}.png
     """
     print(f"🔵 [TOPIK] Đang xử lý sheet: {sheet_name}")
     
@@ -193,7 +194,7 @@ def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGene
                 clean_pdf_name = re.sub(r'[<>:"/\\|?*]', '_', pdf_name)
                 
                 # Format: Bai_10_1a.png
-                filename = f"{clean_pdf_name}_{question_num}{suffix}.png"
+                filename = f"{clean_pdf_name}_S{sheet_number}_{question_num}{suffix}.png"
                 local_path = sheet_local_dir / filename
                 
                 # Vẽ ảnh
@@ -212,8 +213,6 @@ def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGene
                     links.append(link)
                 else:
                     links.append("(Lỗi upload)")
-                
-                links.append(link)
             
             if links:
                 update_topik_cell_inplace(excel_path, sheet_name, row_num, col_idx, job['val'], links)
@@ -287,7 +286,7 @@ def process_hsk_sheet(sheet_name: str, excel_path: str, img_service: ImageGenera
                 
                 # Vẽ ảnh và lưu local (Không upload Drive)
                 if not local_path.exists():
-                    img_bytes = img_service.generate_image(prompt)
+                    img_bytes = img_service.generate_image_legacy(prompt)
                     if img_bytes:
                         with open(local_path, "wb") as f: f.write(img_bytes)
                         created_files.append(filename)
@@ -347,8 +346,8 @@ def process_excel_file(excel_path: str) -> str | None:
             return None
             
         # Xử lý TOPIK (Truyền thêm pdf_name)
-        for sheet in topik_sheets:
-            process_topik_sheet(sheet, excel_path, img_service, output_dir, subfolder_id, pdf_name)
+        for sheet_idx, sheet in enumerate(topik_sheets, start=1):
+            process_topik_sheet(sheet, excel_path, img_service, output_dir, subfolder_id, pdf_name, sheet_idx)
             
         # Xử lý HSK (Logic cũ)
         for sheet in hsk_sheets:

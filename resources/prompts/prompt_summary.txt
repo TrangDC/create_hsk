@@ -1,0 +1,31 @@
+Mục tiêu chính: Dựa vào nội dung các slide trong file PDF, hãy tạo một bản tóm tắt chi tiết cho bài học theo cấu trúc định sẵn bên dưới.
+Vai trò: Hãy đóng vai một người biên soạn tài liệu học tập, tổng hợp thông tin một cách logic, rõ ràng và dễ hiểu cho người học.
+Yêu cầu về cấu trúc và định dạng (Rất quan trọng):
+- Hãy tuân thủ nghiêm ngặt cấu trúc sau đây để trình bày kết quả:
+```
+**Tóm tắt Bài học – <Tên bài học bằng tiếng Trung> (<Tên bài học bằng tiếng Việt>)**
+<Nội dung bài học>
+
+**I. Từ Mới**
+<Liệt kê tất cả các từ mới theo định dạng đánh số. Mỗi từ phải bao gồm đầy đủ các thông tin sau (Tuyệt đối không thêm ví dụ):>
+1.  **[Chữ Hán]** /[Pinyin]/ ([Loại từ: dt/tt/đt].): [Nghĩa tiếng Việt].
+2.  **[Chữ Hán]** /[Pinyin]/ ([Loại từ: dt/tt/đt].): [Nghĩa tiếng Việt].
+...
+
+**II. Nội dung bài khóa**
+<Trích lại bài khóa tiếng Trung>
+(<Bản dịch tiếng Việt của bài khóa>)
+* **Lưu ý quan trọng:**
+<Liệt kê nội dung lưu ý (Yêu cầu phân tích kĩ từng đoạn trong bài). Mỗi nội dung phải bao gồm đầy đủ các thông tin sau (Tuyệt đối không thêm ví dụ):>
+- **[Chữ Hán] ([Pinyin])**: [Phân tích chi tiết].
+- **[Chữ Hán] ([Pinyin])**: [Phân tích chi tiết].
+...
+```
+Chú thích:
+- <Nội dung bài học> : Một đoạn khoảng 3-5 câu trình bày nội dung, hoàn cảnh, ý nghĩa của bài đọc.
+
+Các quy tắc bổ sung:
+- Tổng hợp thông tin: Hãy tự tổng hợp các "Lưu ý quan trọng" từ các slide ghi chú liên quan đến từng đoạn.
+- [Phân tích chi tiết]: Phân tích từ cần lưu ý thật chi tiết: ngữ cảnh, ý nghĩa,... dựa theo nội dung trong các slide.
+- Loại trừ thông tin thừa: Không bao gồm số trang, mục lục, hoặc nội dung của slide cảm ơn ở cuối tài liệu.
+Ngôn ngữ: Toàn bộ phần giải thích và tiêu đề phải bằng tiếng Việt.
