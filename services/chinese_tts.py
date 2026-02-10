@@ -10,6 +10,7 @@ from google.cloud import texttospeech
 from google.oauth2 import service_account
 from dotenv import load_dotenv
 load_dotenv()
+import requests
 
 
 def get_sheets_with_hsk(filepath):
@@ -170,7 +171,6 @@ def processing_sheet(filepath, sheetname):
     
     return stt_array, cleaned_vocabulary_array, examples_array, sttbai_array
 
-
 # Khởi tạo Google Cloud TTS client
 def init_google_tts_client():
     """Initialize Google Cloud TTS client using service account from environment variables"""
@@ -192,7 +192,6 @@ def init_google_tts_client():
     credentials = service_account.Credentials.from_service_account_info(credentials_dict)
     client = texttospeech.TextToSpeechClient(credentials=credentials)
     return client
-
 
 def text_to_speech_google(client, text, output_file):
     """Convert text to speech using Google Cloud TTS and save to file"""
@@ -235,7 +234,6 @@ def text_to_speech_google(client, text, output_file):
     except Exception as e:
         print(f"Error generating speech for '{text}': {e}")
         return False
-
 
 def generate_chinese_tts():
     """Main function to process HSK vocabulary and generate audio files"""
@@ -324,6 +322,80 @@ def generate_chinese_tts():
     print("All done!")
     print(f"{'='*60}")
 
+def generate_single_audio(client, text, output_path):
+    """
+    Hàm hỗ trợ sinh audio lẻ từ bên ngoài (không qua Excel input).
+    Args:
+        client: Google TTS Client object
+        text: Nội dung cần đọc
+        output_path: Đường dẫn file mp3 đầu ra
+    Returns:
+        bool: True nếu thành công, False nếu lỗi
+    """
+    if not text:
+        return False
+    
+    # 1. Đảm bảo thư mục cha tồn tại
+    directory = os.path.dirname(output_path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # 2. Gọi hàm sinh audio cốt lõi
+    # Lưu ý: Hàm text_to_speech_google đã được định nghĩa ở trên trong file cũ
+    return text_to_speech_google(client, text, output_path)
+
+
+# --- CẤU HÌNH NARAKEET ---
+# API Key từ đoạn code của bạn
+NARAKEET_API_KEY = 'QXGh0KOTHI7CaR9Vdh61M77FPRV98ZBMdNALHcsd'
+
+# Giọng đọc Tiếng Trung (Mandarin)
+# Các lựa chọn: 'Luli' (Nữ), 'Wang-Shu' (Nam), 'Chow' (Nam), 'Bao' (Nam)
+VOICE_NAME = 'yifei'
+
+def generate_single_audio_narakeet(text, output_path):
+    """
+    Sinh file MP3 từ text sử dụng Narakeet API.
+    Args:
+        text: Nội dung cần đọc (Tiếng Trung)
+        output_path: Đường dẫn lưu file
+    """
+    if not text:
+        return False
+        
+    # 1. Đảm bảo thư mục tồn tại
+    directory = os.path.dirname(output_path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory)
+        
+    # 2. Cấu hình Request
+    url = f'https://api.narakeet.com/text-to-speech/mp3?voice={VOICE_NAME}'
+    
+    options = {
+        'headers': {
+            'Accept': 'application/octet-stream',
+            'Content-Type': 'text/plain',
+            'x-api-key': NARAKEET_API_KEY,
+        },
+        'data': text.encode('utf8')
+    }
+
+    # 3. Gọi API
+    try:
+        response = requests.post(url, **options)
+        
+        if response.status_code == 200:
+            with open(output_path, 'wb') as f:
+                f.write(response.content)
+            # print(f"   🔊 Đã sinh audio: {os.path.basename(output_path)}")
+            return True
+        else:
+            print(f"   ❌ Lỗi Narakeet ({response.status_code}): {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"   ❌ Lỗi kết nối Narakeet: {e}")
+        return False
 
 if __name__ == "__main__":
     generate_chinese_tts()

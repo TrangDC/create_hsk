@@ -2,6 +2,7 @@ import sys
 import os
 import traceback
 from dotenv import load_dotenv
+import json
 
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -22,8 +23,14 @@ from services.chinese_tts import (
     init_google_tts_client, 
     get_sheets_with_hsk, 
     processing_sheet, 
-    text_to_speech_google
+    text_to_speech_google,
+    generate_single_audio_narakeet
 )
+from services.media_merger import create_merged_gif
+from services.input_handler import InputDataManager
+from services.image_gen_service import ImageGenerationService
+from services.gif_downloader import StrokeGifManager
+from call_vertexai import generate_content
 # Giả sử các module này đã có sẵn trong project của bạn
 from services.CompressPDF import compress_pdf_ghostscript 
 from services.response2docx import response2docx
@@ -45,14 +52,15 @@ class PipelineWorker(QObject):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
 
-    def __init__(self, pdf_folder, hsk_level):
+    def __init__(self, pdf_folder, hsk_level, preproc_mode=0):
         super().__init__()
         self.pdf_folder = pdf_folder
         self.hsk_level = hsk_level
+        self.preproc_mode = preproc_mode
 
     def run(self):
         try:
-            result_path = run_full_pipeline(self.pdf_folder, self.hsk_level)
+            result_path = run_full_pipeline(self.pdf_folder, self.hsk_level, self.preproc_mode)
             if result_path:
                 self.finished.emit(result_path)
             else:
@@ -312,10 +320,11 @@ class SummaryWorker(QObject):
                 service_account_data,
                 scopes=["https://www.googleapis.com/auth/cloud-platform"]
             )
+            return self.credentials
             
         except Exception as e:
             print(f"Lỗi khi tạo credentials từ service account: {e}")
-            self.credentials = None
+            return None
 
     def run(self):
         try:
@@ -361,6 +370,276 @@ class SummaryWorker(QObject):
         except Exception as e:
             self.error.emit(str(e))        
 
+class FlashcardWorker(QObject):
+    finished = pyqtSignal(str)
+    error = pyqtSignal(str)
+    progress = pyqtSignal(str)
+
+    def __init__(self, excel_path, sheet_name, output_base):
+        super().__init__()
+        self.excel_path = excel_path
+        self.sheet_name = sheet_name
+        self.output_base = output_base
+
+        # Cấu hình đường dẫn nội bộ
+        self.img_final_dir = os.path.join(self.output_base, "images")
+        self.audio_dir = os.path.join(self.output_base, "audio")
+        self.raw_img_dir = os.path.join(self.output_base, "raw_images")
+        self.raw_gif_dir = os.path.join(self.output_base, "raw_gifs")
+
+        # Cấu hình Resource
+        self.schema_path = "resources/schema/flashcard_schema.json"
+        self.prompt_path = "resources/prompts/enrich_vocab.txt"
+        self.mascot_pdf = "resources/panda_mascot.pdf"
+
+    def _setup_folders(self):
+        for d in [self.output_base, self.img_final_dir, self.audio_dir, 
+                  self.raw_img_dir, self.raw_gif_dir]:
+            if not os.path.exists(d): os.makedirs(d)
+
+    def _setup_resources(self):
+        """
+        Chỉ kiểm tra sự tồn tại của các file cấu hình.
+        Nếu chưa có thì tạo bản mẫu cơ bản.
+        """
+        # 1. Kiểm tra Schema
+        if not os.path.exists(self.schema_path):
+            os.makedirs(os.path.dirname(self.schema_path), exist_ok=True)
+            default_schema = {
+                "type": "OBJECT",
+                "properties": {
+                    "pinyin": {"type": "STRING", "description": "Phiên âm Pinyin"},
+                    "part_of_speech": {"type": "STRING", "description": "Từ loại"},
+                    "word_meaning_vn": {"type": "STRING", "description": "Nghĩa tiếng Việt"},
+                    "example_sentence_cn": {"type": "STRING", "description": "Câu ví dụ tiếng Trung"},
+                    "example_pinyin": {"type": "STRING", "description": "Pinyin ví dụ"},
+                    "example_meaning_vn": {"type": "STRING", "description": "Nghĩa tiếng Việt ví dụ"},
+                    "use_mascot": {"type": "BOOLEAN", "description": "True nếu dùng Mascot."},
+                    "image_prompt_en": {"type": "STRING", "description": "Prompt vẽ ảnh."}
+                },
+                "required": ["pinyin", "part_of_speech", "word_meaning_vn", "example_sentence_cn", "example_pinyin", "example_meaning_vn", "use_mascot", "image_prompt_en"]
+            }
+            with open(self.schema_path, 'w', encoding='utf-8') as f:
+                json.dump(default_schema, f, ensure_ascii=False, indent=2)
+            self.progress.emit("📄 Đã tạo file Schema mẫu tại " + self.schema_path)
+
+        # 2. Kiểm tra Prompt Template
+        if not os.path.exists(self.prompt_path):
+            os.makedirs(os.path.dirname(self.prompt_path), exist_ok=True)
+            default_prompt = """
+        Bạn là chuyên gia ngôn ngữ Trung-Việt và Art Director.
+Input: Từ '{word}', Nghĩa '{meaning}', Ví dụ '{example}'.
+
+Nhiệm vụ:
+1. Xác định Pinyin chuẩn.
+2. Xác định **DUY NHẤT 01** Từ loại (Part of Speech) dựa trên ngữ cảnh ví dụ.
+3. Tạo Pinyin và dịch nghĩa cho câu ví dụ.
+4. Quyết định 'use_mascot' (True/False):
+   - TRUE khi: Từ chỉ hành động chung (ăn, chạy, học), cảm xúc (vui, buồn), nghề nghiệp chung mà gấu trúc đóng vai được.
+   - FALSE khi: 
+     + Từ chỉ đồ vật tĩnh, kiến trúc, phương tiện (tứ hợp viện, xe hơi, máy tính). -> Vẽ trực tiếp đối tượng.
+     + Từ chỉ hành động/tính chất đặc thù giới tính hoặc nhân vật khác (trang điểm, mặc váy). -> Vẽ nhân vật phù hợp văn hóa Trung Quốc (ví dụ: cô gái Trung Quốc hoạt hình).
+
+5. Viết Prompt vẽ ảnh (image_prompt_en):
+    - Mục tiêu: Tạo ra một đối tượng đồ họa cô lập (isolated) để ghép vào thẻ học.
+    - Yêu cầu bắt buộc: 
+        + Phong cách: Flat illustration, 2D vector, hoạt hình, màu sắc tươi sáng, nét vẽ rõ ràng.
+        + Nền: PHẢI LÀ NỀN TRẮNG TINH (Pure white background). 
+        + Bối cảnh: KHÔNG vẽ bầu trời, KHÔNG vẽ mặt đất, KHÔNG vẽ cây cối hay nhà cửa xung quanh (trừ khi đối tượng chính là cái nhà). 
+        + Hình ảnh phải được cô lập hoàn toàn (Isolated), giống như một tấm nhãn dán (Sticker style).
+    - Nội dung:
+        + Nếu use_mascot=TRUE: Mô tả hành động của chú gấu trúc (từ tài liệu PDF tham khảo) thực hiện hành động của từ '{word}' theo câu ví dụ '{example}'.
+        + Nếu use_mascot=FALSE: Mô tả đối tượng hoặc nhân vật cụ thể thực hiện hành động.
+    - Lưu ý vibes: Ưu tiên vibes Trung Quốc hiện đại hoặc truyền thống nhẹ nhàng tùy ngữ cảnh câu.
+
+Trả về JSON chuẩn theo Schema.
+        """
+            with open(self.prompt_path, 'w', encoding='utf-8') as f:
+                f.write(default_prompt)
+            self.progress.emit("📄 Đã tạo file Prompt mẫu tại " + self.prompt_path)    
+
+    def run(self):
+        try:
+            self.progress.emit("🚀 KHỞI ĐỘNG FLASHCARD GENERATOR...")
+            self._setup_folders()
+            self._setup_resources()
+
+            # 1. XỬ LÝ INPUT
+            self.progress.emit(f"📄 Đang đọc dữ liệu từ Excel...")
+            input_manager = InputDataManager(self.excel_path)
+            input_data_list = input_manager.process_specific_sheet(self.sheet_name)
+            
+            if not input_data_list:
+                raise ValueError("Không tìm thấy dữ liệu hợp lệ trong sheet.")
+
+            # 2. INIT SERVICES
+            self.progress.emit("⚙️ Khởi tạo AI & Image Services...")
+            gif_manager = StrokeGifManager(gif_folder=self.raw_gif_dir, png_folder=self.raw_gif_dir)
+            img_service = ImageGenerationService()
+
+            excel_results = []
+            total_items = len(input_data_list)
+            
+            # 3. VÒNG LẶP XỬ LÝ (QUÉT QUA TOÀN BỘ CÁC DÒNG)
+            for idx, item in enumerate(input_data_list):
+                word = item['word']
+                
+                # Khởi tạo row_data mặc định từ dữ liệu Excel hiện có
+                row_data = {
+                    "Title": item['final_title'],
+                    "word": word,
+                    "pronunciation": item['pinyin'],
+                    "type": item['type'],
+                    "word_translation": item['meaning'],
+                    "phrace": item['example'],
+                    "pronunciation_phrace": item['ex_pinyin'],
+                    "phrace_translation": item['ex_meaning'],
+                    "thumbnail": item['exist_thumb'],
+                    "audio1": item['exist_audio1'],
+                    "audio2": item['exist_audio2']
+                }
+
+                # KIỂM TRA XEM CÓ CẦN XỬ LÝ AI/MEDIA KHÔNG
+                if item['needs_processing']:
+                    self.progress.emit(f"\n[{idx+1}/{total_items}] 🔄 Đang bổ sung dữ liệu: {word}...")
+
+                    # --- A. GỌI AI (Đọc prompt/schema từ file) ---
+                    ai_data = {}
+                    try:
+                        with open(self.prompt_path, 'r', encoding='utf-8') as f:
+                            prompt_template = f.read()
+                        
+                        prompt_input = prompt_template.format(
+                            word=word, 
+                            meaning=item['meaning'] or "", 
+                            example=item['example'] or ""
+                        )
+                        
+                        temp_path = f"resources/prompts/temp_{idx}.txt"
+                        with open(temp_path, 'w', encoding='utf-8') as f: f.write(prompt_input)
+
+                        ai_data = generate_content(temp_path, self.schema_path, [self.mascot_pdf], None)
+                        if os.path.exists(temp_path): os.remove(temp_path)
+                    except Exception as e:
+                        self.progress.emit(f"⚠️ Lỗi AI tại từ '{word}': {e}")
+
+                    # --- B. ĐIỀN KHUYẾT THÔNG TIN TEXT (Nếu Excel trống mới lấy AI) ---
+                    if not row_data['pronunciation']: row_data['pronunciation'] = ai_data.get('pinyin', '')
+                    if not row_data['type']: row_data['type'] = ai_data.get('part_of_speech', '')
+                    if not row_data['word_translation']: row_data['word_translation'] = ai_data.get('word_meaning_vn', '')
+                    
+                    if not row_data['phrace']: 
+                        row_data['phrace'] = ai_data.get('example_sentence_cn', '')
+                    
+                    # Cập nhật pinyin/dịch câu dựa trên câu ví dụ cuối cùng (Excel hoặc AI)
+                    if not row_data['pronunciation_phrace']: row_data['pronunciation_phrace'] = ai_data.get('example_pinyin', '')
+                    if not row_data['phrace_translation']: row_data['phrace_translation'] = ai_data.get('example_meaning_vn', '')
+
+                    # --- C. XỬ LÝ MEDIA (Chỉ sinh những cái còn thiếu) ---
+                    
+                    # 1. Ảnh minh họa (Thumbnail)
+                    if not row_data['thumbnail']:
+                        raw_img_path = os.path.join(self.raw_img_dir, f"{word}_ai.png")
+                        has_img = False
+                        
+                        # Sinh ảnh AI nếu chưa có
+                        if not os.path.exists(raw_img_path):
+                            try:
+                                use_mascot = ai_data.get('use_mascot', True)
+                                prompt = ai_data.get('image_prompt_en', f"illustration of {word}")
+                                pdf = self.mascot_pdf if use_mascot else None
+                                img_bytes = img_service.generate_image_pdfs(prompt, pdf, aspect_ratio="3:2")
+                                if img_bytes:
+                                    with open(raw_img_path, "wb") as f: f.write(img_bytes)
+                                    has_img = True
+                            except Exception as e: self.progress.emit(f"⚠️ Lỗi Image Gen: {e}")
+                        else: has_img = True
+
+                        # Tải GIF nét viết
+                        gifs = []
+                        for char in word:
+                            g = gif_manager.download_char(char) # Trả về (gif_path, png_path)
+                            if g and os.path.exists(g): gifs.append(g)
+                        
+                        if len(gifs) != len(word): gifs = [] # Nếu thiếu nét thì coi như ko có gif
+
+                        # Merge thành GIF cuối cùng
+                        final_gif_path = os.path.join(self.img_final_dir, item['filename_image'])
+                        if has_img:
+                            if create_merged_gif(raw_img_path, gifs, final_gif_path):
+                                row_data['thumbnail'] = item['filename_image']
+                                self.progress.emit(f"   ✅ Đã tạo ảnh mới: {item['filename_image']}")
+                        
+                    # 2. Audio Từ (audio1)
+                    if not row_data['audio1']:
+                        w_path = os.path.join(self.audio_dir, item['filename_audio_word'])
+                        if generate_single_audio_narakeet(word, w_path):
+                            row_data['audio1'] = item['filename_audio_word']
+                            self.progress.emit(f"   🔊 Đã tạo audio từ.")
+
+                    # 3. Audio Câu (audio2)
+                    if not row_data['audio2'] and row_data['phrace']:
+                        ex_path = os.path.join(self.audio_dir, item['filename_audio_ex'])
+                        if generate_single_audio_narakeet(row_data['phrace'], ex_path):
+                            row_data['audio2'] = item['filename_audio_ex']
+                            self.progress.emit(f"   🔊 Đã tạo audio câu.")
+
+                else:
+                    self.progress.emit(f"[{idx+1}/{total_items}] ✅ Bỏ qua (Đã hoàn thành): {word}")
+
+                # Lưu vào danh sách tổng (85 dòng)
+                excel_results.append(row_data)
+
+            # 4. XUẤT EXCEL VỚI RICH TEXT (TÔ ĐẬM TỪ KHÓA)
+            self.progress.emit("\n📦 Đang đóng gói file Excel và tô đậm từ khóa...")
+            if excel_results:
+                df = pd.DataFrame(excel_results)
+                cols_order = ["Title", "word", "pronunciation", "type", 
+                            "word_translation", "phrace", "pronunciation_phrace", 
+                            "phrace_translation", "thumbnail", "audio1", "audio2"]
+                final_cols = [c for c in cols_order if c in df.columns]
+                df = df[final_cols]
+                
+                out_path = os.path.join(self.output_base, f"Result_{self.sheet_name}.xlsx")
+
+                # --- SỬ DỤNG XLSXWRITER ĐỂ BOLD ---
+                writer = pd.ExcelWriter(out_path, engine='xlsxwriter')
+                df.to_excel(writer, index=False, sheet_name='Sheet1')
+
+                workbook  = writer.book
+                worksheet = writer.sheets['Sheet1']
+                bold_format = workbook.add_format({'bold': True})
+
+                try:
+                    phrace_col_idx = df.columns.get_loc("phrace")
+                except:
+                    phrace_col_idx = 5
+
+                # Duyệt toàn bộ 85 dòng trong excel_results
+                for row_num, row_data in enumerate(excel_results):
+                    word_val = str(row_data.get('word', ''))
+                    phrase_val = str(row_data.get('phrace', ''))
+
+                    if word_val and phrase_val and word_val in phrase_val:
+                        parts = phrase_val.split(word_val, 1)
+                        rich_string = []
+                        if parts[0]: rich_string.append(parts[0])
+                        rich_string.append(bold_format)
+                        rich_string.append(word_val)
+                        if parts[1]: rich_string.append(parts[1])
+
+                        # Ghi Rich String vào dòng (row_num + 1)
+                        worksheet.write_rich_string(row_num + 1, phrace_col_idx, *rich_string)
+                
+                writer.close()
+                self.finished.emit(f"🎉 HOÀN TẤT!\nFile: {out_path}")
+            else:
+                self.error.emit("Không có dữ liệu đầu ra.")
+
+        except Exception as e:
+            error_msg = traceback.format_exc()
+            self.error.emit(f"Lỗi hệ thống:\n{error_msg}")
+                   
 # Lớp Giao diện chính với Tab
 class HSKGeneratorApp(QWidget):
     def __init__(self):
@@ -404,6 +683,9 @@ class HSKGeneratorApp(QWidget):
         self.summary_tab = self.create_summary_tab()
         self.tab_widget.addTab(self.summary_tab, "Tóm tắt HSK")
 
+        self.flashcard_tab = self.create_flashcard_tab()
+        self.tab_widget.addTab(self.flashcard_tab, "Flashcard Gen")
+
         main_layout.addWidget(self.tab_widget)
         self.setLayout(main_layout)
 
@@ -438,7 +720,7 @@ class HSKGeneratorApp(QWidget):
             border-bottom-color: #C2C7CB;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
-            min-width: 120px;
+            min-width: 180px;
             padding: 10px 20px;
             font-size: 12pt;
             font-weight: bold;
@@ -567,6 +849,23 @@ class HSKGeneratorApp(QWidget):
         hsk_layout.addWidget(self.hsk_combo, 0)
         hsk_layout.addStretch(1)
         layout.addLayout(hsk_layout)
+
+        # --- THÊM MỚI: Phần chọn Chế độ phân tích PDF ---
+        preproc_layout = QHBoxLayout()
+        preproc_layout.setSpacing(15)
+        self.preproc_label = QLabel('Tùy chọn phân tích PDF:')
+        self.preproc_combo = QComboBox()
+        self.preproc_combo.addItems([
+            "Mặc định",
+            "Chỉ Từ vựng & Bài khóa",
+            "Chỉ Từ vựng & Ngữ pháp"
+        ])
+        self.preproc_combo.setMinimumWidth(300)
+        preproc_layout.addWidget(self.preproc_label, 0)
+        preproc_layout.addWidget(self.preproc_combo, 0)
+        preproc_layout.addStretch(1)
+        layout.addLayout(preproc_layout)
+
         
         # 3. Nút chạy
         self.run_button = QPushButton('🚀 Bắt đầu chạy')
@@ -883,6 +1182,71 @@ class HSKGeneratorApp(QWidget):
         tab.setLayout(layout)
         return tab
 
+    def create_flashcard_tab(self):
+        """Tạo tab Flashcard Generator (Tính năng mới)."""
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(15)
+        layout.setContentsMargins(25, 25, 25, 25)
+
+        # 1. Chọn Excel Input
+        excel_layout = QHBoxLayout()
+        self.fc_excel_label = QLabel('File Excel Đầu vào:')
+        self.fc_excel_input = QLineEdit()
+        self.fc_browse_btn = QPushButton('Duyệt...')
+        self.fc_browse_btn.setStyleSheet("background-color: #28a745;")
+        self.fc_browse_btn.clicked.connect(self._browse_flashcard_excel)
+        excel_layout.addWidget(self.fc_excel_label)
+        excel_layout.addWidget(self.fc_excel_input)
+        excel_layout.addWidget(self.fc_browse_btn)
+        layout.addLayout(excel_layout)
+
+        # 2. Chọn Sheet (Dropdown)
+        sheet_layout = QHBoxLayout()
+        self.fc_sheet_label = QLabel('Chọn Sheet HSK:')
+        self.fc_sheet_combo = QComboBox()
+        self.fc_sheet_combo.setMinimumWidth(200)
+        self.fc_load_sheet_btn = QPushButton('🔄 Tải danh sách Sheet')
+        self.fc_load_sheet_btn.clicked.connect(self._load_sheets)
+        sheet_layout.addWidget(self.fc_sheet_label)
+        sheet_layout.addWidget(self.fc_sheet_combo)
+        sheet_layout.addWidget(self.fc_load_sheet_btn)
+        sheet_layout.addStretch()
+        layout.addLayout(sheet_layout)
+
+        # 3. Chọn Output Folder
+        out_layout = QHBoxLayout()
+        self.fc_out_label = QLabel('Thư mục Output:')
+        self.fc_out_input = QLineEdit()
+        self.fc_out_input.setText(os.path.join(os.getcwd(), "output", "flashcards"))
+        self.fc_out_browse = QPushButton('Duyệt...')
+        self.fc_out_browse.clicked.connect(lambda: self.fc_out_input.setText(QFileDialog.getExistingDirectory(self, "Chọn Output")))
+        out_layout.addWidget(self.fc_out_label)
+        out_layout.addWidget(self.fc_out_input)
+        out_layout.addWidget(self.fc_out_browse)
+        layout.addLayout(out_layout)
+
+        # 4. Nút Chạy
+        self.fc_run_btn = QPushButton('🚀 TẠO FLASHCARD HSK')
+        self.fc_run_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E91E63; 
+                color: white; 
+                font-size: 14pt; padding: 15px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #C2185B; }
+        """)
+        self.fc_run_btn.clicked.connect(self._start_flashcard_gen)
+        layout.addWidget(self.fc_run_btn)
+
+        # 5. Log
+        self.fc_log = QPlainTextEdit()
+        self.fc_log.setReadOnly(True)
+        layout.addWidget(QLabel('📋 Nhật ký xử lý:'))
+        layout.addWidget(self.fc_log)
+
+        tab.setLayout(layout)
+        return tab
 
     def redirect_stdout(self):
         """Chuyển hướng tất cả output từ print() vào khung log."""
@@ -947,6 +1311,8 @@ class HSKGeneratorApp(QWidget):
         """Bắt đầu chạy pipeline trong một luồng riêng."""
         pdf_folder = self.path_input.text()
         hsk_level = self.hsk_combo.currentText()
+        # Lấy index: 0, 1 hoặc 2
+        preproc_mode = self.preproc_combo.currentIndex()
 
         if not pdf_folder or not os.path.isdir(pdf_folder):
             QMessageBox.warning(self, 'Lỗi đầu vào', 'Vui lòng chọn một thư mục PDF hợp lệ.')
@@ -959,7 +1325,7 @@ class HSKGeneratorApp(QWidget):
         
         # Tạo và khởi chạy thread
         self.thread = QThread()
-        self.worker = PipelineWorker(pdf_folder, hsk_level)
+        self.worker = PipelineWorker(pdf_folder, hsk_level, preproc_mode)
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)
@@ -1148,7 +1514,6 @@ class HSKGeneratorApp(QWidget):
 
         self.tts_thread.start()
 
-
     def _tts_progress(self, message):
         """Hàm nhận signal progress từ worker và ghi vào log"""
         self.tts_log_display.appendPlainText(message)
@@ -1221,7 +1586,6 @@ class HSKGeneratorApp(QWidget):
         self.sum_run_button.setText('📝 Bắt đầu Tóm tắt')
         QMessageBox.critical(self, 'Lỗi', f"Lỗi: {err}")
 
-
     def _pipeline_finished(self, result_path):
         """Xử lý khi pipeline chạy thành công."""
         self.run_button.setEnabled(True)
@@ -1257,6 +1621,63 @@ class HSKGeneratorApp(QWidget):
         self.merge_button.setEnabled(True)
         self.merge_button.setText('🔄 Bắt đầu ghép ảnh AI')
         QMessageBox.critical(self, '❌ Lỗi ghép ảnh', f'Đã xảy ra lỗi trong quá trình ghép ảnh:\n\n{error_message}')
+
+    def _browse_flashcard_excel(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Chọn Excel", "", "Excel Files (*.xlsx *.xls)")
+        if path:
+            self.fc_excel_input.setText(path)
+            self._load_sheets() # Tự động load sheet khi chọn file
+
+    def _load_sheets(self):
+        path = self.fc_excel_input.text()
+        if not path or not os.path.exists(path): return
+        
+        try:
+            input_mgr = InputDataManager(path)
+            sheets = input_mgr.get_hsk_sheets()
+            self.fc_sheet_combo.clear()
+            if sheets:
+                self.fc_sheet_combo.addItems(sheets)
+                QMessageBox.information(self, "Thành công", f"Tìm thấy {len(sheets)} sheet HSK.")
+            else:
+                QMessageBox.warning(self, "Cảnh báo", "Không tìm thấy sheet nào có chữ 'HSK'.")
+        except Exception as e:
+            QMessageBox.critical(self, "Lỗi", str(e))
+
+    def _start_flashcard_gen(self):
+        excel = self.fc_excel_input.text()
+        sheet = self.fc_sheet_combo.currentText()
+        out_dir = self.fc_out_input.text()
+
+        if not excel or not sheet:
+            QMessageBox.warning(self, "Lỗi", "Vui lòng chọn File Excel và Sheet.")
+            return
+
+        self.fc_run_btn.setEnabled(False)
+        self.fc_run_btn.setText("⏳ Đang chạy...")
+        self.fc_log.clear()
+
+        # Thread Setup
+        self.fc_thread = QThread()
+        self.fc_worker = FlashcardWorker(excel, sheet, out_dir)
+        self.fc_worker.moveToThread(self.fc_thread)
+
+        self.fc_thread.started.connect(self.fc_worker.run)
+        self.fc_worker.progress.connect(lambda text: self.fc_log.appendPlainText(text)) # Update Log trực tiếp
+        self.fc_worker.finished.connect(self._finish_flashcard)
+        self.fc_worker.error.connect(lambda err: self.fc_log.appendPlainText(f"❌ {err}"))
+        
+        # Cleanup
+        self.fc_worker.finished.connect(self.fc_thread.quit)
+        self.fc_worker.error.connect(self.fc_thread.quit)
+        self.fc_thread.finished.connect(self.fc_thread.deleteLater)
+
+        self.fc_thread.start()
+
+    def _finish_flashcard(self, msg):
+        self.fc_run_btn.setEnabled(True)
+        self.fc_run_btn.setText("🚀 TẠO FLASHCARD HSK")
+        QMessageBox.information(self, "Hoàn tất", msg)
 
 
 if __name__ == '__main__':

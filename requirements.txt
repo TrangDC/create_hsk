@@ -13,7 +13,7 @@ google-cloud-core==2.4.3
 google-cloud-resource-manager==1.14.2
 google-cloud-storage==2.19.0
 google-crc32c==1.7.1
-google-genai==1.31.0
+google-genai==1.55.0
 google-resumable-media==2.7.2
 googleapis-common-protos==1.70.0
 grpc-google-iam-v1==0.14.2
@@ -51,3 +51,4 @@ typing_extensions==4.14.1
 tzdata==2025.2
 urllib3==2.5.0
 websockets==15.0.1
+beautifulsoup4==4.14.3

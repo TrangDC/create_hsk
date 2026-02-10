@@ -20,14 +20,20 @@ def get_resource_path(relative_path):
     
     return os.path.join(base_path, relative_path)
 
-def format_structured_data_for_prompt(structured_data: Dict[str, Any]) -> str:
+def format_structured_data_for_prompt(structured_data: Dict[str, Any], mode: int = 0) -> str:
     """
     Định dạng dữ liệu có cấu trúc (bao gồm tóm tắt tình huống) thành một chuỗi văn bản
     sạch sẽ để làm ngữ cảnh cho AI tạo câu hỏi.
     """
     content_parts = []
     
-    content_parts.append("Dưới đây là nội dung học thuật từ tài liệu đã được phân tích. Dựa vào đây để tạo câu hỏi:\n")
+    # Thay đổi câu dẫn nhập dựa trên mode
+    if mode == 1:
+        content_parts.append("Dưới đây là nội dung TỪ VỰNG và TÓM TẮT BÀI KHÓA đã được bóc tách sạch sẽ. Hãy dựa vào đây để tạo câu hỏi:\n")
+    elif mode == 2:
+        content_parts.append("Dưới đây là nội dung TỪ VỰNG và NGỮ PHÁP TRỌNG TÂM đã được bóc tách sạch sẽ. Hãy dựa vào đây để tạo câu hỏi:\n")
+    else:
+        content_parts.append("Dưới đây là nội dung học thuật đầy đủ từ tài liệu. Dựa vào đây để tạo câu hỏi:\n")
     
     if structured_data.get("vocabulary"):
         content_parts.append("--- PHẦN TỪ VỰNG ---\n")
@@ -47,7 +53,7 @@ def format_structured_data_for_prompt(structured_data: Dict[str, Any]) -> str:
     if structured_data.get("situational_contexts"):
         content_parts.append("--- PHẦN NGỮ CẢNH TÌNH HUỐNG (Tóm tắt) ---\n")
         for i, context in enumerate(structured_data["situational_contexts"], 1):
-            topic = context.get('topic', 'Không rõ chủ đề')
+            topic = context.get('topic', '')
             participants = ", ".join(context.get('participants', []))
             summary = context.get('summary', '')
             
@@ -59,7 +65,7 @@ def format_structured_data_for_prompt(structured_data: Dict[str, Any]) -> str:
     return "\n".join(content_parts)
 
 # --- HÀM ĐIỀU PHỐI CHÍNH CỦA MODULE ---
-def run_question_generation(level: str, pdf_folder_path: str, output_folder_path: str):
+def run_question_generation(level: str, pdf_folder_path: str, output_folder_path: str, preproc_mode: int = 0):
     """
     Thực hiện toàn bộ quy trình tạo câu hỏi.
     Returns:
@@ -77,11 +83,19 @@ def run_question_generation(level: str, pdf_folder_path: str, output_folder_path
     
     # --- 1. XÁC ĐỊNH CÁC ĐƯỜNG DẪN ĐỘNG ---
     RESOURCES_DIR = get_resource_path("resources")
+
+    # Mặc định
+    prompt_file_name = "extract_lesson_structure.txt"
+    
+    if preproc_mode == 1:
+        prompt_file_name = "extract_words_texts_structure.txt"
+    elif preproc_mode == 2:
+        prompt_file_name = "extract_words_grammars_structure.txt"
     
     PROMPTS_FOLDER = os.path.join(RESOURCES_DIR, "prompts", "create", level)
     SCHEMAS_FOLDER = os.path.join(RESOURCES_DIR, "schema", "create", level)
     # (MỚI) Đường dẫn cho prompt và schema tiền xử lý
-    PREPROCESSING_PROMPT_PATH = os.path.join(RESOURCES_DIR, "prompts", "preprocessing", "extract_lesson_structure.txt")
+    PREPROCESSING_PROMPT_PATH = os.path.join(RESOURCES_DIR, "prompts", "preprocessing", prompt_file_name)
     PREPROCESSING_SCHEMA_PATH = os.path.join(RESOURCES_DIR, "schema", "preprocessing", "extract_lesson_structure.json")
     EXCEL_TEMPLATE_PATH = os.path.join(RESOURCES_DIR, "sheet", f"{level}.xlsx")
 
@@ -211,10 +225,3 @@ def run_question_generation(level: str, pdf_folder_path: str, output_folder_path
     print("==========================================================")
     
     return INTERMEDIATE_DATA_FILE, OUTPUT_EXCEL_PATH
-
-# TEST hàm tạo
-if __name__ == '__main__':
-    level = "hsk3"
-    pdf_folder_path = r"D:\Edmicro\Tools\create_hsk\input\hsk3_bk"
-    output_folder_path = r"D:\Edmicro\Tools\create_hsk\output\test"
-    run_question_generation(level, pdf_folder_path, output_folder_path)

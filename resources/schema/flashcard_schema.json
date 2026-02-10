@@ -1,0 +1,47 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "pinyin": {
+      "type": "STRING",
+      "description": "Phiên âm Pinyin"
+    },
+    "part_of_speech": {
+      "type": "STRING",
+      "description": "Từ loại"
+    },
+    "word_meaning_vn": {
+      "type": "STRING",
+      "description": "Nghĩa tiếng Việt"
+    },
+    "example_sentence_cn": {
+      "type": "STRING",
+      "description": "Câu ví dụ tiếng Trung"
+    },
+    "example_pinyin": {
+      "type": "STRING",
+      "description": "Pinyin ví dụ"
+    },
+    "example_meaning_vn": {
+      "type": "STRING",
+      "description": "Nghĩa tiếng Việt ví dụ"
+    },
+    "use_mascot": {
+      "type": "BOOLEAN",
+      "description": "True nếu dùng Mascot."
+    },
+    "image_prompt_en": {
+      "type": "STRING",
+      "description": "Prompt vẽ ảnh."
+    }
+  },
+  "required": [
+    "pinyin",
+    "part_of_speech",
+    "word_meaning_vn",
+    "example_sentence_cn",
+    "example_pinyin",
+    "example_meaning_vn",
+    "use_mascot",
+    "image_prompt_en"
+  ]
+}

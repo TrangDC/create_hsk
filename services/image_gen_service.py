@@ -1,3 +1,4 @@
+# services/image_gen_service.py
 import os
 import time
 from google import genai
@@ -75,7 +76,7 @@ class ImageGenerationService:
             print(f"❌ Lỗi tạo credentials: {e}")
             return None
 
-    def generate_image(self, prompt, aspect_ratio="1:1", max_retries=5, retry_delay=3):
+    def generate_image(self, prompt, aspect_ratio="1:1", max_retries=5, retry_delay=3,):
         """
         Tạo ảnh với cơ chế KIÊN TRÌ (Retry mạnh mẽ).
         Chỉ trả về None khi đã thử hết max_retries.
@@ -133,6 +134,75 @@ class ImageGenerationService:
         
         return None
 
+    def generate_image_pdfs(self, prompt, pdf_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=3):
+        """
+        Tạo ảnh với tham chiếu từ file PDF Mascot và ép quy tắc nền trắng.
+        """
+        if not self.client:
+            return None
+
+        # --- ÉP QUY TẮC NỀN TRẮNG (STRICT WHITE BACKGROUND) ---
+        # Chúng ta thêm hậu tố này vào cuối mọi prompt để Imagen xử lý chính xác
+        style_suffix = (
+            "Isolated on a pure white background, no background scenery, "
+            "no floor, no horizon, flat 2D vector illustration, high resolution."
+        )
+        final_prompt = f"{prompt}. {style_suffix}"
+
+        # --- CHUẨN BỊ NỘI DUNG (MULTIMODAL) ---
+        request_contents = []
+        
+        # 1. Nếu có file PDF Mascot (Dành cho use_mascot=True)
+        if pdf_path and os.path.exists(pdf_path):
+            try:
+                with open(pdf_path, "rb") as f:
+                    pdf_bytes = f.read()
+                
+                request_contents.append(
+                    types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf")
+                )
+                # Chỉ dẫn bổ sung khi có PDF tham khảo
+                final_prompt = (
+                    f"Follow the character design from the attached PDF. "
+                    f"Action: {final_prompt}"
+                )
+            except Exception as e:
+                print(f"⚠️ Không thể đọc file PDF Mascot: {e}")
+
+        # 2. Đưa Prompt văn bản cuối cùng vào
+        request_contents.append(types.Part.from_text(text=final_prompt))
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                if attempt > 1:
+                    print(f"   🔄 Thử lại lần {attempt}/{max_retries}...")
+                
+                # Gọi Model Image Generation (Imagen)
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=request_contents,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["IMAGE"],
+                        candidate_count=1,
+                        image_config=types.ImageConfig(aspect_ratio=aspect_ratio),
+                    )
+                )
+
+                if response.parts:
+                    for part in response.parts:
+                        if part.inline_data and part.inline_data.data:
+                            return part.inline_data.data
+
+                raise Exception("Empty image data from API")
+
+            except Exception as e:
+                print(f"      ❌ Lỗi sinh ảnh (Lần {attempt}): {str(e)}")
+                if attempt < max_retries:
+                    time.sleep(retry_delay)
+                else:
+                    return None
+        return None
+
     def generate_image_legacy(self, prompt, max_retries=3):
         """
         Tạo ảnh sử dụng Imagen Ultra (Cho HSK).
@@ -141,37 +211,6 @@ class ImageGenerationService:
         if not self.imagen_model:
             print("❌ Lỗi: Imagen Model chưa được khởi tạo")
             return None
-
-        # for attempt in range(1, max_retries + 1):
-        #     try:
-        #         if attempt > 1: print(f"   🔄 Imagen retry ({attempt}/{max_retries})...")
-        #         else: print(f"   🎨 [Imagen] Đang sinh ảnh: {prompt[:30]}...")
-
-        #         # Gọi API Imagen cũ
-        #         response = self.imagen_model.generate_images(
-        #             prompt=f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác cho mô tả sau: {prompt}. Không vẽ theo phong cách hoạt hình hay tranh vẽ tay.",
-        #             number_of_images=1, # Chỉ lấy 1 ảnh để tiết kiệm
-        #             aspect_ratio="1:1",
-        #             negative_prompt="",
-        #             person_generation="allow_all",
-        #             safety_filter_level="block_few",
-        #             add_watermark=False,
-        #         )
-
-        #         if response.images and len(response.images) > 0:
-        #             # Imagen SDK trả về object GeneratedImage
-        #             # Ta lấy bytes trực tiếp từ thuộc tính _image_bytes (hoặc save vào buffer)
-        #             # Cách chuẩn nhất với SDK này là truy cập ._image_bytes
-        #             return response.images[0]._image_bytes
-                
-        #         print(f"      ⚠️ Imagen không trả về ảnh (Lần {attempt}).")
-        #         raise Exception("Empty response")
-
-        #     except Exception as e:
-        #         print(f"      ❌ Lỗi Imagen (Lần {attempt}): {str(e)}")
-        #         if attempt < max_retries: time.sleep(3)
-        #         else: return None
-        # return None
 
         for attempt in range(1, max_retries + 1):
             try:

@@ -13,6 +13,8 @@ a = Analysis(
         'google.auth',
         'google.oauth2',
         'googleapiclient',
+        'bs4',
+        'bs4.builder',
     ],
     hookspath=[],
     hooksconfig={},

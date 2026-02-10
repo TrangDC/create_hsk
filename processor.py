@@ -6,13 +6,14 @@ import traceback
 from question_generator import run_question_generation
 from explanation_generator import run_explanation_generation
 
-def run_full_pipeline(pdf_folder_path: str, level: str) -> str | None:
+def run_full_pipeline(pdf_folder_path: str, level: str, preproc_mode: int = 0) -> str | None:
     """
     Hàm tổng điều phối toàn bộ quy trình tạo câu hỏi và lời giải.
 
     Args:
         pdf_folder_path (str): Đường dẫn đến thư mục chứa các file PDF đầu vào.
         hsk_level (str): Cấp độ HSK cần tạo (ví dụ: "hsk1", "hsk2",...).
+        preproc_mode (int): Chế độ phân tích PDF (0: mặc định, 1: chỉ từ vựng & bài khóa, 2: chỉ từ vựng & ngữ pháp).
 
     Returns:
         str | None: Đường dẫn đến thư mục chứa kết quả nếu thành công, ngược lại trả về None.
@@ -52,7 +53,8 @@ def run_full_pipeline(pdf_folder_path: str, level: str) -> str | None:
         intermediate_file, output_excel = run_question_generation(
             level=level,
             pdf_folder_path=pdf_folder_path,
-            output_folder_path=output_folder_with_timestamp
+            output_folder_path=output_folder_with_timestamp,
+            preproc_mode=preproc_mode  # <--- THÊM MỚI
         )
         # Kiểm tra nếu bước 1 thành công thì mới chạy bước 2
         if intermediate_file and output_excel:
