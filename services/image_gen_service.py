@@ -46,7 +46,6 @@ class ImageGenerationService:
                     credentials=self.credentials
                 )
                 self.imagen_model = ImageGenerationModel.from_pretrained(self.imagen_model_name)
-                print(f"🚀 Đã khởi tạo Imagen Model: {self.imagen_model_name}")
             except Exception as e:
                 print(f"❌ Lỗi khởi tạo Imagen Model: {e}")    
         else:
@@ -102,6 +101,7 @@ class ImageGenerationService:
 
                 response = client.models.generate_content(
                     model=self.model_name,
+    
                     contents=f"Vẽ hình ảnh minh họa chính xác cho mô tả sau: {prompt}",
                     config=types.GenerateContentConfig(
                         response_modalities=["IMAGE"],
@@ -180,6 +180,7 @@ class ImageGenerationService:
                 # Gọi Model Image Generation (Imagen)
                 response = self.client.models.generate_content(
                     model=self.model_name,
+    
                     contents=request_contents,
                     config=types.GenerateContentConfig(
                         response_modalities=["IMAGE"],
@@ -208,9 +209,6 @@ class ImageGenerationService:
         Tạo ảnh sử dụng Imagen Ultra (Cho HSK).
         Code logic lấy từ yêu cầu cũ.
         """
-        if not self.imagen_model:
-            print("❌ Lỗi: Imagen Model chưa được khởi tạo")
-            return None
 
         for attempt in range(1, max_retries + 1):
             try:
@@ -229,7 +227,8 @@ class ImageGenerationService:
 
                 response = client.models.generate_content(
                     model=self.model_name,
-                    contents=f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác cho mô tả sau: {prompt}. Không vẽ theo phong cách hoạt hình hay tranh vẽ tay.",
+    
+                    contents=f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác cho mô tả sau: {prompt}. Lưu ý: + Không vẽ theo phong cách hoạt hình hay tranh vẽ tay. Với hình ảnh có chữ, ưu tiên sử dụng từ Tiếng Anh phải đảm bảo chữ chính xác. Chỉ sinh ra ảnh có chữ Tiếng Việt trong trường hợp mô tả ảnh yêu cầu có chữ Tiếng Việt.",
                     config=types.GenerateContentConfig(
                         response_modalities=["IMAGE"],
                         candidate_count=1,
