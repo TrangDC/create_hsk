@@ -210,55 +210,94 @@ class ImageGenerationService:
         Code logic lấy từ yêu cầu cũ.
         """
 
+        if not self.imagen_model:
+            print("❌ Lỗi: Imagen Model chưa được khởi tạo")
+            return None
+        
+        prompt_gen_image= f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác theo mô tả sau: {prompt}."
+        prompt_gen_image += f"**Lưu ý**: Không vẽ theo phong cách hoạt hình hay tranh vẽ tay."
+        prompt_gen_image += f"Với hình ảnh có chữ, ưu tiên sử dụng từ Tiếng Anh để đảm bảo chữ chính xác không lỗi."
+        prompt_gen_image += f"Chỉ sinh ra ảnh có chữ Tiếng Việt trong trường hợp mô tả ảnh yêu cầu có chữ Tiếng Việt."
+
         for attempt in range(1, max_retries + 1):
-            try:
-                # Re-init client để tránh stale connection
-                client = genai.Client(
-                    vertexai=True, 
-                    project=self.project_id, 
-                    location=self.location, 
-                    credentials=self.credentials
-                )
+        #     try:
+        #         # Re-init client để tránh stale connection
+        #         client = genai.Client(
+        #             vertexai=True, 
+        #             project=self.project_id, 
+        #             location=self.location, 
+        #             credentials=self.credentials
+        #         )
 
-                if attempt > 1:
-                    print(f"   🔄 Thử lại lần {attempt}/{max_retries}...")
-                else:
-                    print(f"   🎨 Đang sinh ảnh: {prompt[:30]}...")
+        #         if attempt > 1:
+        #             print(f"   🔄 Thử lại lần {attempt}/{max_retries}...")
+        #         else:
+        #             print(f"   🎨 Đang sinh ảnh: {prompt[:30]}...")
 
-                response = client.models.generate_content(
-                    model=self.model_name,
+        #         response = client.models.generate_content(
+        #             model=self.model_name,
     
-                    contents=f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác cho mô tả sau: {prompt}. Lưu ý: + Không vẽ theo phong cách hoạt hình hay tranh vẽ tay. Với hình ảnh có chữ, ưu tiên sử dụng từ Tiếng Anh phải đảm bảo chữ chính xác. Chỉ sinh ra ảnh có chữ Tiếng Việt trong trường hợp mô tả ảnh yêu cầu có chữ Tiếng Việt.",
-                    config=types.GenerateContentConfig(
-                        response_modalities=["IMAGE"],
-                        candidate_count=1,
-                        image_config=types.ImageConfig(aspect_ratio="1:1"),
-                    )
+        #             contents=f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác cho mô tả sau: {prompt}. Lưu ý: + Không vẽ theo phong cách hoạt hình hay tranh vẽ tay. Với hình ảnh có chữ, ưu tiên sử dụng từ Tiếng Anh phải đảm bảo chữ chính xác. Chỉ sinh ra ảnh có chữ Tiếng Việt trong trường hợp mô tả ảnh yêu cầu có chữ Tiếng Việt.",
+        #             config=types.GenerateContentConfig(
+        #                 response_modalities=["IMAGE"],
+        #                 candidate_count=1,
+        #                 image_config=types.ImageConfig(aspect_ratio="1:1"),
+        #             )
+        #         )
+
+        #         # Kiểm tra dữ liệu ảnh
+        #         if response.parts:
+        #             for part in response.parts:
+        #                 if part.inline_data and part.inline_data.data:
+        #                     # ✅ THÀNH CÔNG -> Trả về luôn
+        #                     return part.inline_data.data
+
+        #         # ❌ NẾU KHÔNG CÓ DATA -> Raise Exception để kích hoạt cơ chế retry bên dưới
+        #         print(f"      ⚠️ API trả về rỗng (Lần {attempt}).")
+        #         raise Exception("Empty response from API (No image data)")
+
+        #     except Exception as e:
+        #         # Bắt mọi lỗi (bao gồm lỗi Empty response vừa raise ở trên)
+        #         print(f"      ❌ Gặp lỗi (Lần {attempt}): {str(e)}")
+                
+        #         if attempt < max_retries:
+        #             print(f"      ⏳ Đợi 3 giây trước khi thử lại...")
+        #             time.sleep(3)
+        #         else:
+        #             print("      ❌ ĐÃ THẤT BẠI HOÀN TOÀN sau tất cả các lần thử.")
+        #             return None
+        
+        # return None
+            try:
+                if attempt > 1: print(f"   🔄 Imagen retry ({attempt}/{max_retries})...")
+                else: print(f"   🎨 [Imagen] Đang sinh ảnh: {prompt[:30]}...")
+
+                # Gọi API Imagen cũ
+                response = self.imagen_model.generate_images(
+                    number_of_images=1, # Chỉ lấy 1 ảnh để tiết kiệm
+                    prompt=prompt_gen_image,
+                    aspect_ratio="1:1",
+                    negative_prompt="",
+                    person_generation="allow_all",
+                    safety_filter_level="block_few",
+                    add_watermark=False,
                 )
 
-                # Kiểm tra dữ liệu ảnh
-                if response.parts:
-                    for part in response.parts:
-                        if part.inline_data and part.inline_data.data:
-                            # ✅ THÀNH CÔNG -> Trả về luôn
-                            return part.inline_data.data
-
-                # ❌ NẾU KHÔNG CÓ DATA -> Raise Exception để kích hoạt cơ chế retry bên dưới
-                print(f"      ⚠️ API trả về rỗng (Lần {attempt}).")
-                raise Exception("Empty response from API (No image data)")
+                if response.images and len(response.images) > 0:
+                    # Imagen SDK trả về object GeneratedImage
+                    # Ta lấy bytes trực tiếp từ thuộc tính _image_bytes (hoặc save vào buffer)
+                    # Cách chuẩn nhất với SDK này là truy cập ._image_bytes
+                    return response.images[0]._image_bytes
+                
+                print(f"      ⚠️ Imagen không trả về ảnh (Lần {attempt}).")
+                raise Exception("Empty response")
 
             except Exception as e:
-                # Bắt mọi lỗi (bao gồm lỗi Empty response vừa raise ở trên)
-                print(f"      ❌ Gặp lỗi (Lần {attempt}): {str(e)}")
-                
-                if attempt < max_retries:
-                    print(f"      ⏳ Đợi 3 giây trước khi thử lại...")
-                    time.sleep(3)
-                else:
-                    print("      ❌ ĐÃ THẤT BẠI HOÀN TOÀN sau tất cả các lần thử.")
-                    return None
-        
+                print(f"      ❌ Lỗi Imagen (Lần {attempt}): {str(e)}")
+                if attempt < max_retries: time.sleep(3)
+                else: return None
         return None
+
 
 # --- KHỐI TEST ---
 if __name__ == "__main__":

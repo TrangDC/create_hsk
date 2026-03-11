@@ -1,8 +1,43 @@
 import sys
 import os
+import subprocess
 import traceback
 from dotenv import load_dotenv
 import json
+
+# ==========================================
+# SUPPRESS SUBPROCESS WINDOWS GLOBALLY
+# ==========================================
+# Patch subprocess TRƯỚC khi import các module khác
+if os.name == 'nt':  # Windows only
+    old_popen = subprocess.Popen
+    
+    class _SuppressedPopen(subprocess.Popen):
+        def __init__(self, *args, **kwargs):
+            # Thiết lập startupinfo để suppress window
+            if 'startupinfo' not in kwargs:
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= 0x01  # STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = 0  # SW_HIDE
+                kwargs['startupinfo'] = startupinfo
+            
+            # Redirect stdout, stderr, stdin nếu không có
+            if 'stdout' not in kwargs:
+                kwargs['stdout'] = subprocess.DEVNULL
+            if 'stderr' not in kwargs:
+                kwargs['stderr'] = subprocess.DEVNULL
+            if 'stdin' not in kwargs:
+                kwargs['stdin'] = subprocess.DEVNULL
+            
+            # Thêm creationflags để không mở window
+            if 'creationflags' not in kwargs:
+                kwargs['creationflags'] = 0x08000000 | 0x00000200  # CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP
+            else:
+                kwargs['creationflags'] |= 0x08000000
+            
+            super().__init__(*args, **kwargs)
+    
+    subprocess.Popen = _SuppressedPopen
 
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -639,6 +674,44 @@ Trả về JSON chuẩn theo Schema.
         except Exception as e:
             error_msg = traceback.format_exc()
             self.error.emit(f"Lỗi hệ thống:\n{error_msg}")
+
+class AudioTTSWorker(QObject):
+    """Worker để chạy Audio TTS (Vertex AI) trong một luồng riêng."""
+    finished = pyqtSignal(str)  # Trả về đường dẫn folder chứa audio
+    error = pyqtSignal(str)
+    progress = pyqtSignal(str)
+
+    def __init__(self, excel_path, output_folder, model_name='Chirp3-HD', male_voice='Charon', female_voice='Zephyr'):
+        super().__init__()
+        self.excel_path = excel_path
+        self.output_folder = output_folder
+        self.model_name = model_name
+        self.male_voice = male_voice
+        self.female_voice = female_voice
+
+    def run(self):
+        try:
+            self.progress.emit("🔄 Khởi tạo Audio TTS (Vertex AI)...")
+            self.progress.emit(f"   Model: {self.model_name} | Voice Nam: {self.male_voice} | Voice Nữ: {self.female_voice}")
+
+            # delegate toàn bộ logic sang helper ở services/audio_tts
+            from services.audio_tts import test_file
+            audio_folder, result_excel = test_file(
+                self.excel_path,
+                self.output_folder,
+                model_name=self.model_name,
+                male_voice=self.male_voice,
+                female_voice=self.female_voice,
+                log_fn=self.progress.emit
+            )
+
+            self.progress.emit(f"\n🎉 HOÀN THÀNH! Audio thư mục: {os.path.abspath(audio_folder)}")
+            self.finished.emit(f"✅ Thành công!\nFolder audio: {os.path.abspath(audio_folder)}\nFile Excel: {os.path.abspath(result_excel)}")
+            
+        except Exception as e:
+            error_details = traceback.format_exc()
+            self.progress.emit(f"❌ Lỗi: {str(e)}")
+            self.error.emit(f"{str(e)}\n\nChi tiết:\n{error_details}")
                    
 # Lớp Giao diện chính với Tab
 class HSKGeneratorApp(QWidget):
@@ -679,6 +752,10 @@ class HSKGeneratorApp(QWidget):
         # --- THÊM TAB TTS MỚI Ở ĐÂY ---
         self.tts_tab = self.create_tts_tab()
         self.tab_widget.addTab(self.tts_tab, "TTS")
+
+        # --- TAB AUDIO TTS (VERTEX AI) ---
+        self.audio_tts_tab = self.create_audio_tts_tab()
+        self.tab_widget.addTab(self.audio_tts_tab, "🎙️ Audio TTS")
 
         self.summary_tab = self.create_summary_tab()
         self.tab_widget.addTab(self.summary_tab, "Tóm tắt HSK")
@@ -1117,6 +1194,114 @@ class HSKGeneratorApp(QWidget):
         tab.setLayout(layout)
         return tab
 
+    def create_audio_tts_tab(self):
+        """Tạo tab cho chức năng Audio TTS (Vertex AI)."""
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(20)
+        layout.setContentsMargins(25, 25, 25, 25)
+
+        # 1. Chọn File Excel
+        excel_layout = QHBoxLayout()
+        self.audio_tts_excel_label = QLabel('File Excel:')
+        self.audio_tts_excel_input = QLineEdit()
+        self.audio_tts_excel_input.setPlaceholderText("Chọn file Excel chứa câu hỏi...")
+        self.audio_tts_browse_excel_btn = QPushButton('Duyệt...')
+        self.audio_tts_browse_excel_btn.setStyleSheet("background-color: #28a745;")
+        self.audio_tts_browse_excel_btn.clicked.connect(self._browse_audio_tts_excel)
+        
+        excel_layout.addWidget(self.audio_tts_excel_label)
+        excel_layout.addWidget(self.audio_tts_excel_input)
+        excel_layout.addWidget(self.audio_tts_browse_excel_btn)
+        layout.addLayout(excel_layout)
+
+        # 2. Chọn Folder Output
+        output_layout = QHBoxLayout()
+        self.audio_tts_output_label = QLabel('Thư mục Output:')
+        self.audio_tts_output_input = QLineEdit()
+        # default points to root 'output' folder - audio subfolder will be created automatically
+        self.audio_tts_output_input.setText(os.path.join(os.getcwd(), "output"))
+        self.audio_tts_browse_output_btn = QPushButton('Duyệt...')
+        self.audio_tts_browse_output_btn.setStyleSheet("background-color: #28a745;")
+        self.audio_tts_browse_output_btn.clicked.connect(self._browse_audio_tts_output)
+
+        output_layout.addWidget(self.audio_tts_output_label)
+        output_layout.addWidget(self.audio_tts_output_input)
+        output_layout.addWidget(self.audio_tts_browse_output_btn)
+        layout.addLayout(output_layout)
+
+        # 3. Cấu hình Model và Voice
+        config_group_box = QGroupBox("Cấu hình Model & Voice")
+        config_layout = QVBoxLayout()
+        
+        # Dòng 1: Model Name Selection
+        model_layout = QHBoxLayout()
+        model_label = QLabel("Model TTS:")
+        self.audio_tts_model_combo = QComboBox()
+        self.audio_tts_model_combo.addItems(['Chirp3-HD', 'gemini-2.5-pro-tts', 'gemini-2.5-flash-tts'])
+        self.audio_tts_model_combo.setCurrentText('Chirp3-HD')
+        model_layout.addWidget(model_label)
+        model_layout.addWidget(self.audio_tts_model_combo)
+        model_layout.addStretch()
+        config_layout.addLayout(model_layout)
+        
+        # Dòng 2: Voice Nam Selection
+        male_layout = QHBoxLayout()
+        male_label = QLabel("Voice Nam:")
+        self.audio_tts_male_voice_combo = QComboBox()
+        self.audio_tts_male_voice_combo.addItems(['Charon', 'Orus', 'Enceladus'])
+        self.audio_tts_male_voice_combo.setCurrentText('Charon')
+        male_layout.addWidget(male_label)
+        male_layout.addWidget(self.audio_tts_male_voice_combo)
+        male_layout.addStretch()
+        config_layout.addLayout(male_layout)
+        
+        # Dòng 3: Voice Nữ Selection
+        female_layout = QHBoxLayout()
+        female_label = QLabel("Voice Nữ:")
+        self.audio_tts_female_voice_combo = QComboBox()
+        self.audio_tts_female_voice_combo.addItems(['Zephyr', 'Leda', 'Carrllihoe'])
+        self.audio_tts_female_voice_combo.setCurrentText('Zephyr')
+        female_layout.addWidget(female_label)
+        female_layout.addWidget(self.audio_tts_female_voice_combo)
+        female_layout.addStretch()
+        config_layout.addLayout(female_layout)
+        
+        config_group_box.setLayout(config_layout)
+        layout.addWidget(config_group_box)
+
+        # 4. Nút chạy
+        self.audio_tts_run_button = QPushButton('🎙️ Tạo Audio TTS (Vertex AI)')
+        self.audio_tts_run_button.setStyleSheet("""
+            QPushButton {
+                background-color: #FF6B6B;
+                color: white;
+                font-size: 14pt;
+                padding: 15px 30px;
+                min-height: 35px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #FF5252;
+            }
+            QPushButton:pressed {
+                background-color: #E63946;
+            }
+        """)
+        self.audio_tts_run_button.clicked.connect(self._start_audio_tts)
+        layout.addWidget(self.audio_tts_run_button)
+
+        # 5. Log area
+        log_label = QLabel('📋 Nhật ký Audio TTS:')
+        layout.addWidget(log_label)
+        
+        self.audio_tts_log_display = QPlainTextEdit()
+        self.audio_tts_log_display.setReadOnly(True)
+        layout.addWidget(self.audio_tts_log_display)
+
+        tab.setLayout(layout)
+        return tab
+
     def create_summary_tab(self):
         """Tạo tab cho chức năng Tóm tắt Tiếng Trung."""
         tab = QWidget()
@@ -1527,7 +1712,118 @@ class HSKGeneratorApp(QWidget):
     def _tts_error(self, error_msg):
         self.tts_run_button.setEnabled(True)
         self.tts_run_button.setText('🔊 Bắt đầu tạo Audio')
-        QMessageBox.critical(self, 'Lỗi', f"Đã xảy ra lỗi:\n{error_msg}")    
+        QMessageBox.critical(self, 'Lỗi', f"Đã xảy ra lỗi:\n{error_msg}")
+
+    # --- SLOT CHO AUDIO TTS TAB ---
+    def _browse_audio_tts_excel(self):
+        """Chọn file Excel cho Audio TTS."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, 'Chọn file Excel câu hỏi', '', 'Excel Files (*.xlsx *.xls)'
+        )
+        if file_path:
+            self.audio_tts_excel_input.setText(file_path)
+
+    def _browse_audio_tts_output(self):
+        """Chọn folder output cho Audio TTS."""
+        folder_path = QFileDialog.getExistingDirectory(self, 'Chọn thư mục lưu Audio')
+        if folder_path:
+            self.audio_tts_output_input.setText(folder_path)
+
+    def _start_audio_tts(self):
+        """Bắt đầu chạy Audio TTS trong một luồng riêng."""
+        excel_path = self.audio_tts_excel_input.text()
+        output_folder = self.audio_tts_output_input.text()
+        model_name = self.audio_tts_model_combo.currentText()
+        male_voice = self.audio_tts_male_voice_combo.currentText()
+        female_voice = self.audio_tts_female_voice_combo.currentText()
+
+        if not excel_path or not os.path.isfile(excel_path):
+            QMessageBox.warning(self, 'Lỗi', 'Vui lòng chọn file Excel hợp lệ.')
+            return
+        
+        if not output_folder:
+            QMessageBox.warning(self, 'Lỗi', 'Vui lòng chọn thư mục Output.')
+            return
+
+        # Disable nút và xóa log cũ
+        self.audio_tts_run_button.setEnabled(False)
+        self.audio_tts_run_button.setText('⏳ Đang xử lý...')
+        self.audio_tts_log_display.clear()
+        self.audio_tts_log_display.appendPlainText(">> Khởi động Audio TTS (Vertex AI)...")
+
+        # Tạo Thread
+        self.audio_tts_thread = QThread()
+        self.audio_tts_worker = AudioTTSWorker(
+            excel_path, 
+            output_folder, 
+            model_name=model_name,
+            male_voice=male_voice,
+            female_voice=female_voice
+        )
+        self.audio_tts_worker.moveToThread(self.audio_tts_thread)
+
+        # Kết nối tín hiệu
+        self.audio_tts_thread.started.connect(self.audio_tts_worker.run)
+        self.audio_tts_worker.finished.connect(self._audio_tts_finished)
+        self.audio_tts_worker.error.connect(self._audio_tts_error)
+        self.audio_tts_worker.progress.connect(self._audio_tts_progress)
+
+        # Dọn dẹp
+        self.audio_tts_worker.error.connect(self.audio_tts_thread.quit)
+        self.audio_tts_worker.error.connect(self.audio_tts_worker.deleteLater)
+        self.audio_tts_worker.finished.connect(self.audio_tts_thread.quit)
+        self.audio_tts_worker.finished.connect(self.audio_tts_worker.deleteLater)
+        self.audio_tts_thread.finished.connect(self.audio_tts_thread.deleteLater)
+
+        self.audio_tts_thread.start()
+
+    def _audio_tts_progress(self, message):
+        """Hàm nhận signal progress từ worker và ghi vào log."""
+        self.audio_tts_log_display.appendPlainText(message)
+        self.audio_tts_log_display.verticalScrollBar().setValue(
+            self.audio_tts_log_display.verticalScrollBar().maximum()
+        )
+
+    def _audio_tts_finished(self, result_msg):
+        """Xử lý khi Audio TTS chạy thành công."""
+        self.audio_tts_run_button.setEnabled(True)
+        self.audio_tts_run_button.setText('🎙️ Tạo Audio TTS (Vertex AI)')
+        
+        # trích thư mục audio từ thông điệp trả về (nếu có)
+        audio_folder = None
+        try:
+            import re
+            m = re.search(r"Folder audio:\s*(.+)", result_msg)
+            if m:
+                audio_folder = m.group(1).strip()
+        except Exception:
+            audio_folder = None
+
+        # Hiển thị thông báo với nút mở folder
+        reply = QMessageBox.information(
+            self, 
+            '✅ Hoàn thành', 
+            f'{result_msg}\n\nBạn có muốn mở thư mục audio không?',
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            target = audio_folder or self.audio_tts_output_input.text()
+            if os.path.exists(target):
+                import subprocess
+                import platform
+                if platform.system() == 'Windows':
+                    subprocess.Popen(f'explorer /select, "{target}"')
+                elif platform.system() == 'Darwin':  # macOS
+                    subprocess.Popen(['open', target])
+                else:  # Linux
+                    subprocess.Popen(['xdg-open', target])
+
+    def _audio_tts_error(self, error_msg):
+        """Xử lý khi Audio TTS gặp lỗi."""
+        self.audio_tts_run_button.setEnabled(True)
+        self.audio_tts_run_button.setText('🎙️ Tạo Audio TTS (Vertex AI)')
+        QMessageBox.critical(self, 'Lỗi Audio TTS', f"Đã xảy ra lỗi:\n{error_msg}")    
 
     # --- SLOT CHO SUMMARY TAB ---
     def _browse_sum_pdf(self):
