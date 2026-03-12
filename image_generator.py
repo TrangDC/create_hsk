@@ -31,11 +31,27 @@ load_dotenv()
 # ==========================================
 
 def get_resource_path(relative_path):
-    """Lấy đường dẫn tài nguyên, tương thích với PyInstaller"""
-    try:
+    """
+    Lấy đường dẫn tài nguyên, tương thích với PyInstaller
+    Tìm thư mục resources từ thư mục dự án
+    """
+    # Nếu đã frozen bởi PyInstaller, dùng directory của executable
+    if getattr(sys, 'frozen', False):
         base_path = os.path.dirname(sys.executable)
-    except Exception:
-        base_path = os.path.abspath(".")
+    else:
+        # Nếu không, tìm thư mục dự án bằng cách tìm resources folder
+        current_dir = os.path.abspath(".")
+        if os.path.exists(os.path.join(current_dir, "resources")):
+            base_path = current_dir
+        else:
+            # Fallback: dùng thư mục của script hiện tại
+            base_path = os.path.dirname(os.path.abspath(__file__))
+            # Nếu vẫn không tìm thấy, lên một cấp
+            parent = os.path.dirname(base_path)
+            if os.path.exists(os.path.join(parent, "resources")):
+                base_path = parent
+            else:
+                base_path = current_dir
     return os.path.join(base_path, relative_path)
 
 def get_output_path(folder_name):

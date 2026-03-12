@@ -1096,7 +1096,6 @@ def populate_topik_reading_shared(worksheet, data: list):
 
     print(f"   ✅ Hoàn thành điền {len(data)} bài đọc (tổng {len(data)*4} câu).")
 
-
 def populate_topik_listening_vocab(worksheet, data: list):
     """
     Điền dữ liệu cho sheet 'Nghe và chọn đáp án đúng'.
