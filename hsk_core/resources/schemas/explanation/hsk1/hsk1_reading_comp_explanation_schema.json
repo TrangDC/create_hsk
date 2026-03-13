@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng đọc hiểu và chọn phương án đúng.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải phân tích logic bằng tiếng Việt, giải thích tại sao đáp án đúng dựa trên ngữ cảnh đã cho. Yêu cầu lời giải ngắn gọn, súc tích."
+    },
+    "options_list": {
+      "type": "array",
+      "description": "Danh sách các phương án trả lời, bao gồm thông tin chi tiết cho việc hiển thị.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "letter": { "type": "string", "description": "Chữ cái của phương án (A, B, C...)" },
+          "chinese_text": { "type": "string" },
+          "pinyin": { "type": "string" },
+          "translation": { "type": "string", "description": "Nghĩa tiếng Việt của phương án, để hiển thị trong ngoặc đơn." },
+          "is_correct": { "type": "boolean", "description": "True nếu đây là đáp án đúng." }
+        },
+        "required": ["letter", "chinese_text", "pinyin", "translation", "is_correct"]
+      }
+    },
+    "context_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa ngữ cảnh và câu hỏi gốc, được chia thành các dòng.",
+      "properties": {
+        "script_lines": {
+          "type": "array",
+          "description": "Một danh sách các dòng trong script (dòng ngữ cảnh và dòng câu hỏi).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "line_label": { "type": "string", "description": "Nhãn cho dòng, ví dụ: '问' cho câu hỏi, '男' cho Nam,'女' cho Nữ, hoặc để trống." },
+              "chinese_text": { "type": "string" },
+              "pinyin": { "type": "string" }
+            },
+            "required": ["line_label", "chinese_text", "pinyin"]
+          }
+        }
+      },
+      "required": ["script_lines"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch của ngữ cảnh và câu hỏi.",
+      "properties": {
+        "context_vietnamese": { "type": "string" },
+        "query_vietnamese": { "type": "string" }
+      },
+      "required": ["context_vietnamese", "query_vietnamese"]
+    }
+  },
+  "required": ["analysis_paragraph", "options_list", "context_block", "translation_block"]
+}

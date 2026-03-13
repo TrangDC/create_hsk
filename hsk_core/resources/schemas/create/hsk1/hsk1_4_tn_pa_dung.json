@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "reading_comprehension_choice": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "context_chinese": { "type": "string" },
+          "query_chinese": { "type": "string" },
+          "answer_options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": { "chinese_text": { "type": "string" }, "pinyin": { "type": "string" } }
+            }
+          },
+          "correct_answer": { "type": "integer", "enum": [1, 2, 3] }
+        },
+        "required": ["question_id", "context_chinese", "query_chinese", "answer_options", "correct_answer"]
+      }
+    }
+  },
+  "required": ["reading_comprehension_choice"]
+}

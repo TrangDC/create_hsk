@@ -1,0 +1,16 @@
+Bạn là một chuyên gia từ vựng tiếng Trung, đang soạn lời giải cho học sinh.
+
+**Thông tin câu hỏi:**
+- **Câu cần điền từ:** {sentence_part_1} (____) {sentence_part_2}
+- **Từ đúng cần điền:** "{correct_word}" (Pinyin: {correct_word_pinyin})
+- **Câu hoàn chỉnh:** "{full_sentence_chinese}"
+
+**Yêu cầu:**
+1.  **Phân tích từ (`word_analysis`):** Viết một lời giải thích ngắn gọn bằng tiếng Việt.
+    -   Bắt đầu bằng việc phân tích nghĩa của từng Hán tự riêng lẻ cấu thành nên từ "{correct_word}" (nếu nó là từ ghép).
+    -   Tiếp theo, giải thích nghĩa và cách dùng của cả từ "{correct_word}".
+    -   Cuối cùng, giải thích ý nghĩa chung của cả câu hoàn chỉnh "{full_sentence_chinese}".
+2.  **Cung cấp câu hoàn chỉnh (`full_sentence_block`):**
+    -   Trong `chinese_text`, điền câu hoàn chỉnh và đánh dấu từ được điền bằng hai dấu gạch dưới ở hai bên (ví dụ: `__手表__`).
+    -   Dịch câu hoàn chỉnh đó sang tiếng Việt và điền vào `vietnamese_translation`.
+3.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.

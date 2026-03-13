@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "properties": {
+    "listening_comprehension": {
+      "type": "array",
+      "description": "Danh sách các học liệu, mỗi học liệu chứa 1 script và 2 câu hỏi.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "script_chinese": { "type": "string", "description": "Đoạn văn bản học liệu." },
+          "questions": {
+            "type": "array",
+            "description": "Danh sách 2 câu hỏi cho học liệu này.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "question_id": { "type": "integer" },
+                "query_chinese": { "type": "string", "description": "Nội dung câu hỏi." },
+                "answer_options": {
+                  "type": "array",
+                  "description": "Danh sách 4 phương án trả lời.",
+                  "items": { "type": "string" }
+                },
+                "correct_answer": { "type": "integer", "description": "Đáp án đúng (1-4)." }
+              },
+              "required": ["question_id", "query_chinese", "answer_options", "correct_answer"]
+            }
+          }
+        },
+        "required": ["script_chinese", "questions"]
+      }
+    }
+  },
+  "required": ["listening_comprehension"]
+}

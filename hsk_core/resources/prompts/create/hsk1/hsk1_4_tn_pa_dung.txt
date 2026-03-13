@@ -1,0 +1,5 @@
+Tạo 4 câu hỏi đọc hiểu ngắn.
+- context_chinese: Đúng 1 câu cung cấp thông tin (không phải hội thoại).
+- query_chinese: Câu hỏi về thông tin đó.
+- answer_options: 3 lựa chọn (Hán ngữ + Pinyin).
+- correct_answer: 1, 2 hoặc 3.

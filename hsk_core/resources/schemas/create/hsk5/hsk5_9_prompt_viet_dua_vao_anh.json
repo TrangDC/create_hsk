@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "writing_from_image": {
+      "type": "array",
+      "description": "Một bài tập viết đoạn văn dựa trên một hình ảnh.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "image_description": { "type": "string", "description": "Mô tả hình ảnh bằng tiếng Việt." },
+          "sample_paragraph": { "type": "string", "description": "Đoạn văn mẫu mô tả hình ảnh." },
+          "translation": { "type": "string", "description": "Bản dịch tiếng Việt của đoạn văn mẫu." }
+        },
+        "required": ["question_id", "image_description", "sample_paragraph", "translation"]
+      }
+    }
+  },
+  "required": ["writing_from_image"]
+}

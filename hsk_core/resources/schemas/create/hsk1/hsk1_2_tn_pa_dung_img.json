@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "individual_image_matching": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "image_options": { "type": "array", "items": { "type": "string" }, "minItems": 3, "maxItems": 3 },
+          "script_chinese": { "type": "string" },
+          "script_pinyin": { "type": "string" },
+          "correct_answer": { "type": "integer", "enum": [1, 2, 3] }
+        },
+        "required": ["question_id", "image_options", "script_chinese", "script_pinyin", "correct_answer"]
+      }
+    }
+  },
+  "required": ["individual_image_matching"]
+}

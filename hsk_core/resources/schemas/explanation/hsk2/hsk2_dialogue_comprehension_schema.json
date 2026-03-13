@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng hội thoại HSK2.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải ngắn gọn bằng tiếng Việt, trích dẫn câu nói quan trọng từ hội thoại để giải thích tại sao đáp án là đúng."
+    },
+    "options_list": {
+      "type": "array",
+      "description": "Danh sách các phương án trả lời, đã được bổ sung bản dịch tiếng Việt.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "letter": { "type": "string", "description": "Chữ cái của phương án (A, B, C...)" },
+          "chinese_text": { "type": "string" },
+          "pinyin": { "type": "string" },
+          "translation": { "type": "string", "description": "Nghĩa tiếng Việt của phương án." },
+          "is_correct": { "type": "boolean" }
+        },
+        "required": ["letter", "chinese_text", "pinyin", "translation", "is_correct"]
+      }
+    },
+    "context_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa toàn bộ hội thoại và câu hỏi gốc.",
+      "properties": {
+        "dialogue": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "speaker": { "type": "string", "description": "Người nói (男, 女, hoặc 问 cho câu hỏi)." },
+              "chinese_text": { "type": "string" },
+              "pinyin": { "type": "string" }
+            },
+            "required": ["speaker", "chinese_text", "pinyin"]
+          }
+        }
+      },
+      "required": ["dialogue"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của hội thoại và câu hỏi.",
+      "properties": {
+        "vietnamese_dialogue": {
+          "type": "array",
+          "description": "Danh sách các lượt lời và câu hỏi đã được dịch sang tiếng Việt.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "speaker_vi": { "type": "string", "description": "Nhãn người nói tiếng Việt (ví dụ: 'Nam', 'Nữ') hoặc nhãn Câu hỏi ('Câu hỏi')." },
+              "dialogue_vi": { "type": "string", "description": "Nội dung lời thoại và câu hỏi đã dịch." }
+            },
+            "required": ["speaker_vi", "dialogue_vi"]
+          }
+        }
+      },
+      "required": ["vietnamese_dialogue"]
+    }
+  },
+  "required": ["analysis_paragraph", "options_list", "context_block", "translation_block"]
+}

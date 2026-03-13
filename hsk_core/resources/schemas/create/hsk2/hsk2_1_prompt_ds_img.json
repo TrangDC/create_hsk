@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "description": "Một bộ câu hỏi Đúng/Sai dựa trên hình ảnh cho HSK2.",
+  "properties": {
+    "true_false_image_questions": {
+      "type": "array",
+      "description": "Danh sách các câu hỏi Đúng/Sai.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "description": "Số thứ tự của câu hỏi." },
+          "script": { "type": "string", "description": "Nội dung script bằng tiếng Trung." },
+          "pinyin": { "type": "string", "description": "Phiên âm Pinyin cho script." },
+          "translation": { "type": "string", "description": "Bản dịch tiếng Việt của script." },
+          "image_des": { "type": "string", "description": "Mô tả những gì có trong hình ảnh bằng tiếng Việt." },
+          "correct_answer": { "type": "integer", "description": "Đáp án: 1 cho Đúng, 0 cho Sai." }
+        },
+        "required": ["id", "script", "pinyin", "translation", "image_des", "correct_answer"]
+      }
+    }
+  },
+  "required": ["true_false_image_questions"]
+}

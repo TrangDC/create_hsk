@@ -1,0 +1,18 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp.
+
+Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi trắc nghiệm bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK4.
+
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
+Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Chọn từ điền vào chỗ trống":
+*   Tạo ra một học liệu chung `shared_material` gồm 4 từ vựng (A-D), mỗi từ có cả tiếng Trung và Pinyin.
+*   Tạo ra ```4``` câu hỏi (`questions`), mỗi câu có một chỗ trống `( )` để điền từ. Các câu hỏi có thể là câu đơn hoặc hội thoại ngắn.
+*   Đáp án `correct_answer` phải là chữ cái (A-D) của từ đúng.
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "word_fill_in_questions".
+-   Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên thông tin có trong tài liệu PDF.
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

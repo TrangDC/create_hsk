@@ -1,0 +1,14 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp, đang soạn lời giải cho học sinh.
+
+**Thông tin câu hỏi:**
+- **Đoạn script:** "{script_chinese}"
+- **Câu nhận định (cần phán đoán):** "{statement_chinese}"
+- **Đáp án đúng:** Nhận định trên là {correct_answer_text}
+
+**Yêu cầu:**
+1.  **Phân tích (`analysis_paragraph`):** Viết một lời giải ngắn gọn bằng tiếng Việt. 
+    So sánh thông tin trong đoạn nghe với câu nhận định để giải thích tại sao đáp án là {correct_answer_text}.
+    LƯU Ý: Không dùng từ "script" khi đề cập tới đoạn nghe mà dùng từ "nội dung nghe".
+2.  **Cung cấp văn bản gốc (`original_texts_block`):** Điền chính xác đoạn script và câu nhận định vào các trường tương ứng.
+3.  **Cung cấp bản dịch (`translation_block`):** Dịch CẢ đoạn script và câu nhận định sang tiếng Việt.
+4.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.

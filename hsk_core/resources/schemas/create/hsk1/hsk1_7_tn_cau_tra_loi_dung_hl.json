@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "sentence_matching_questions": {
+      "type": "object",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "option_letter": { "type": "string" }, "chinese_text": { "type": "string" }, "pinyin": { "type": "string" } }
+          }
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "question_text_chinese": { "type": "string" },
+              "pinyin": { "type": "string" },
+              "correct_answer": { "type": "string", "enum": ["A", "B", "C", "D"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

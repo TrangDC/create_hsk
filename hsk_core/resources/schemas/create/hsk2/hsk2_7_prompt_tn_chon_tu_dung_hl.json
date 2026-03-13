@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "description": "Một bộ câu hỏi chọn từ điền vào chỗ trống cho HSK2.",
+  "properties": {
+    "word_fill_in_questions": {
+      "type": "object",
+      "description": "Gồm 1 học liệu chung là 4 từ và các câu hỏi điền từ.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Học liệu chung: Một danh sách 4 từ vựng (A-D).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option_letter": { "type": "string" },
+              "chinese_word": { "type": "string" },
+              "pinyin": { "type": "string" }
+            },
+            "required": ["option_letter", "chinese_word", "pinyin"]
+          }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách các câu hỏi điền từ.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "lines": {
+                "type": "array",
+                "description": "Danh sách các dòng của câu hỏi. Câu đơn có 1 dòng, hội thoại có 2 dòng.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "speaker": { "type": "string", "description": "Người nói ('男', '女') hoặc chuỗi rỗng cho câu đơn." },
+                    "chinese_text": { "type": "string", "description": "Nội dung câu, có chứa dấu ngoặc đơn ( ) để điền từ." },
+                    "pinyin": { "type": "string" }
+                  },
+                  "required": ["speaker", "chinese_text", "pinyin"]
+                }
+              },
+              "correct_answer": { "type": "string", "description": "Đáp án đúng, là chữ cái (A-D) của từ trong học liệu." }
+            },
+            "required": ["question_id", "lines", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_material", "questions"]
+    }
+  },
+  "required": ["word_fill_in_questions"]
+}

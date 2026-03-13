@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "image_matching_questions": {
+      "type": "object",
+      "properties": {
+        "shared_material": { "type": "array", "items": { "type": "string" } },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "question_text_chinese": { "type": "string" },
+              "pinyin": { "type": "string" },
+              "correct_answer": { "type": "integer", "enum": [1, 2, 3, 4] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

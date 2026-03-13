@@ -1,0 +1,12 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp, đang soạn lời giải cho học sinh.
+
+**Thông tin câu hỏi:**
+- **Câu gốc:** "{script_chinese}"
+- **Câu nhận định (cần phán đoán):** "{statement_chinese}"
+- **Đáp án đúng:** Nhận định trên là {correct_answer_text}
+
+**Yêu cầu:**
+1.  **Phân tích (`analysis_paragraph`):** Viết một lời giải thích ngắn gọn bằng tiếng Việt. BẮT BUỘC phải bắt đầu bằng cụm từ "Trong câu nói \"{script_chinese}\", ", sau đó giải thích ngắn gọn tại sao câu nhận định "{statement_chinese}" là {correct_answer_text}.
+2.  **Cung cấp văn bản gốc (`original_texts_block`):** Điền chính xác câu gốc và câu nhận định vào các trường tương ứng.
+3.  **Cung cấp bản dịch (`translation_block`):** Dịch CẢ câu gốc và câu nhận định sang tiếng Việt và điền vào các trường tương ứng.
+4.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp. Không thêm bất kỳ văn bản nào khác.

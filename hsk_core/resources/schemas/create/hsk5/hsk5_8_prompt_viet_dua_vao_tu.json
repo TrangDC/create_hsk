@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "writing_from_keywords": {
+      "type": "array",
+      "description": "Một bài tập viết đoạn văn dựa trên 5 từ khóa cho trước.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "keywords": {
+            "type": "array",
+            "description": "Danh sách 5 từ khóa bằng tiếng Trung.",
+            "items": { "type": "string" }
+          },
+          "sample_paragraph_marked": { "type": "string", "description": "Đoạn văn mẫu có các từ khóa được đánh dấu bằng __từ khóa__." },
+          "translation": { "type": "string", "description": "Bản dịch tiếng Việt của đoạn văn mẫu, không có __từ khóa__" }
+        },
+        "required": ["question_id", "keywords", "sample_paragraph_marked", "translation"]
+      }
+    }
+  },
+  "required": ["writing_from_keywords"]
+}

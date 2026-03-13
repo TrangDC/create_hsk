@@ -1,0 +1,4 @@
+Tạo một cụm câu hỏi gồm:
+- shared_material: 4 mô tả hình ảnh (A-D) bằng tiếng Việt.
+- questions: 4 đoạn hội thoại (Nam/Nữ, 2 lượt lời). Mỗi đoạn tương ứng với 1 ảnh trong học liệu.
+- correct_answer: Số thứ tự từ 1 đến 4.

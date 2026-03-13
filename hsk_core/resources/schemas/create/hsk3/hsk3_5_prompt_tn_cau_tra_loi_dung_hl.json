@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "properties": {
+    "sentence_matching_inverted_questions": {
+      "type": "object",
+      "description": "Gồm 1 học liệu chung là các câu thoại đứng trước và các câu trả lời để ghép nối.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Học liệu chung: Một danh sách 4 câu thoại có thể đứng trước.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option_letter": { "type": "string" },
+              "chinese_text": { "type": "string" },
+              "pinyin": { "type": "string" }
+            },
+            "required": ["option_letter", "chinese_text", "pinyin"]
+          }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách 4 câu trả lời. Nhiệm vụ là tìm câu thoại đứng trước phù hợp.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "question_text_chinese": { "type": "string", "description": "Câu trả lời." },
+              "pinyin": { "type": "string" },
+              "correct_answer": { "type": "string", "description": "Đáp án đúng, là chữ cái (A-D) của câu thoại trong học liệu." }
+            },
+            "required": ["question_id", "question_text_chinese", "pinyin", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_material", "questions"]
+    }
+  },
+  "required": ["sentence_matching_inverted_questions"]
+}

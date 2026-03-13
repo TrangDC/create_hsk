@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "ds_img_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "kind": { "const": "script_hinh_anh" },
+          "script": { "type": "string" },
+          "pinyin": { "type": "string" },
+          "translation": { "type": "string" },
+          "image_des": { "type": "string" },
+          "correct_answer": { "type": "integer", "enum": [0, 1] },
+          "explanation": { "type": "string" }
+        },
+        "required": ["id", "kind", "script", "pinyin", "translation", "image_des", "correct_answer", "explanation"]
+      }
+    }
+  },
+  "required": ["ds_img_data"]
+}

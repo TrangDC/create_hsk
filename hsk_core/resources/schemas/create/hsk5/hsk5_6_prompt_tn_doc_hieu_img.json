@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "long_passage_comprehension": {
+      "type": "object",
+      "description": "Một học liệu là đoạn văn dài, có mô tả ảnh và 4 câu hỏi liên quan.",
+      "properties": {
+        "shared_passage": { "type": "string", "description": "Đoạn văn dài làm học liệu chung." },
+        "image_description": { "type": "string", "description": "Mô tả ảnh minh họa bằng tiếng Việt." },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách 4 câu hỏi cho học liệu.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "query_chinese": { "type": "string", "description": "Nội dung câu hỏi." },
+              "answer_options": {
+                "type": "array",
+                "description": "Danh sách 4 phương án trả lời.",
+                "items": { "type": "string" }
+              },
+              "correct_answer": { "type": "integer", "description": "Đáp án đúng (1-4)." }
+            },
+            "required": ["question_id", "query_chinese", "answer_options", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_passage", "image_description", "questions"]
+    }
+  },
+  "required": ["long_passage_comprehension"]
+}

@@ -1,0 +1,3 @@
+Học liệu gồm 4 từ vựng (A-D). Tạo 4 câu hỏi có chỗ trống ( ).
+- 3 câu đơn, 1 câu hội thoại.
+- correct_answer: Chữ cái A, B, C hoặc D.

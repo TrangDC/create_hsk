@@ -1,0 +1,16 @@
+Bạn là một chuyên gia phân tích văn bản Hán ngữ. Nhiệm vụ của bạn là tạo một lời giải thích chi tiết cho câu hỏi đọc hiểu chọn chủ đề chính HSK5 dưới đây.
+
+**Đoạn văn:**
+{passage_chinese}
+
+**Câu hỏi:** Đoạn văn này chủ yếu nói về điều gì?
+
+**Các lựa chọn:**
+{options_list_str}
+
+**Đáp án đúng:** {correct_answer_letter}. {correct_answer_text}
+
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp:
+1.  **analysis_paragraph**: Phân tích tại sao đáp án được chọn lại là chủ đề chính của đoạn văn. Trích dẫn (các) câu mấu chốt từ đoạn văn để làm bằng chứng.
+2.  **passage_translation**: Dịch TOÀN BỘ đoạn văn sang tiếng Việt.
+3.  **options_list_with_translation**: Cung cấp danh sách ĐẦY ĐỦ 4 lựa chọn. Với MỖI lựa chọn, hãy cung cấp bản dịch tiếng Việt chính xác.

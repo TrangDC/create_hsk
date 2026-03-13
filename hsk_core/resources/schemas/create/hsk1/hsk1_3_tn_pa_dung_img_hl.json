@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "shared_image_comprehension": {
+      "type": "object",
+      "properties": {
+        "shared_material": { "type": "array", "items": { "type": "string" }, "minItems": 4, "maxItems": 4 },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "script_chinese": { "type": "string", "description": "Hội thoại 2 lượt lời, có xuống dòng" },
+              "script_pinyin": { "type": "string" },
+              "correct_answer": { "type": "integer", "enum": [1, 2, 3, 4] }
+            },
+            "required": ["question_id", "script_chinese", "script_pinyin", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_material", "questions"]
+    }
+  },
+  "required": ["shared_image_comprehension"]
+}

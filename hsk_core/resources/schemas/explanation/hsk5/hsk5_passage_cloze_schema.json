@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "explanations": {
+      "type": "array",
+      "description": "Danh sách chứa đúng 4 lời giải cho 4 chỗ trống.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "analysis_paragraph": { "type": "string" },
+          "options_list": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "letter": { "type": "string" },
+                "chinese_text": { "type": "string" },
+                "translation": { "type": "string" }
+              },
+              "required": ["letter", "chinese_text", "translation"]
+            }
+          }
+        },
+        "required": ["analysis_paragraph", "options_list"]
+      }
+    },
+    "shared_translation": {
+      "type": "object",
+      "properties": {
+        "full_passage_vietnamese": {
+          "type": "string",
+          "description": "Bản dịch tiếng Việt của toàn bộ đoạn văn sau khi đã điền đầy đủ các từ."
+        }
+      },
+      "required": ["full_passage_vietnamese"]
+    }
+  },
+  "required": ["explanations", "shared_translation"]
+}

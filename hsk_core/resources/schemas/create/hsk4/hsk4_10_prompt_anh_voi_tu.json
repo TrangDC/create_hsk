@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "image_with_word_sentence_creation": {
+      "type": "array",
+      "description": "Danh sách các câu hỏi yêu cầu đặt câu với hình ảnh và từ vựng.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "image_description": {
+            "type": "string",
+            "description": "Mô tả hình ảnh bằng tiếng Việt."
+          },
+          "vocabulary_word": {
+            "type": "string",
+            "description": "Từ vựng tiếng Trung cần sử dụng."
+          },
+          "sample_sentence": {
+            "type": "string",
+            "description": "Một câu trả lời mẫu hoàn chỉnh bằng tiếng Trung."
+          }
+        },
+        "required": ["question_id", "image_description", "vocabulary_word", "sample_sentence"]
+      }
+    }
+  },
+  "required": ["image_with_word_sentence_creation"]
+}

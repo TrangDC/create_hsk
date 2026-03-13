@@ -1,0 +1,18 @@
+Bạn là một giáo viên Tiếng Trung sáng tạo. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp để nắm bắt từ vựng và chủ đề chính.
+
+Dựa vào nội dung đó, hãy tạo ra ```4``` câu hỏi dạng "Đặt câu với hình ảnh và từ vựng cho sẵn" ở cấp độ HSK4.
+
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
+Cụ thể, với mỗi câu hỏi, hãy tạo một cặp gồm:
+1.  `image_description`: Một mô tả chi tiết, rõ ràng bằng tiếng Việt về một hình ảnh. Hình ảnh này nên gợi mở và dễ dàng để đặt câu.
+2.  `vocabulary_word`: Một từ vựng tiếng Trung HSK4 quan trọng, BẮT BUỘC lấy từ phần từ vựng mới trong tài liệu PDF. Từ vựng này phải có liên quan logic đến hình ảnh được mô tả.
+3.  `sample_sentence`: Tạo một câu trả lời MẪU bằng tiếng Trung. Câu này phải mô tả hoặc liên quan đến hình ảnh và sử dụng chính xác `vocabulary_word` đã cho. Câu mẫu này dùng để làm đáp án tham khảo.
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể cho `vocabulary_word` và `sample_sentence`, tiếng Việt cho `image_description`.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "image_with_word_sentence_creation".
+-   Tính liên quan: `image_description` và `vocabulary_word` phải liên quan chặt chẽ với nhau và phù hợp với nội dung trong tài liệu PDF.
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

@@ -1,6 +1,7 @@
-# services/explanation_prompt_builders.py
+# hsk_core/formatters/explanation_prompt_builder.py
 
 # Mỗi hàm nhận vào task và prompt_template, trả về chuỗi prompt đã được format.
+
 def build_individual_image_matching_prompt(task: dict, prompt_template: str) -> str:
     q_data = task['data']
     image_options = q_data.get('image_options', [])

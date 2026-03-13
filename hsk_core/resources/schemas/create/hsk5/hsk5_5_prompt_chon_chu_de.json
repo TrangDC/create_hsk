@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "main_idea_comprehension": {
+      "type": "array",
+      "description": "Danh sách các câu hỏi đọc hiểu chọn chủ đề chính.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "passage_chinese": { "type": "string", "description": "Đoạn văn bản gốc." },
+          "answer_options": {
+            "type": "array",
+            "description": "Danh sách 4 phương án về chủ đề chính.",
+            "items": { "type": "string" }
+          },
+          "correct_answer": { "type": "integer", "description": "Đáp án đúng (1-4)." }
+        },
+        "required": ["question_id", "passage_chinese", "answer_options", "correct_answer"]
+      }
+    }
+  },
+  "required": ["main_idea_comprehension"]
+}

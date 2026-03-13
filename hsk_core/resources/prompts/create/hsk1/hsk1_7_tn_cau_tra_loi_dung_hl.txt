@@ -1,0 +1,2 @@
+Học liệu chung gồm 4 câu trả lời mẫu (A-D). Tạo 4 câu hỏi (câu nghi vấn). Mỗi câu hỏi có một câu trả lời phù hợp trong học liệu.
+- correct_answer: Chữ cái A, B, C hoặc D.

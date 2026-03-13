@@ -1,0 +1,16 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp, đang soạn lời giải cho học sinh.
+
+**Thông tin câu hỏi:**
+- **Đoạn văn:** "{script_chinese}"
+- **Câu hỏi:** "{query_chinese}"
+- **Các lựa chọn:**
+{options_list_str}
+- **Đáp án đúng:** Lựa chọn {correct_answer_letter}
+
+**Yêu cầu:**
+1.  **Phân tích (`analysis_paragraph`):** Viết một lời giải thích ngắn gọn bằng tiếng Việt. Bắt đầu bằng "Đoạn văn nói rằng...", sau đó trích dẫn thông tin liên quan để giải thích tại sao đáp án "{correct_answer_letter}" là đúng.
+2.  **Cung cấp Tạm dịch (`translation_block`):** Điền chính xác đoạn văn gốc và bản dịch tiếng Việt tương ứng của nó.
+3.  **Cung cấp Câu hỏi và Lựa chọn (`query_and_options_block`):**
+    -   Điền câu hỏi gốc và **bản dịch tiếng Việt** của câu hỏi vào `query`.
+    -   Với mỗi lựa chọn trong `options`, điền đầy đủ chữ cái, nội dung gốc và **bản dịch tiếng Việt** tương ứng.
+4.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.

@@ -1,0 +1,4 @@
+Tạo 4 câu hỏi trắc nghiệm. Mỗi câu hỏi gồm 1 đoạn script mô tả một trong 3 bức ảnh.
+- image_options: Danh sách 3 mô tả ảnh khác nhau (đánh dấu A, B, C) bằng tiếng Việt.
+- script_chinese: Câu nói mô tả chính xác 1 trong 3 ảnh đó.
+- correct_answer: Số thứ tự 1, 2 hoặc 3.

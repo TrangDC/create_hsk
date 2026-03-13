@@ -1,0 +1,28 @@
+Bạn là một chuyên gia Hán ngữ. Nhiệm vụ của bạn là tạo một bộ lời giải thích chi tiết cho 2 câu hỏi nghe hiểu HSK4 dưới đây. Cả hai câu hỏi đều dựa trên cùng một đoạn văn bản nghe.
+
+**Đoạn văn nghe (Học liệu):**
+{script_chinese}
+
+---
+**Câu hỏi 1:**
+- Câu hỏi: {query_chinese_1}
+- Các lựa chọn:
+{options_list_1}
+- Đáp án đúng: {correct_answer_letter_1}. {correct_answer_text_1}
+---
+**Câu hỏi 2:**
+- Câu hỏi: {query_chinese_2}
+- Các lựa chọn:
+{options_list_2}
+- Đáp án đúng: {correct_answer_letter_2}. {correct_answer_text_2}
+---
+
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp.
+1.  **explanations**: Tạo một danh sách chứa đúng 2 đối tượng lời giải, tương ứng với 2 câu hỏi.
+    -   Trong mỗi đối tượng, cung cấp `analysis_paragraph` (phân tích đáp án) và `options_list` (danh sách 4 lựa chọn kèm bản dịch). Lưu ý lời giải ngắn gọn, Không dùng từ script mà thay bằng "Nội dung nghe"
+2.  **shared_translation**: Cung cấp MỘT bản dịch chung cho cả học liệu.
+    -   `script_vietnamese`: Dịch TOÀN BỘ đoạn văn nghe sang tiếng Việt.
+    -   `query_vietnamese_1`: Dịch Câu hỏi 1 sang tiếng Việt.
+    -   `query_vietnamese_2`: Dịch Câu hỏi 2 sang tiếng Việt.
+
+Đảm bảo bản dịch `script_vietnamese` là nhất quán.

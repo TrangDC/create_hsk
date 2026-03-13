@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải cho câu hỏi sắp xếp thành phần câu của HSK3.",
+  "properties": {
+    "grammar_analysis": {
+      "type": "string",
+      "description": "Lời giải thích ngắn gọn bằng tiếng Việt về cấu trúc ngữ pháp của câu đúng. Phân tích thành phần như chủ ngữ, vị ngữ, tân ngữ, trạng ngữ và giải thích tại sao chúng phải được xếp theo thứ tự đó. Trong lời giải, các thành phần tiếng Trung cần được trích dẫn trong dấu ngoặc kép."
+    },
+    "correct_sentence_block": {
+      "type": "object",
+      "description": "Khối chứa câu hoàn chỉnh và bản dịch tiếng Việt.",
+      "properties": {
+        "chinese_text": { "type": "string", "description": "Câu hoàn chỉnh bằng tiếng Trung." },
+        "vietnamese_translation": { "type": "string", "description": "Bản dịch tiếng Việt của câu hoàn chỉnh." }
+      },
+      "required": ["chinese_text", "vietnamese_translation"]
+    }
+  },
+  "required": ["grammar_analysis", "correct_sentence_block"]
+}

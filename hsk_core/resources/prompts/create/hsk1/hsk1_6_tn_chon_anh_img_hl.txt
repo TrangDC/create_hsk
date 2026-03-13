@@ -1,0 +1,2 @@
+Tạo 4 câu hỏi. Học liệu chung gồm 4 mô tả ảnh (A-D). Mỗi câu hỏi là 1 câu tiếng Trung. Người học phải chọn ảnh tương ứng.
+- correct_answer: 1 đến 4.

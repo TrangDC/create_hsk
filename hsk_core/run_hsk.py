@@ -1,0 +1,158 @@
+import os
+import json
+import shutil
+from pathlib import Path
+from typing import List, Dict, Any
+import openpyxl
+
+# Phase 1: AI Client & Path Manager
+from utils.call_vertex_ai import ai_client, get_resource_path
+# Phase 3 (Step trước): Configs
+from config.hsk_question_configs import get_prompt_config
+# from config.hsk_explanation_configs import get_explanation_config
+
+class HSKPipeline:
+    def __init__(self, pdf_folder: str, hsk_level: str):
+        self.hsk_level = hsk_level.lower()
+        self.pdf_folder = Path(pdf_folder)
+        
+        # Thiết lập đường dẫn
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.output_dir = get_resource_path(f"output/{self.hsk_level}_{timestamp}")
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.excel_output_path = self.output_dir / f"{self.hsk_level}_result.xlsx"
+        self.json_data_path = self.output_dir / "generated_data.json"
+        
+        # 1. Khởi tạo file Excel từ Template
+        self._prepare_excel()
+        
+    def _prepare_excel(self):
+        """Copy file excel mẫu từ resources/sheet sang output"""
+        template_path = get_resource_path(f"resources/sheet/{self.hsk_level}.xlsx")
+        if not template_path.exists():
+            raise FileNotFoundError(f"❌ Không tìm thấy template: {template_path}")
+        shutil.copy(template_path, self.excel_output_path)
+        print(f"✅ Đã chuẩn bị file Excel tại: {self.excel_output_path}")
+
+    def _load_resource(self, sub_path: str):
+        """Helper để đọc file prompt/schema"""
+        path = get_resource_path(sub_path)
+        if path.suffix == '.json':
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return path.read_text(encoding='utf-8')
+
+    def run_preprocessing(self) -> str:
+        """Bước 1: Gom PDF và tạo Super Context"""
+        print(f"\n--- [BƯỚC 1] TIỀN XỬ LÝ PDF ---")
+        pdf_files = [str(f) for f in self.pdf_folder.glob("*.pdf")]
+        
+        prompt = self._load_resource("resources/prompts/preprocessing/extract_lesson_structure.txt")
+        schema = self._load_resource("resources/schemas/preprocessing/extract_lesson_structure.json")
+        
+        result = ai_client.generate_content(prompt, schema, pdf_paths=pdf_files)
+        context_str = json.dumps(result, ensure_ascii=False)
+        
+        # Lưu lại để xem bối cảnh bài học
+        (self.output_dir / "super_context.json").write_text(context_str, encoding='utf-8')
+        return context_str
+
+    def run_question_generation(self, super_context: str):
+        """Bước 2: Tạo câu hỏi và điền vào Excel"""
+        print(f"\n--- [BƯỚC 2] TẠO CÂU HỎI ---")
+        configs = get_prompt_config(self.hsk_level)
+        workbook = openpyxl.load_workbook(self.excel_output_path)
+        
+        all_generated_data = {}
+
+        for prompt_id, config in configs.items():
+            print(f"   🚀 Đang chạy prompt: {prompt_id}")
+            
+            # Load Prompt/Schema từ resources theo đúng cấu trúc thư mục mới
+            p_text = self._load_resource(f"resources/prompts/create/{self.hsk_level}/{prompt_id}.txt")
+            p_schema = self._load_resource(f"resources/schemas/create/{self.hsk_level}/{prompt_id}.json")
+            
+            # Gọi AI
+            data = ai_client.generate_content(p_text, p_schema, text_context=super_context)
+            all_generated_data[prompt_id] = data
+            
+            # Ghi dữ liệu vào Excel (Duyệt qua các processors trong config)
+            for json_key, sheet_name, populate_func in config["processors"]:
+                if sheet_name in workbook.sheetnames:
+                    data_part = data.get(json_key)
+                    if data_part:
+                        populate_func(workbook[sheet_name], data_part)
+                else:
+                    print(f"   ⚠️ Cảnh báo: Không tìm thấy sheet '{sheet_name}'")
+        
+        workbook.save(self.excel_output_path)
+        # Lưu JSON để dùng cho bước tạo lời giải
+        self.json_data_path.write_text(json.dumps(all_generated_data, ensure_ascii=False, indent=2), encoding='utf-8')
+        return all_generated_data
+
+    # def run_explanation_generation(self, questions_data: Dict):
+    #     """Bước 3: Tạo lời giải dựa trên các câu hỏi đã sinh ra"""
+    #     print(f"\n--- [BƯỚC 3] TẠO LỜI GIẢI ---")
+    #     exp_configs = get_explanation_config(self.hsk_level)
+    #     if not exp_configs: return
+
+    #     workbook = openpyxl.load_workbook(self.excel_output_path)
+        
+    #     # Làm phẳng dữ liệu JSON (Flatten) để tạo các task lời giải
+    #     for prompt_id, data in questions_data.items():
+    #         for q_type, q_content in data.items():
+    #             if q_type not in exp_configs: continue
+                
+    #             config = exp_configs[q_type]
+    #             print(f"   💡 Đang tạo lời giải cho dạng: {q_type}")
+                
+    #             # Chuyển data thành list để xử lý (Dù là object hay list)
+    #             tasks = q_content if isinstance(q_content, list) else [q_content]
+                
+    #             # Điểm mới: Tạo task list và gọi AI (có thể dùng ThreadPool ở đây để nhanh hơn)
+    #             for task_item in tasks:
+    #                 # 1. Dùng Builder tạo Prompt text (không dùng file tạm)
+    #                 prompt_file_text = self._load_resource(f"resources/prompts/explanation/{self.hsk_level}/{config['prompt_file']}")
+    #                 final_prompt = config['builder'](task_item, prompt_file_text)
+                    
+    #                 # 2. Load Schema
+    #                 schema = self._load_resource(f"resources/schemas/explanation/{self.hsk_level}/{config['schema_path']}")
+                    
+    #                 # 3. Gọi AI lấy lời giải
+    #                 explanation_result = ai_client.generate_content(final_prompt, schema)
+                    
+    #                 # 4. Dùng Renderer ghi vào Excel
+    #                 if config['sheet_name'] in workbook.sheetnames:
+    #                     # renderer sẽ tự tìm hàng trống hoặc hàng tương ứng để ghi
+    #                     config['renderer'](workbook[config['sheet_name']], explanation_result, task_item)
+
+    #     workbook.save(self.excel_output_path)
+
+    def start(self):
+        """Khởi động toàn bộ Pipeline"""
+        print(f"================ START PIPELINE: {self.hsk_level.upper()} ================")
+        try:
+            # B1: Preprocessing
+            super_context = self.run_preprocessing()
+            
+            # B2: Questions
+            questions_data = self.run_question_generation(super_context)
+            
+            # # B3: Explanations
+            # self.run_explanation_generation(questions_data)
+            
+            print(f"\n✨ TẤT CẢ HOÀN TẤT! ✨")
+            print(f"📂 Kết quả: {self.excel_output_path}")
+            
+        except Exception as e:
+            print(f"❌ PIPELINE BỊ LỖI: {e}")
+            import traceback
+            traceback.print_exc()
+
+# --- TEST ---
+from datetime import datetime
+if __name__ == "__main__":
+    # Test thử với HSK1
+    pipeline = HSKPipeline(pdf_folder=r"input/tóm tắt HSK/hsk2", hsk_level="hsk2")
+    pipeline.start()

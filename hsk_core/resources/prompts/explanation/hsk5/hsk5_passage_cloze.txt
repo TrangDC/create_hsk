@@ -1,0 +1,17 @@
+Bạn là một chuyên gia phân tích từ vựng và ngữ pháp Hán ngữ. Nhiệm vụ của bạn là tạo một bộ lời giải thích chi tiết cho bài tập điền từ vào đoạn văn HSK5 dưới đây.
+
+**Đoạn văn gốc (có 4 chỗ trống):**
+{passage_with_blanks}
+
+---
+**Các bộ lựa chọn và đáp án đúng cho từng chỗ trống:**
+{choices_and_answers_str}
+---
+**Đoạn văn hoàn chỉnh (đã điền từ):**
+{full_passage_chinese}
+---
+
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp.
+1.  **explanations**: Tạo một danh sách gồm đúng 4 đối tượng lời giải, mỗi đối tượng tương ứng với một chỗ trống theo thứ tự.
+    -   Trong mỗi đối tượng, cung cấp `analysis_paragraph` (phân tích chi tiết tại sao từ đúng lại phù hợp nhất) và `options_list` (danh sách 4 lựa chọn kèm bản dịch tiếng Việt của chúng).
+2.  **shared_translation**: Cung cấp MỘT bản dịch duy nhất cho đoạn văn ĐÃ HOÀN CHỈNH.

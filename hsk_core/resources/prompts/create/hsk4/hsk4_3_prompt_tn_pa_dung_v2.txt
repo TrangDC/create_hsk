@@ -1,0 +1,20 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp.
+
+Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi trắc nghiệm bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK4.
+
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
+Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Đọc hiểu hội thoại dài và chọn đáp án":
+*   Mỗi câu hỏi phải bao gồm:
+    *   `dialogue`: một đoạn hội thoại giữa `男` và `女` (4 lượt lời, xen kẽ).
+    *   `query_chinese`: một câu hỏi liên quan trực tiếp đến nội dung hội thoại.
+    *   `answer_options`: một danh sách 3 phương án trả lời, trong đó chỉ có một phương án đúng. Mỗi phương án phải có cả `chinese_text` và `pinyin`.
+*   Đáp án `correct_answer` phải là số thứ tự (1, 2, hoặc 3) của câu trả lời đúng.
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "reading_comprehension_dialogue_4_lines".
+-   Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên thông tin có trong tài liệu PDF.
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

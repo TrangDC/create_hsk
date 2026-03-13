@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "description": "Một bộ câu hỏi trắc nghiệm chọn phương án đúng dựa trên học liệu ảnh chung cho HSK3.",
+  "properties": {
+    "shared_image_comprehension": {
+      "type": "object",
+      "description": "Gồm 1 học liệu 4 ảnh và các script tương ứng.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Một danh sách 4 chuỗi (A-D) mô tả hình ảnh bằng tiếng Việt theo cấu trúc Ảnh: {mô tả}.\nVí dụ: A. Ảnh: Một bác sĩ đang chỉ đạo đội ngũ làm việc",
+          "items": { "type": "string" }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách các script, mỗi script tương ứng với một ảnh. Ví dụ: 女：都半夜了，你怎么还不睡觉？\n男：这本书太有意思了，我想再看一会儿。",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "script_chinese": { "type": "string" },
+              "script_pinyin": { "type": "string" },
+              "correct_answer": { "type": "integer", "description": "Đáp án đúng, là số thứ tự của ảnh (1 đến 4)." }
+            },
+            "required": ["question_id", "script_chinese", "script_pinyin", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_material", "questions"]
+    }
+  },
+  "required": ["shared_image_comprehension"]
+}

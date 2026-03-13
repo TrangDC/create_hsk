@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "image_matching_questions": {
+      "type": "object",
+      "description": "Gồm 1 học liệu chung là 4 mô tả ảnh và các câu hỏi tương ứng.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Một danh sách 4 chuỗi (đánh thứ tự từ A-D) mô tả hình ảnh bằng tiếng Việt, trình bày theo cấu trúc Ảnh: {mô tả}.\nVí dụ: A. Ảnh: Một bác sĩ đang chỉ đạo đội ngũ làm việc",
+          "items": { "type": "string" }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách các câu hỏi để chọn ảnh tương ứng.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": { "type": "integer" },
+              "question_text_chinese": { "type": "string" },
+              "pinyin": { "type": "string" },
+              "correct_answer": { "type": "integer", "description": "Đáp án đúng, là số thứ tự của ảnh (1 đến 4)." }
+            },
+            "required": ["question_id", "question_text_chinese", "pinyin", "correct_answer"]
+          }
+        }
+      },
+      "required": ["shared_material", "questions"]
+    }
+  },
+  "required": ["image_matching_questions"]
+}

@@ -1,0 +1,4 @@
+Tạo 4 câu hỏi Đúng/Sai kiểm tra từ vựng.
+- script: 1 từ vựng HSK1 duy nhất.
+- image_des: Mô tả ảnh bằng tiếng Việt.
+- correct_answer: 1 (Nếu ảnh khớp từ vựng) hoặc 0 (Nếu không khớp).

@@ -1,0 +1,26 @@
+Bạn là một chuyên gia Hán ngữ. Nhiệm-vụ của bạn là tạo một bộ lời giải thích chi tiết cho 2 câu-hỏi đọc-hiểu HSK4 dưới đây, dựa trên cùng một đoạn-văn.
+
+**Đoạn văn (Học liệu):**
+{script_chinese}
+
+---
+**Câu hỏi 1:**
+- Câu hỏi: {query_chinese_1}
+- Các lựa chọn:
+{options_list_1}
+- Đáp án đúng: {correct_answer_letter_1}. {correct_answer_text_1}
+---
+**Câu hỏi 2:**
+- Câu hỏi: {query_chinese_2}
+- Các lựa chọn:
+{options_list_2}
+- Đáp án đúng: {correct_answer_letter_2}. {correct_answer_text_2}
+---
+
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp.
+1.  **explanations**: Tạo một danh sách chứa đúng 2 đối tượng lời giải.
+    -   Trong mỗi đối tượng, cung cấp `analysis_paragraph` (phân-tích đáp-án) và `options_list` (danh-sách 4 lựa-chọn kèm bản-dịch).
+2.  **shared_translation**: Cung cấp MỘT bản-dịch chung cho cả học-liệu.
+    -   `passage_vietnamese`: Dịch TOÀN BỘ đoạn-văn sang tiếng Việt.
+    -   `query_vietnamese_1`: Dịch Câu hỏi 1.
+    -   `query_vietnamese_2`: Dịch Câu hỏi 2.

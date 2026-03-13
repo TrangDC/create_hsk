@@ -1,0 +1,19 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp.
+
+Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi trắc nghiệm bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK3.
+
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
+Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Đọc hiểu với học liệu ảnh chung":
+*   Tạo ra một học liệu chung `shared_material` gồm 4 mô tả hình ảnh khác nhau (đánh chữ thứ tự từ A-D) bằng tiếng Việt.
+*   Tạo ra các câu hỏi (`questions`), mỗi câu là một `script` (hội thoại 2 lượt lời giữa `男` và `女`, có xuống dòng giữa các câu) tương ứng với một ảnh trong học liệu.
+*   Đáp án `correct_answer` phải là số thứ tự (từ 1 đến 4) của ảnh đúng.
+*   CÁC MÔ TẢ HÌNH ẢNH TUYỆT ĐỐI KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN.
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "shared_image_comprehension".
+-   Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên thông tin có trong tài liệu PDF.
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

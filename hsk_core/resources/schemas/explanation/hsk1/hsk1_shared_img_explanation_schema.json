@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng TN chọn ảnh đúng từ học liệu chung.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Đoạn văn phân tích logic bằng tiếng Việt."
+    },
+    "context_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa hội thoại gốc.",
+      "properties": {
+        "dialogue": {
+          "type": "array",
+          "description": "Danh sách các lượt lời trong hội thoại gốc.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "speaker": { "type": "string", "description": "Người nói (ví dụ: '男', '女')." },
+              "chinese_text": { "type": "string", "description": "Nội dung lời thoại tiếng Trung." },
+              "pinyin": { "type": "string", "description": "Phiên âm Pinyin." }
+            },
+            "required": ["speaker", "chinese_text", "pinyin"]
+          }
+        }
+      },
+      "required": ["dialogue"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của hội thoại.",
+      "properties": {
+        "vietnamese_dialogue": {
+          "type": "array",
+          "description": "Danh sách các lượt lời đã được dịch sang tiếng Việt.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "speaker_vi": { "type": "string", "description": "Nhãn người nói tiếng Việt (ví dụ: 'Nam', 'Nữ')." },
+              "dialogue_vi": { "type": "string", "description": "Nội dung lời thoại đã dịch." }
+            },
+            "required": ["speaker_vi", "dialogue_vi"]
+          }
+        }
+      },
+      "required": ["vietnamese_dialogue"]
+    }
+  },
+  "required": ["analysis_paragraph", "context_block", "translation_block"]
+}

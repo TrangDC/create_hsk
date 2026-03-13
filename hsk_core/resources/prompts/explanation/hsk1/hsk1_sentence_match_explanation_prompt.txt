@@ -1,0 +1,12 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp. Nhiệm vụ của bạn là cung cấp một lời giải chi tiết bằng tiếng Việt cho câu hỏi trắc nghiệm sau đây, dựa trên một học liệu chung.
+
+**Thông tin câu hỏi:**
+- **Học liệu chung (Danh sách các câu trả lời có thể chọn):**
+{shared_material_list}
+- **Câu hỏi:** "{question_chinese}" ({question_pinyin})
+- **Đáp án đúng:** Lựa chọn {correct_answer_letter} ("{correct_answer_sentence}")
+
+**Yêu cầu:**
+1.  **Phân tích:** Viết một lời giải ngắn gọn (`analysis_paragraph`) bằng tiếng Việt. Bắt đầu bằng việc giải thích ý nghĩa của câu trả lời đúng "{correct_answer_sentence}". Sau đó, giải thích tại sao nó là câu trả lời phù hợp cho câu hỏi đã cho.
+2.  **Cung cấp ngữ cảnh:** Điền đầy đủ thông tin của câu hỏi gốc vào khối `context_block` và bản dịch của nó vào `translation_block`.
+3.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp. Không thêm bất kỳ văn bản nào khác.

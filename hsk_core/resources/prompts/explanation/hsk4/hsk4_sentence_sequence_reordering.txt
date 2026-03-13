@@ -1,0 +1,13 @@
+Bạn là một chuyên gia phân tích ngữ pháp và logic văn bản tiếng Trung. Nhiệm vụ của bạn là tạo một lời giải thích chi tiết cho câu hỏi sắp xếp các câu văn HSK4 dưới đây.
+
+**Các câu văn bị xáo trộn:**
+{components_str}
+
+**Thứ tự đúng:** {correct_order}
+**Đoạn văn hoàn chỉnh:**
+{full_passage_chinese}
+
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp:
+1.  **logical_steps**: Tạo một danh sách gồm đúng 3 bước logic, tương ứng với 3 câu trong thứ tự ĐÚNG.
+    -   Với mỗi bước, hãy cung cấp cả **bản dịch tiếng Việt** của câu đó và một lời **giải thích NGẮN GỌN** tại sao câu đó lại được đặt ở vị trí đó.
+2.  **full_passage_translation**: Dịch TOÀN BỘ đoạn văn hoàn chỉnh sang tiếng Việt.

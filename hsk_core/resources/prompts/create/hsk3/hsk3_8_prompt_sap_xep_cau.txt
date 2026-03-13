@@ -1,0 +1,18 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng các tài liệu PDF được cung cấp.
+
+Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài liệu đó, hãy tạo ra ```4``` câu hỏi sắp xếp câu bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK3.
+
+**LƯU Ý QUAN TRỌNG:** Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu, KHÔNG sao chép nội dung bài khóa. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP với các ví dụ trong tài liệu.
+
+Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Sắp xếp câu":
+*   Mỗi câu hỏi gồm một danh sách các thành phần câu (`components`) bị xáo trộn.
+*   Số lượng thành phần trong mỗi câu hỏi phải từ 5 đến 7.
+*   Đáp án `correct_order` phải là một chuỗi số thể hiện thứ tự sắp xếp đúng của các thành phần (ví dụ: "24135").
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "sentence_reordering".
+-   Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên thông tin có trong tài liệu PDF.
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

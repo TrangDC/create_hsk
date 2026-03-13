@@ -1,0 +1,16 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp. Nhiệm vụ của bạn là cung cấp một lời giải chi tiết bằng tiếng Việt cho câu hỏi nghe hiểu hội thoại sau.
+
+**Thông tin câu hỏi:**
+- **Hội thoại:**
+{dialogue_str}
+- **Câu hỏi:** {query_chinese}
+- **Các lựa chọn:**
+{options_list_str}
+- **Đáp án đúng:** Lựa chọn {correct_answer_letter}
+
+**Yêu cầu:**
+1.  **Phân tích (`analysis_paragraph`):** Viết lời giải thật ngắn gọn bằng tiếng Việt. Trích dẫn câu nói mấu chốt của người nói trong hội thoại và giải thích tại sao câu đó giúp chọn được đáp án "{correct_answer_letter}".
+2.  **Chi tiết hóa lựa chọn (`options_list`):** Điền đầy đủ thông tin vào mảng `options_list`, bao gồm cả việc **dịch nghĩa tiếng Việt** cho mỗi lựa chọn và đặt cờ `is_correct` là true cho đáp án đúng.
+3.  **Cấu trúc Phụ đề (`dialogue_block`):** Gộp toàn bộ hội thoại và câu hỏi vào mảng `full_script`. Sử dụng "男", "女" cho người nói và "问" cho dòng câu hỏi.
+4.  **Cung cấp bản dịch (`translation_block`):** Cung cấp một bản dịch hoàn chỉnh của hội thoại và câu hỏi trong trường `vietnamese_translation`. Sử dụng "Nữ:", "Nam:", và "Câu hỏi:" để phân biệt các dòng.
+5.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.
