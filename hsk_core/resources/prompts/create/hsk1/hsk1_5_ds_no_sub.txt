@@ -1,4 +1,18 @@
-Tạo 4 câu hỏi Đúng/Sai kiểm tra từ vựng.
-- script: 1 từ vựng HSK1 duy nhất.
-- image_des: Mô tả ảnh bằng tiếng Việt.
-- correct_answer: 1 (Nếu ảnh khớp từ vựng) hoặc 0 (Nếu không khớp).
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng dữ liệu bài học nền tảng (từ vựng, ngữ pháp, bài khóa) được cung cấp.
+
+Hãy tạo DẠNG CÂU HỎI ĐÚNG/SAI DỰA TRÊN TỪ VỰNG VÀ HÌNH ẢNH (thuộc cấp độ HSK1) với các yêu cầu cực kỳ nghiêm ngặt sau:
+- Tạo ra chính xác 4 câu hỏi.
+- Trong 4 câu hỏi này, bắt buộc phải có ít nhất 1 câu mang đáp án ĐÚNG và ít nhất 1 câu mang đáp án SAI.
+- Mỗi câu hỏi bao gồm:
+    + `kind`: Cố định là "tuvung_hinh_anh".
+    + `image_des`: Mô tả hình ảnh bằng tiếng Việt (LƯU Ý KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN).
+    + `script`: Một từ vựng bằng tiếng Trung.
+    + `pinyin`: Phiên âm Pinyin cho từ vựng đó.
+    + `translation`: Bản dịch tiếng Việt của từ vựng đó.
+    + `correct_answer`: Là 1 (nếu từ vựng mô tả ĐÚNG hình ảnh) hoặc 0 (nếu từ vựng mô tả SAI hình ảnh).
+    + `explanation`: Lời giải thích chi tiết bằng tiếng Việt. KHÔNG SỬ DỤNG TIẾNG ANH.
+
+YÊU CẦU ĐẦU RA:
+- Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+- Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được định nghĩa.
+- Không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác.

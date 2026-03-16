@@ -1,5 +1,18 @@
-Tạo 4 câu hỏi đọc hiểu ngắn.
-- context_chinese: Đúng 1 câu cung cấp thông tin (không phải hội thoại).
-- query_chinese: Câu hỏi về thông tin đó.
-- answer_options: 3 lựa chọn (Hán ngữ + Pinyin).
-- correct_answer: 1, 2 hoặc 3.
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng dữ liệu bài học nền tảng (bao gồm từ vựng, ngữ pháp, bài khóa) được cung cấp.
+
+Dựa vào nội dung đó, hãy tạo ra các câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK1.
+
+Hãy tạo DẠNG ĐỌC HIỂU NGẮN VÀ CHỌN ĐÁP ÁN ĐÚNG với các yêu cầu cực kỳ nghiêm ngặt sau:
+- Tạo ra chính xác 4 câu hỏi.
+- Mỗi câu hỏi phải bao gồm:
+    + `context_chinese`: một câu tiếng Trung cung cấp thông tin (ví dụ: "下个月，我去北京。"). LƯU Ý BẮT BUỘC: Đây chỉ là một câu kể/câu đơn, tuyệt đối KHÔNG PHẢI là 2 câu lời thoại ghép lại, KHÔNG PHẢI là đoạn hội thoại.
+    + `query_chinese`: một câu hỏi liên quan trực tiếp đến thông tin trong `context_chinese` (ví dụ: "她什么时候去北京？").
+    + `answer_options`: một danh sách gồm 3 phương án trả lời, trong đó chỉ có MỘT phương án đúng. Mỗi phương án phải có cả chữ Hán (`chinese_text`) và phiên âm (`pinyin`).
+- Đáp án `correct_answer` phải là số thứ tự (1, 2, hoặc 3) của câu trả lời đúng.
+
+YÊU CẦU ĐẦU RA:
+- Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin. 
+- Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+- Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được định nghĩa.
+- Tính chính xác: Các câu hỏi KHÔNG được lặp lại, đa dạng ngữ cảnh và PHẢI sử dụng từ vựng/ngữ pháp trong tài liệu nền tảng.
+- Không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

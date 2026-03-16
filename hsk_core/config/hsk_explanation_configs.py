@@ -24,30 +24,30 @@ from formatters.explanation_prompt_builder import (
     build_hsk5_long_passage_comprehension_prompt
 )
 
-# from formatters.explanation_excel_formatter import (
-#     render_individual_img_explanation,
-#     render_shared_image_comprehension_explanation,
-#     render_reading_comp_explanation,
-#     render_image_matching_explanation,
-#     render_sentence_matching_explanation,
-#     render_word_fill_explanation,
-#     render_hsk2_true_false_image_explanation,
-#     render_hsk2_dialogue_comprehension_explanation,
-#     render_hsk2_true_false_statement_explanation,
-#     render_hsk2_sentence_matching_inverted_explanation,
-#     render_hsk3_true_false_listening_choice_explanation,
-#     render_hsk3_reading_comprehension_no_pinyin_v3_explanation_with_markers,
-#     render_hsk3_sentence_reordering_explanation,
-#     render_hsk4_listening_comprehension_explanation,
-#     render_hsk4_sentence_sequence_reordering_explanation,
-#     render_hsk4_reading_passage_explanation,
-#     render_hsk4_image_word_sentence_creation_explanation,
-#     render_hsk5_passage_cloze_explanation,
-#     render_hsk5_main_idea_comprehension_explanation,
-#     render_hsk5_long_passage_comprehension_explanation,
-#     render_hsk5_writing_from_keywords, 
-#     render_hsk5_writing_from_image
-# )
+from formatters.explanation_excel_formatter import (
+    render_individual_img_explanation,
+    render_shared_image_comprehension_explanation,
+    render_reading_comp_explanation,
+    render_image_matching_explanation,
+    render_sentence_matching_explanation,
+    render_word_fill_explanation,
+    render_hsk2_true_false_image_explanation,
+    render_hsk2_dialogue_comprehension_explanation,
+    render_hsk2_true_false_statement_explanation,
+    render_hsk2_sentence_matching_inverted_explanation,
+    render_hsk3_true_false_listening_choice_explanation,
+    render_hsk3_reading_comprehension_no_pinyin_v3_explanation_with_markers,
+    render_hsk3_sentence_reordering_explanation,
+    render_hsk4_listening_comprehension_explanation,
+    render_hsk4_sentence_sequence_reordering_explanation,
+    render_hsk4_reading_passage_explanation,
+    render_hsk4_image_word_sentence_creation_explanation,
+    render_hsk5_passage_cloze_explanation,
+    render_hsk5_main_idea_comprehension_explanation,
+    render_hsk5_long_passage_comprehension_explanation,
+    render_hsk5_writing_from_keywords, 
+    render_hsk5_writing_from_image
+)
 
 HSK1_EXPLANATION_CONFIGS = {
     "individual_image_matching": {

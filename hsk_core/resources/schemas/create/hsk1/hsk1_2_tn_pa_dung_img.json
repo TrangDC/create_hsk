@@ -3,18 +3,44 @@
   "properties": {
     "individual_image_matching": {
       "type": "array",
+      "description": "Dạng TN phương án đúng (hình ảnh). Gồm 4 câu, mỗi câu có 3 mô tả ảnh và 1 script.",
       "items": {
         "type": "object",
         "properties": {
-          "question_id": { "type": "integer" },
-          "image_options": { "type": "array", "items": { "type": "string" }, "minItems": 3, "maxItems": 3 },
-          "script_chinese": { "type": "string" },
-          "script_pinyin": { "type": "string" },
-          "correct_answer": { "type": "integer", "enum": [1, 2, 3] }
+          "question_id": {
+            "type": "integer"
+          },
+          "image_options": {
+            "type": "array",
+            "description": "Danh sách gồm 3 chuỗi, đánh thứ tự A., B., C., mô tả hình ảnh theo cấu trúc Ảnh: {mô tả} bằng Tiếng Việt.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "script_chinese": {
+            "type": "string",
+            "description": "Script tiếng Trung mô tả 1 trong 3 ảnh."
+          },
+          "script_pinyin": {
+            "type": "string",
+            "description": "Phiên âm Pinyin cho script."
+          },
+          "correct_answer": {
+            "type": "integer",
+            "description": "Đáp án đúng, là số thứ tự của ảnh (1, 2, hoặc 3) trong 'image_options' khớp với script."
+          }
         },
-        "required": ["question_id", "image_options", "script_chinese", "script_pinyin", "correct_answer"]
+        "required":[
+          "question_id",
+          "image_options",
+          "script_chinese",
+          "script_pinyin",
+          "correct_answer"
+        ]
       }
     }
   },
-  "required": ["individual_image_matching"]
+  "required": [
+    "individual_image_matching"
+  ]
 }

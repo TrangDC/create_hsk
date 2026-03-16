@@ -9,7 +9,7 @@ import openpyxl
 from utils.call_vertex_ai import ai_client, get_resource_path
 # Phase 3 (Step trước): Configs
 from config.hsk_question_configs import get_prompt_config
-# from config.hsk_explanation_configs import get_explanation_config
+from config.hsk_explanation_configs import get_explanation_config
 
 class HSKPipeline:
     def __init__(self, pdf_folder: str, hsk_level: str):
@@ -91,43 +91,43 @@ class HSKPipeline:
         self.json_data_path.write_text(json.dumps(all_generated_data, ensure_ascii=False, indent=2), encoding='utf-8')
         return all_generated_data
 
-    # def run_explanation_generation(self, questions_data: Dict):
-    #     """Bước 3: Tạo lời giải dựa trên các câu hỏi đã sinh ra"""
-    #     print(f"\n--- [BƯỚC 3] TẠO LỜI GIẢI ---")
-    #     exp_configs = get_explanation_config(self.hsk_level)
-    #     if not exp_configs: return
+    def run_explanation_generation(self, questions_data: Dict):
+        """Bước 3: Tạo lời giải dựa trên các câu hỏi đã sinh ra"""
+        print(f"\n--- [BƯỚC 3] TẠO LỜI GIẢI ---")
+        exp_configs = get_explanation_config(self.hsk_level)
+        if not exp_configs: return
 
-    #     workbook = openpyxl.load_workbook(self.excel_output_path)
+        workbook = openpyxl.load_workbook(self.excel_output_path)
         
-    #     # Làm phẳng dữ liệu JSON (Flatten) để tạo các task lời giải
-    #     for prompt_id, data in questions_data.items():
-    #         for q_type, q_content in data.items():
-    #             if q_type not in exp_configs: continue
+        # Làm phẳng dữ liệu JSON (Flatten) để tạo các task lời giải
+        for prompt_id, data in questions_data.items():
+            for q_type, q_content in data.items():
+                if q_type not in exp_configs: continue
                 
-    #             config = exp_configs[q_type]
-    #             print(f"   💡 Đang tạo lời giải cho dạng: {q_type}")
+                config = exp_configs[q_type]
+                print(f"   💡 Đang tạo lời giải cho dạng: {q_type}")
                 
-    #             # Chuyển data thành list để xử lý (Dù là object hay list)
-    #             tasks = q_content if isinstance(q_content, list) else [q_content]
+                # Chuyển data thành list để xử lý (Dù là object hay list)
+                tasks = q_content if isinstance(q_content, list) else [q_content]
                 
-    #             # Điểm mới: Tạo task list và gọi AI (có thể dùng ThreadPool ở đây để nhanh hơn)
-    #             for task_item in tasks:
-    #                 # 1. Dùng Builder tạo Prompt text (không dùng file tạm)
-    #                 prompt_file_text = self._load_resource(f"resources/prompts/explanation/{self.hsk_level}/{config['prompt_file']}")
-    #                 final_prompt = config['builder'](task_item, prompt_file_text)
+                # Điểm mới: Tạo task list và gọi AI (có thể dùng ThreadPool ở đây để nhanh hơn)
+                for task_item in tasks:
+                    # 1. Dùng Builder tạo Prompt text (không dùng file tạm)
+                    prompt_file_text = self._load_resource(f"resources/prompts/explanation/{self.hsk_level}/{config['prompt_file']}")
+                    final_prompt = config['builder'](task_item, prompt_file_text)
                     
-    #                 # 2. Load Schema
-    #                 schema = self._load_resource(f"resources/schemas/explanation/{self.hsk_level}/{config['schema_path']}")
+                    # 2. Load Schema
+                    schema = self._load_resource(f"resources/schemas/explanation/{self.hsk_level}/{config['schema_path']}")
                     
-    #                 # 3. Gọi AI lấy lời giải
-    #                 explanation_result = ai_client.generate_content(final_prompt, schema)
+                    # 3. Gọi AI lấy lời giải
+                    explanation_result = ai_client.generate_content(final_prompt, schema)
                     
-    #                 # 4. Dùng Renderer ghi vào Excel
-    #                 if config['sheet_name'] in workbook.sheetnames:
-    #                     # renderer sẽ tự tìm hàng trống hoặc hàng tương ứng để ghi
-    #                     config['renderer'](workbook[config['sheet_name']], explanation_result, task_item)
+                    # 4. Dùng Renderer ghi vào Excel
+                    if config['sheet_name'] in workbook.sheetnames:
+                        # renderer sẽ tự tìm hàng trống hoặc hàng tương ứng để ghi
+                        config['renderer'](workbook[config['sheet_name']], explanation_result, task_item)
 
-    #     workbook.save(self.excel_output_path)
+        workbook.save(self.excel_output_path)
 
     def start(self):
         """Khởi động toàn bộ Pipeline"""
@@ -139,8 +139,8 @@ class HSKPipeline:
             # B2: Questions
             questions_data = self.run_question_generation(super_context)
             
-            # # B3: Explanations
-            # self.run_explanation_generation(questions_data)
+            # B3: Explanations
+            self.run_explanation_generation(questions_data)
             
             print(f"\n✨ TẤT CẢ HOÀN TẤT! ✨")
             print(f"📂 Kết quả: {self.excel_output_path}")
@@ -154,5 +154,5 @@ class HSKPipeline:
 from datetime import datetime
 if __name__ == "__main__":
     # Test thử với HSK1
-    pipeline = HSKPipeline(pdf_folder=r"input/tóm tắt HSK/hsk2", hsk_level="hsk2")
+    pipeline = HSKPipeline(pdf_folder=r"input/tóm tắt HSK/hsk5", hsk_level="hsk5")
     pipeline.start()

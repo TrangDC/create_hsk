@@ -1,4 +1,18 @@
-Tạo 4 câu hỏi trắc nghiệm. Mỗi câu hỏi gồm 1 đoạn script mô tả một trong 3 bức ảnh.
-- image_options: Danh sách 3 mô tả ảnh khác nhau (đánh dấu A, B, C) bằng tiếng Việt.
-- script_chinese: Câu nói mô tả chính xác 1 trong 3 ảnh đó.
-- correct_answer: Số thứ tự 1, 2 hoặc 3.
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng dữ liệu bài học nền tảng (bao gồm từ vựng, ngữ pháp, bài khóa) được cung cấp.
+
+Dựa vào nội dung đó, hãy tạo ra một danh sách các câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK1 để kiểm tra mức độ hiểu biết của học viên.
+
+Hãy tạo CÂU HỎI TRẮC NGHIỆM CHỌN PHƯƠNG ÁN ĐÚNG TỪ ẢNH với các yêu cầu cực kỳ nghiêm ngặt sau:
+- Tạo ra chính xác 4 câu hỏi.
+- Đối với mỗi câu hỏi, bạn phải tạo ra:
+    + `image_options`: một danh sách 3 mô tả ngắn gọn về 3 hình ảnh khác nhau bằng tiếng Việt, đánh thứ tự từ A-C. Cấu trúc yêu cầu: Ảnh: {mô tả}.
+    + `script_chinese` và `script_pinyin`: một đoạn script tiếng Trung ngắn (câu nói) mô tả CHÍNH XÁC một trong 3 hình ảnh đó.
+- Đáp án `correct_answer` phải là số thứ tự (1, 2, hoặc 3) của mô tả ảnh khớp với script.
+- LƯU Ý QUAN TRỌNG: CÁC MÔ TẢ HÌNH ẢNH (NẾU CÓ) TUYỆT ĐỐI KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN.
+
+YÊU CẦU ĐẦU RA:
+- Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin theo yêu cầu. Mô tả ảnh bằng Tiếng Việt.
+- Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+- Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được định nghĩa.
+- Tính chính xác: Nội dung câu hỏi và học liệu cần đa dạng, KHÔNG được lặp lại, và PHẢI sử dụng từ vựng/ngữ pháp trong tài liệu nền tảng.
+- Không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

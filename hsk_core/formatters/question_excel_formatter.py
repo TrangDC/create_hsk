@@ -26,54 +26,33 @@ def populate_individual_image_matching(worksheet, data: list):
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
 
 # Sheet ĐS (img) HSK1 và ĐS Ko phụ đề (img) HSK1
-def populate_true_false_from_array(workbook, data: list):
+def populate_true_false_from_array(worksheet, data: list):
     """
-    Điền dữ liệu cho 2 sheet Đúng/Sai từ một mảng JSON phẳng.
-    Key JSON: (không có, xử lý toàn bộ mảng)
+    Điền dữ liệu cho sheet Đúng/Sai từ một mảng JSON.
+    Hàm này được dùng chung cho cả 'ĐS (img) HSK1' và 'ĐS Ko phụ đề (img) HSK1'.
     """
-    print(f"   -> Đang phân phối dữ liệu Đúng/Sai vào các sheet...")
-    # Lấy các sheet cần điền
-    try:
-        sheet_img = workbook["ĐS (img) HSK1"]
-        sheet_vocab = workbook["ĐS Ko phụ đề (img) HSK1"]
-    except KeyError as e:
-        print(f"   ❌ Lỗi: Không tìm thấy sheet cần thiết: {e}. Bỏ qua.")
-        return
-
-    # Khởi tạo bộ đếm hàng cho mỗi sheet
-    row_counters = {
-        "ĐS (img) HSK1": 2,
-        "ĐS Ko phụ đề (img) HSK1": 2
-    }
-
-    # Lặp qua từng câu hỏi trong mảng dữ liệu
-    for item in data:
+    print(f"   -> Đang điền dữ liệu Đúng/Sai vào sheet: {worksheet.title}")
+    
+    start_row = 2
+    for i, item in enumerate(data, start=start_row):
         kind = item.get("kind")
-        sheet_to_populate = None
+        
+        # Xử lý chuỗi hiển thị và lời giải dựa trên 'kind'
         if kind == "script_hinh_anh":
-            sheet_to_populate = sheet_img
-            current_row = row_counters["ĐS (img) HSK1"]
-            row_counters["ĐS (img) HSK1"] += 1
-            # Định dạng nội dung cột F
             content_f = f"Ảnh: {item.get('image_des', '')}\nScript: {item.get('script', '')}"
-        elif kind == "tuvung_hinh_anh":
-            sheet_to_populate = sheet_vocab
-            current_row = row_counters["ĐS Ko phụ đề (img) HSK1"]
-            row_counters["ĐS Ko phụ đề (img) HSK1"] += 1
-            # Định dạng nội dung cột F
+            explanation = f"{item.get('explanation', '')}\n\nPhụ đề:\n{item.get('script', '')}\n{item.get('pinyin', '')}\n\nTạm dịch: {item.get('translation', '')}"
+        else:  # tuvung_hinh_anh
             content_f = f"Ảnh: {item.get('image_des', '')}\nTừ vựng: {item.get('script', '')}\nPinyin: {item.get('pinyin', '')}"
-        # Nếu tìm thấy loại câu hỏi hợp lệ, điền dữ liệu
-        if sheet_to_populate:
-            sheet_to_populate.cell(row=current_row, column=3).value = "DS"
-            sheet_to_populate.cell(row=current_row, column=4).value = "NB"
-            sheet_to_populate.cell(row=current_row, column=6).value = content_f
-            sheet_to_populate.cell(row=current_row, column=8).value = f"đúng sai: {item.get('correct_answer')}"
-            if kind == "script_hinh_anh":
-                explanation = f"{item.get('explanation', '')}\n\nPhụ đề:\n{item.get('script', '')}\n{item.get('pinyin', '')}\n\nTạm dịch: {item.get('translation', '')}"
-            else:  # tuvung_hinh_anh
-                explanation = f"{item.get('explanation', '')}\n\nTạm dịch: {item.get('translation', '')}"
-            sheet_to_populate.cell(row=current_row, column=9).value = explanation
-    print(f"   ✅ Hoàn thành điền dữ liệu Đúng/Sai.")
+            explanation = f"{item.get('explanation', '')}\n\nTạm dịch: {item.get('translation', '')}"
+            
+        # Điền vào Excel
+        worksheet.cell(row=i, column=3).value = "DS"
+        worksheet.cell(row=i, column=4).value = "NB"
+        worksheet.cell(row=i, column=6).value = content_f
+        worksheet.cell(row=i, column=8).value = f"đúng sai: {item.get('correct_answer')}"
+        worksheet.cell(row=i, column=9).value = explanation
+        
+    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
 
 # Sheet TN PA đúng (img) (HL) (HSK1)
 def populate_shared_image_comprehension(worksheet, data: dict):

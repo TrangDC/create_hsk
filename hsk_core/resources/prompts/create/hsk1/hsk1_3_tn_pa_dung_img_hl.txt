@@ -1,4 +1,17 @@
-Tạo một cụm câu hỏi gồm:
-- shared_material: 4 mô tả hình ảnh (A-D) bằng tiếng Việt.
-- questions: 4 đoạn hội thoại (Nam/Nữ, 2 lượt lời). Mỗi đoạn tương ứng với 1 ảnh trong học liệu.
-- correct_answer: Số thứ tự từ 1 đến 4.
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng dữ liệu bài học nền tảng (bao gồm từ vựng, ngữ pháp, bài khóa) được cung cấp.
+
+Dựa vào nội dung đó, hãy tạo ra một bộ câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK1.
+
+Hãy tạo DẠNG ĐỌC HIỂU HỘI THOẠI VỚI HỌC LIỆU ẢNH CHUNG với các yêu cầu cực kỳ nghiêm ngặt sau:
+- Tạo ra một học liệu chung `shared_material` gồm 4 mô tả hình ảnh khác nhau bằng tiếng Việt, đánh thứ tự từ A-D.
+- Tạo ra chính xác 4 câu hỏi (`questions`).
+- Đối với mỗi câu hỏi, tạo ra một `script` (1 đoạn hội thoại giữa `男` và `女`, gồm 2 lượt lời, có xuống dòng giữa các câu) có nội dung tương ứng với MỘT mô tả ảnh trong học liệu chung.
+- Đáp án `correct_answer` phải là số thứ tự (từ 1 đến 4) của ảnh khớp với đoạn hội thoại.
+- LƯU Ý QUAN TRỌNG: CÁC MÔ TẢ HÌNH ẢNH (NẾU CÓ) TUYỆT ĐỐI KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN.
+
+YÊU CẦU ĐẦU RA:
+- Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin. Mô tả ảnh bằng Tiếng Việt.
+- Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+- Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được định nghĩa.
+- Tính chính xác: Nội dung câu hỏi và học liệu cần đa dạng, KHÔNG được lặp lại, và PHẢI bám sát tài liệu nền tảng.
+- Không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.
