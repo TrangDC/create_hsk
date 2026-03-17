@@ -10,6 +10,7 @@ from utils.call_vertex_ai import ai_client, get_resource_path
 # Phase 3 (Step trước): Configs
 from config.hsk_question_configs import get_prompt_config
 from config.hsk_explanation_configs import get_explanation_config
+from formatters.explanation_excel_formatter import render_ds_vocab_explanation
 
 class HSKPipeline:
     def __init__(self, pdf_folder: str, hsk_level: str):
@@ -107,25 +108,74 @@ class HSKPipeline:
                 config = exp_configs[q_type]
                 print(f"   💡 Đang tạo lời giải cho dạng: {q_type}")
                 
-                # Chuyển data thành list để xử lý (Dù là object hay list)
-                tasks = q_content if isinstance(q_content, list) else [q_content]
+                # Làm phẳng dữ liệu và bọc trong 'data'
+                tasks = []
+                if isinstance(q_content, list):
+                    for q in q_content:
+                        tasks.append({"data": q})
+                elif isinstance(q_content, dict):
+                    if 'questions' in q_content:
+                        shared_material = q_content.get('shared_material', [])
+                        for q in q_content['questions']:
+                            tasks.append({
+                                "data": q,
+                                "shared_material": shared_material
+                            })
+                    else:
+                        tasks.append({"data": q_content})
                 
                 # Điểm mới: Tạo task list và gọi AI (có thể dùng ThreadPool ở đây để nhanh hơn)
                 for task_item in tasks:
+                    if 'prompt_file' not in config or 'schema_path' not in config:
+                        # Bỏ qua các task không dùng API tạo lời giải (như các dạng của HSK1/HSK5 có sẵn đáp án)
+                        continue
+
+                    prompt_filename = config['prompt_file']
+                    schema_filename = config['schema_path']
+                    
+                    # Xác định thư mục chứa file bằng cách lấy tiền tố từ tên file (vd: "hsk1_..." -> "hsk1")
+                    prompt_folder = prompt_filename.split('_')[0]
+                    schema_folder = schema_filename.split('_')[0]
+
                     # 1. Dùng Builder tạo Prompt text (không dùng file tạm)
-                    prompt_file_text = self._load_resource(f"resources/prompts/explanation/{self.hsk_level}/{config['prompt_file']}")
+                    prompt_file_text = self._load_resource(f"resources/prompts/explanation/{prompt_folder}/{prompt_filename}")
                     final_prompt = config['builder'](task_item, prompt_file_text)
                     
                     # 2. Load Schema
-                    schema = self._load_resource(f"resources/schemas/explanation/{self.hsk_level}/{config['schema_path']}")
+                    schema = self._load_resource(f"resources/schemas/explanation/{schema_folder}/{schema_filename}")
                     
                     # 3. Gọi AI lấy lời giải
                     explanation_result = ai_client.generate_content(final_prompt, schema)
                     
                     # 4. Dùng Renderer ghi vào Excel
-                    if config['sheet_name'] in workbook.sheetnames:
-                        # renderer sẽ tự tìm hàng trống hoặc hàng tương ứng để ghi
-                        config['renderer'](workbook[config['sheet_name']], explanation_result, task_item)
+                    sheet_name = config['sheet_name']
+                    if sheet_name in workbook.sheetnames:
+                        sheet = workbook[sheet_name]
+                        # Tìm hàng trống trong cột I
+                        current_row = 2
+                        while sheet[f'I{current_row}'].value is not None:
+                            current_row += 1
+                        
+                        renderer = config['renderer']
+                        cell = sheet[f'I{current_row}']
+                        
+                        # Xử lý các dạng khác nhau tùy theo số lượng tham số của renderer
+                        import inspect
+                        sig = inspect.signature(renderer)
+                        if 'worksheet' in sig.parameters:
+                            renderer(sheet, current_row, explanation_result, task_item)
+                        elif len(sig.parameters) == 3:
+                            renderer(cell, explanation_result, task_item)
+                        else:
+                            renderer(cell, explanation_result)
+
+        # Xử lý đặc biệt cho sheet "ĐS (img) HSK1" và "ĐS Ko phụ đề (img) HSK1"
+        if "ĐS (img) HSK1" in workbook.sheetnames:
+            ds_worksheet = workbook["ĐS (img) HSK1"]
+            render_ds_vocab_explanation(ds_worksheet, "ĐS (img) HSK1")
+        if "ĐS Ko phụ đề (img) HSK1" in workbook.sheetnames:
+            ds_no_sub_worksheet = workbook["ĐS Ko phụ đề (img) HSK1"]
+            render_ds_vocab_explanation(ds_no_sub_worksheet, "ĐS Ko phụ đề (img) HSK1")
 
         workbook.save(self.excel_output_path)
 
