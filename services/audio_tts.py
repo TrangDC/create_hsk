@@ -13,9 +13,11 @@ load_dotenv()
 # PHẦN 1: XỬ LÝ VĂN BẢN (PROCESSOR)
 # ==========================================
 class HSKTextProcessor:
-    def __init__(self):
+    def __init__(self, exam_type=1):
         self.chinese_char_pattern = re.compile(r'[\u4e00-\u9fff]')
-        self.question_numbers = {i: f"第{self._to_chinese_num(i)}题" for i in range(1, 21)}
+        # Tăng range lên 50 để an toàn cho đề có số câu dài hơn
+        self.question_numbers = {i: f"第{self._to_chinese_num(i)}题" for i in range(1, 51)}
+        self.exam_type = exam_type
 
     def _to_chinese_num(self, n):
         nums =["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
@@ -55,54 +57,52 @@ class HSKTextProcessor:
 
         # LƯU Ý MỚI: Zephyr = Nữ, Charon = Nam, Leda = Dẫn chuyện
 
-        # CÂU 1 - 8 (Câu đơn: Nam đọc 1 dòng, Nữ đọc 1 dòng)
-        if 1 <= q_idx <= 8:
+        # 1. KIỂM TRA DẠNG CÂU ĐƠN (Nam đọc 1 dòng, Nữ đọc 1 dòng)
+        is_single = False
+        if self.exam_type == 1 and 1 <= q_idx <= 8: is_single = True
+        elif self.exam_type == 2 and 13 <= q_idx <= 20: is_single = True
+        elif self.exam_type == 3 and 16 <= q_idx <= 20: is_single = True
+
+        if is_single:
             script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
             if text_i:
                 content = self.clean_tags(text_i[0], remove_all=True)
                 script.extend([{'v': 'Charon', 't': content}, {'v': 'Zephyr', 't': content}])
+            return script
 
-        # CÂU 9 - 12 (Cặp thoại)
-        elif 9 <= q_idx <= 12:
+        # 2. KIỂM TRA DẠNG GỘP NHÓM (Chỉ áp dụng cho Type 1: Câu 9-12)
+        if self.exam_type == 1 and 9 <= q_idx <= 12:
             if q_idx == 9: script.append({'v': 'Leda', 't': "第九题到十二题是根据下面一段话。"})
             script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
             block =[]
             for i, line in enumerate(text_i):
-                # Bắt chính xác tag để không bị nhầm khi trong câu có chữ "Nữ" hoặc "Nam"
-                if "女：" in line or "女:" in line:
-                    v = 'Zephyr' # Nữ
-                elif "男：" in line or "男:" in line:
-                    v = 'Charon' # Nam
-                else:
-                    # Nếu file Excel vô tình thiếu Tag, tự động gán luân phiên để chống lỗi
-                    v = 'Charon' if i % 2 == 0 else 'Zephyr'
-                
+                if "女：" in line or "女:" in line: v = 'Zephyr'
+                elif "男：" in line or "男:" in line: v = 'Charon'
+                else: v = 'Charon' if i % 2 == 0 else 'Zephyr'
                 block.append({'v': v, 't': self.clean_tags(line, remove_all=True)})
             script.extend(block * 2)
+            return script
 
-        # CÂU 13 (Cột F có ví dụ)
-        elif q_idx == 13:
-            if len(text_f) >= 1: script.append({'v': 'Leda', 't': text_f[0]}) # Dòng ví dụ
-            if len(text_f) >= 2: script.append({'v': 'Zephyr', 't': self.clean_tags(text_f[1])}) # Câu hỏi -> Nữ
+        # 3. KIỂM TRA DẠNG CÓ VÍ DỤ (Chỉ áp dụng cho Type 1: Câu 13)
+        if self.exam_type == 1 and q_idx == 13:
+            if len(text_f) >= 1: script.append({'v': 'Leda', 't': text_f[0]})
+            if len(text_f) >= 2: script.append({'v': 'Zephyr', 't': self.clean_tags(text_f[1])})
             script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
-            
-            # Cột I: Dòng 1 Nội dung (Nam), Dòng 2 Câu hỏi (Nữ)
             if len(text_i) >= 2:
                 block =[{'v': 'Charon', 't': self.clean_tags(text_i[0], remove_all=True)},
                          {'v': 'Zephyr', 't': self.clean_tags(text_i[1], remove_all=True)}]
                 script.extend(block * 2)
+            return script
 
-        # CÂU 14 TRỞ ĐI
-        elif q_idx >= 14:
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
-            # Cột I: Dòng 1 Nội dung (Nam), Dòng 2 Câu hỏi (Nữ)
-            if len(text_i) >= 2:
-                block =[{'v': 'Charon', 't': self.clean_tags(text_i[0], remove_all=True)},
-                         {'v': 'Zephyr', 't': self.clean_tags(text_i[1], remove_all=True)}]
-                script.extend(block * 2)
-            elif text_i:
-                content = self.clean_tags(text_i[0], remove_all=True)
-                script.extend([{'v': 'Charon', 't': content}, {'v': 'Zephyr', 't': content}])
+        # 4. CÁC CÂU CÒN LẠI (MẶC ĐỊNH LÀ ĐỐI THOẠI)
+        script.append({'v': 'Leda', 't': self.question_numbers.get(q_idx, f"第{q_idx}题")})
+        if len(text_i) >= 2:
+            block =[{'v': 'Charon', 't': self.clean_tags(text_i[0], remove_all=True)},
+                     {'v': 'Zephyr', 't': self.clean_tags(text_i[1], remove_all=True)}]
+            script.extend(block * 2)
+        elif text_i:
+            content = self.clean_tags(text_i[0], remove_all=True)
+            script.extend([{'v': 'Charon', 't': content}, {'v': 'Zephyr', 't': content}])
         return script
 
 # ==========================================
@@ -233,7 +233,7 @@ class VertexAudioGenerator:
 # ==========================================
 # PHẦN 3: HÀM CHẠY TEST (MAIN RUNNER)
 # ==========================================
-def test_file(excel_path, output_dir, model_name='Chirp3-HD', male_voice='Charon', female_voice='Zephyr', log_fn=print):
+def test_file(excel_path, output_dir, model_name='Chirp3-HD', male_voice='Charon', female_voice='Zephyr', log_fn=print, exam_type=1):
     """
     Xử lý file Excel và tạo audio tương ứng.
 
@@ -244,96 +244,63 @@ def test_file(excel_path, output_dir, model_name='Chirp3-HD', male_voice='Charon
         male_voice: Voice nam (Charon, Orus, Enceladus)
         female_voice: Voice nữ (Zephyr, Leda, Carrllihoe)
         log_fn: hàm để nhận thông điệp tiến độ (mặc định là print)
+        exam_type: Dạng cấu trúc đề (1: Dạng cũ, 2: Câu 13-20 là câu đơn, 3: Câu 16-20 là câu đơn)
     """    # xác định tên folder con dựa trên tên file input
     base_name = os.path.splitext(os.path.basename(excel_path))[0]
     audio_folder = os.path.join(output_dir, "audio", base_name)
     if not os.path.exists(audio_folder):
         os.makedirs(audio_folder, exist_ok=True)
 
-    # tạo bản sao Excel bằng pywin32 để không làm mất định dạng
-    dest_excel = os.path.join(audio_folder, f"{base_name}_Result_Final.xlsx")
-    try:
-        import win32com.client as win32
-        excel_app = win32.gencache.EnsureDispatch('Excel.Application')
-        excel_app.DisplayAlerts = False
-        wb_copy = excel_app.Workbooks.Open(os.path.abspath(excel_path))
-        wb_copy.SaveAs(os.path.abspath(dest_excel))
-        wb_copy.Close(False)
-        excel_app.Quit()
-    except Exception as e:
-        # nếu pywin32 không tồn tại, fallback về sao chép file bình thường
-        import shutil
-        shutil.copy2(excel_path, dest_excel)
+    # dùng pandas đọc dữ liệu từ file để xử lý nội dung
+    df = pd.read_excel(excel_path)
 
-    # dùng pandas đọc dữ liệu từ bản sao để xử lý nội dung
-    df = pd.read_excel(dest_excel)
-
-    # khởi tạo processor/generator giống như trước
-    processor = HSKTextProcessor()
+    # khởi tạo processor/generator
+    processor = HSKTextProcessor(exam_type=exam_type)
     generator = VertexAudioGenerator(model_name=model_name, male_voice=male_voice, female_voice=female_voice)
 
     group_9_12_script = []
+    group_9_12_filename = "Câu_9_12"
     log_fn("--- Bắt đầu xử lý file ---")
     log_fn(f"Model: {model_name} | Voice Nam: {male_voice} | Voice Nữ: {female_voice}")
 
-    # nếu pywin32 thành công ở trên, mở file để cập nhật đường dẫn trực tiếp
-    excel_updater = None
-    try:
-        import win32com.client as win32
-        excel_app = win32.gencache.EnsureDispatch('Excel.Application')
-        excel_app.DisplayAlerts = False
-        workbook = excel_app.Workbooks.Open(os.path.abspath(dest_excel))
-        worksheet = workbook.Worksheets(1)
-        excel_updater = (excel_app, workbook, worksheet)
-    except Exception:
-        excel_updater = None
-
     for idx, row in df.iterrows():
         q_idx = idx + 1  # Dòng 2 Excel là Câu 1
-        col_f, col_i = row.iloc[5], row.iloc[8]
+        col_b, col_f, col_i = row.iloc[1], row.iloc[5], row.iloc[8]
         if "Phụ đề:" not in str(col_i):
             continue
 
-        script = processor.build_script(col_f, col_i, q_idx)
-        if 9 <= q_idx <= 12:
-            group_9_12_script.extend(script)
-            if q_idx == 12:
-                path = generator.create_audio(group_9_12_script, os.path.join(audio_folder, "Câu_9_12.mp3"))
-                for r in range(idx - 3, idx + 1):
-                    if r < len(df):
-                        # cập nhật dataframe để giữ track
-                        df.iloc[r, 10] = path
-                        # viết vào file Excel qua COM nếu có
-                        if excel_updater:
-                            excel_row = r + 2
-                            excel_updater[2].Cells(excel_row, 11).Value = path
-                log_fn("Đã xong cụm Câu 9-12")
-        else:
-            path = generator.create_audio(script, os.path.join(audio_folder, f"Câu_{q_idx}.mp3"))
-            if idx < len(df):
-                df.iloc[idx, 10] = path
-                if excel_updater:
-                    excel_updater[2].Cells(idx + 2, 11).Value = path
-            log_fn(f"Đã xong Câu {q_idx}")
+        # Lấy tên file từ cột F
+        file_name = f"Câu_{q_idx}"
+        if isinstance(col_f, str):
+            url_match = re.search(r'URL:\s*([^\n\r]+)', col_f, re.IGNORECASE)
+            if url_match:
+                file_name = url_match.group(1).strip()
+                if file_name.lower().endswith('.mp3'):
+                    file_name = file_name[:-4].strip()
 
-    # lưu kết quả nếu không dùng COM, otherwise COM đã lưu trực tiếp
-    if not excel_updater:
-        df.to_excel(dest_excel, index=False)
-    else:
-        workbook.Save()
-        workbook.Close(False)
-        excel_app.Quit()
+        script = processor.build_script(col_f, col_i, q_idx)
+        if exam_type == 1 and 9 <= q_idx <= 12:
+            group_9_12_script.extend(script)
+            if q_idx == 9:
+                if isinstance(col_b, str):
+                    lines = [l.strip() for l in col_b.split('\n') if l.strip()]
+                    for l in lines:
+                        if "audio" not in l.lower():
+                            group_9_12_filename = l
+                            break
+                    else:
+                        if lines: group_9_12_filename = lines[-1]
+                    
+                    if group_9_12_filename.lower().endswith('.mp3'):
+                        group_9_12_filename = group_9_12_filename[:-4].strip()
+            if q_idx == 12:
+                path = generator.create_audio(group_9_12_script, os.path.join(audio_folder, f"{group_9_12_filename}.mp3"))
+                log_fn(f"Đã xong cụm Câu 9-12 (File: {group_9_12_filename}.mp3)")
+        else:
+            path = generator.create_audio(script, os.path.join(audio_folder, f"{file_name}.mp3"))
+            log_fn(f"Đã xong Câu {q_idx} (File: {file_name}.mp3)")
 
     log_fn(f"\n--- HOÀN THÀNH ---")
-    log_fn(f"File kết quả: {dest_excel}")
 
-    # trả về đường dẫn folder audio và file excel kết quả
-    return audio_folder, dest_excel
-
-if __name__ == "__main__":
-    # Thay đổi đường dẫn file test tại đây
-    EXCEL_INPUT = r"D:\Edmicro\Tools\create_hsk\input\Bài 13.xlsx" 
-    # folder gốc 'output'; hàm sẽ tạo subfolder audio/<basename>
-    FOLDER_AUDIO = os.path.join(".", "output")
-    
-    test_file(EXCEL_INPUT, FOLDER_AUDIO)
+    # trả về đường dẫn folder audio
+    return audio_folder
