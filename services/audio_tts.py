@@ -60,49 +60,95 @@ class HSKTextProcessor:
         # 1. KIỂM TRA DẠNG CÂU ĐƠN (Nam đọc 1 dòng, Nữ đọc 1 dòng)
         is_single = False
         if self.exam_type == 1 and 1 <= q_idx <= 8: is_single = True
-        elif self.exam_type == 2 and 13 <= q_idx <= 20: is_single = True
-        elif self.exam_type == 3 and 16 <= q_idx <= 20: is_single = True
+        elif self.exam_type in [2, 3]: is_single = True
 
         if is_single:
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
+            script.append({'v': 'Leda', 't': self.question_numbers[q_idx], 'delay_after': 1500})
             if text_i:
                 content = self.clean_tags(text_i[0], remove_all=True)
-                script.extend([{'v': 'Charon', 't': content}, {'v': 'Zephyr', 't': content}])
+                script.extend([
+                    {'v': 'Charon', 't': content, 'delay_after': 5000},
+                    {'v': 'Zephyr', 't': content, 'delay_after': 0}
+                ])
             return script
 
         # 2. KIỂM TRA DẠNG GỘP NHÓM (Chỉ áp dụng cho Type 1: Câu 9-12)
         if self.exam_type == 1 and 9 <= q_idx <= 12:
-            if q_idx == 9: script.append({'v': 'Leda', 't': "第九题到十二题是根据下面一段话。"})
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
-            block =[]
+            if q_idx == 9: 
+                script.append({'v': 'Leda', 't': "第九题到十二题是根据下面一段话。", 'delay_after': 5000})
+            
+            script.append({'v': 'Leda', 't': self.question_numbers[q_idx], 'delay_after': 1500})
+            
+            block1 = []
             for i, line in enumerate(text_i):
                 if "女：" in line or "女:" in line: v = 'Zephyr'
                 elif "男：" in line or "男:" in line: v = 'Charon'
                 else: v = 'Charon' if i % 2 == 0 else 'Zephyr'
-                block.append({'v': v, 't': self.clean_tags(line, remove_all=True)})
-            script.extend(block * 2)
+                delay = 800 if i < len(text_i) - 1 else 5000
+                block1.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
+            
+            block2 = []
+            for i, line in enumerate(text_i):
+                if "女：" in line or "女:" in line: v = 'Zephyr'
+                elif "男：" in line or "男:" in line: v = 'Charon'
+                else: v = 'Charon' if i % 2 == 0 else 'Zephyr'
+                delay = 800 if i < len(text_i) - 1 else (15000 if q_idx < 12 else 0)
+                block2.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
+            
+            script.extend(block1)
+            script.extend(block2)
             return script
 
         # 3. KIỂM TRA DẠNG CÓ VÍ DỤ (Chỉ áp dụng cho Type 1: Câu 13)
         if self.exam_type == 1 and q_idx == 13:
-            if len(text_f) >= 1: script.append({'v': 'Leda', 't': text_f[0]})
-            if len(text_f) >= 2: script.append({'v': 'Zephyr', 't': self.clean_tags(text_f[1])})
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
+            if len(text_f) >= 1: 
+                delay = 1200 if len(text_f) >= 2 else 15000
+                script.append({'v': 'Leda', 't': text_f[0], 'delay_after': delay})
+            if len(text_f) >= 2: 
+                script.append({'v': 'Zephyr', 't': self.clean_tags(text_f[1]), 'delay_after': 15000})
+            
+            script.append({'v': 'Leda', 't': self.question_numbers[q_idx], 'delay_after': 1500})
             if len(text_i) >= 2:
-                block =[{'v': 'Charon', 't': self.clean_tags(text_i[0], remove_all=True)},
-                         {'v': 'Zephyr', 't': self.clean_tags(text_i[1], remove_all=True)}]
-                script.extend(block * 2)
+                # Iterate 1
+                for i, line in enumerate(text_i):
+                    v = 'Charon' if i % 2 == 0 else 'Zephyr'
+                    delay = 1200 if i < len(text_i) - 1 else 5000
+                    script.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
+                
+                # Iterate 2
+                for i, line in enumerate(text_i):
+                    v = 'Charon' if i % 2 == 0 else 'Zephyr'
+                    delay = 1200 if i < len(text_i) - 1 else 0
+                    script.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
             return script
 
         # 4. CÁC CÂU CÒN LẠI (MẶC ĐỊNH LÀ ĐỐI THOẠI)
-        script.append({'v': 'Leda', 't': self.question_numbers.get(q_idx, f"第{q_idx}题")})
+        script.append({'v': 'Leda', 't': self.question_numbers.get(q_idx, f"第{q_idx}题"), 'delay_after': 1500})
+        
         if len(text_i) >= 2:
-            block =[{'v': 'Charon', 't': self.clean_tags(text_i[0], remove_all=True)},
-                     {'v': 'Zephyr', 't': self.clean_tags(text_i[1], remove_all=True)}]
-            script.extend(block * 2)
+            # Iterate 1
+            for i, line in enumerate(text_i):
+                if "女：" in line or "女:" in line: v = 'Zephyr'
+                elif "男：" in line or "男:" in line: v = 'Charon'
+                else: v = 'Charon' if i % 2 == 0 else 'Zephyr'
+                delay = 1200 if i < len(text_i) - 1 else 5000
+                script.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
+            
+            # Iterate 2
+            for i, line in enumerate(text_i):
+                if "女：" in line or "女:" in line: v = 'Zephyr'
+                elif "男：" in line or "男:" in line: v = 'Charon'
+                else: v = 'Charon' if i % 2 == 0 else 'Zephyr'
+                delay = 1200 if i < len(text_i) - 1 else 0
+                script.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
+                
         elif text_i:
             content = self.clean_tags(text_i[0], remove_all=True)
-            script.extend([{'v': 'Charon', 't': content}, {'v': 'Zephyr', 't': content}])
+            script.extend([
+                {'v': 'Charon', 't': content, 'delay_after': 5000},
+                {'v': 'Zephyr', 't': content, 'delay_after': 0}
+            ])
+            
         return script
 
 # ==========================================
@@ -130,7 +176,6 @@ class VertexAudioGenerator:
         self.narrator_voice = self.NARRATOR_VOICE
         
         self.client = self._init_client()
-        self.silence = AudioSegment.silent(duration=1000)
         self.language_code = "cmn-CN"
 
     def _init_client(self):
@@ -218,15 +263,18 @@ class VertexAudioGenerator:
         Tạo audio file từ script.
         
         Args:
-            script: List of {'v': role, 't': text}
+            script: List of {'v': role, 't': text, 'delay_after': int}
             out_path: Đường dẫn lưu file MP3
         """
         combined = AudioSegment.empty()
         for i, item in enumerate(script):
             seg = self.generate_single(item['t'], item['v'])
             combined += seg
-            if i < len(script) - 1: 
-                combined += self.silence
+            
+            delay = item.get('delay_after', 1000)
+            if i < len(script) - 1 and delay > 0:
+                combined += AudioSegment.silent(duration=delay)
+                
         combined.export(out_path, format="mp3")
         return os.path.abspath(out_path)
 
@@ -260,6 +308,8 @@ def test_file(excel_path, output_dir, model_name='Chirp3-HD', male_voice='Charon
 
     group_9_12_script = []
     group_9_12_filename = "Câu_9_12"
+    generated_audio_paths = []
+    
     log_fn("--- Bắt đầu xử lý file ---")
     log_fn(f"Model: {model_name} | Voice Nam: {male_voice} | Voice Nữ: {female_voice}")
 
@@ -295,10 +345,32 @@ def test_file(excel_path, output_dir, model_name='Chirp3-HD', male_voice='Charon
                         group_9_12_filename = group_9_12_filename[:-4].strip()
             if q_idx == 12:
                 path = generator.create_audio(group_9_12_script, os.path.join(audio_folder, f"{group_9_12_filename}.mp3"))
+                generated_audio_paths.append(path)
                 log_fn(f"Đã xong cụm Câu 9-12 (File: {group_9_12_filename}.mp3)")
         else:
             path = generator.create_audio(script, os.path.join(audio_folder, f"{file_name}.mp3"))
+            generated_audio_paths.append(path)
             log_fn(f"Đã xong Câu {q_idx} (File: {file_name}.mp3)")
+
+    if generated_audio_paths:
+        log_fn("\n--- Đang gộp thành file tổng ---")
+        try:
+            combined = AudioSegment.empty()
+            delay_segment = AudioSegment.silent(duration=15000)
+            
+            for i, path in enumerate(generated_audio_paths):
+                if os.path.exists(path):
+                    audio = AudioSegment.from_file(path, format="mp3")
+                    combined += audio
+                    if i < len(generated_audio_paths) - 1:
+                        combined += delay_segment
+            
+            merged_filename = f"{base_name}_Full.mp3"
+            merged_path = os.path.join(audio_folder, merged_filename)
+            combined.export(merged_path, format="mp3")
+            log_fn(f"Đã tạo file tổng: {merged_filename}")
+        except Exception as e:
+            log_fn(f"⚠️ Lỗi khi gộp file tổng: {e}")
 
     log_fn(f"\n--- HOÀN THÀNH ---")
 
