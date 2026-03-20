@@ -7,6 +7,7 @@ import openpyxl
 
 # Phase 1: AI Client & Path Manager
 from utils.call_vertex_ai import ai_client, get_resource_path
+from utils.matrix_manager import MatrixManager
 # Phase 3 (Step trước): Configs
 from config.hsk_question_configs import get_prompt_config
 from config.hsk_explanation_configs import get_explanation_config
@@ -59,8 +60,8 @@ class HSKPipeline:
         (self.output_dir / "super_context.json").write_text(context_str, encoding='utf-8')
         return context_str
 
-    def run_question_generation(self, super_context: str):
-        """Bước 2: Tạo câu hỏi và điền vào Excel"""
+    def run_question_generation(self, matrix_manager):
+        """Bước 2: Tạo câu hỏi và điền vào Excel dựa trên cấu trúc ma trận"""
         print(f"\n--- [BƯỚC 2] TẠO CÂU HỎI ---")
         configs = get_prompt_config(self.hsk_level)
         workbook = openpyxl.load_workbook(self.excel_output_path)
@@ -68,17 +69,36 @@ class HSKPipeline:
         all_generated_data = {}
 
         for prompt_id, config in configs.items():
-            print(f"   🚀 Đang chạy prompt: {prompt_id}")
+            matrix_name = config.get("matrix_name")
+            if not matrix_name:
+                print(f"   ⏩ Bỏ qua {prompt_id} (Không có cấu hình matrix_name)")
+                continue
+
+            # 1. Lấy dữ liệu động từ matrix_manager
+            dynamic_data = matrix_manager.get_dynamic_data_for_form(self.hsk_level, matrix_name)
+            if not dynamic_data:
+                print(f"   ⏩ Bỏ qua {prompt_id} (Không tìm thấy '{matrix_name}' trong file matrix)")
+                continue
+
+            print(f"   🚀 Đang chạy dạng bài: {matrix_name} ({prompt_id})")
             
-            # Load Prompt/Schema từ resources theo đúng cấu trúc thư mục mới
-            p_text = self._load_resource(f"resources/prompts/create/{self.hsk_level}/{prompt_id}.txt")
+            # 2. Đọc file text template và format
+            p_text_template = self._load_resource(f"resources/prompts/create/{self.hsk_level}/{prompt_id}.txt")
+            final_prompt = p_text_template.format(
+                number=dynamic_data["number"],
+                matrix_name=dynamic_data["matrix_name"],
+                rules_text=dynamic_data["rules_text"],
+                vocab_md=dynamic_data["vocab_md"]
+            )
+            
+            # 3. Đọc Schema
             p_schema = self._load_resource(f"resources/schemas/create/{self.hsk_level}/{prompt_id}.json")
             
-            # Gọi AI
-            data = ai_client.generate_content(p_text, p_schema, text_context=super_context)
+            # 4. Gọi AI
+            data = ai_client.generate_content(final_prompt, p_schema)
             all_generated_data[prompt_id] = data
             
-            # Ghi dữ liệu vào Excel (Duyệt qua các processors trong config)
+            # 5. Ghi dữ liệu vào Excel (Duyệt qua các processors trong config)
             for json_key, sheet_name, populate_func in config["processors"]:
                 if sheet_name in workbook.sheetnames:
                     data_part = data.get(json_key)
@@ -183,11 +203,15 @@ class HSKPipeline:
         """Khởi động toàn bộ Pipeline"""
         print(f"================ START PIPELINE: {self.hsk_level.upper()} ================")
         try:
-            # B1: Preprocessing
-            super_context = self.run_preprocessing()
+            # B1: Load Matrix Data (Thay thế Preprocessing)
+            print(f"\n--- [BƯỚC 1] LOAD MATRIX & VOCAB DATA ---")
+            matrix_path = get_resource_path(f"resources/data/matrix_{self.hsk_level}.json")
+            vocab_path = get_resource_path("resources/data/hsk_vocab.json")
+            
+            matrix_manager = MatrixManager(matrix_path=str(matrix_path), vocab_path=str(vocab_path))
             
             # B2: Questions
-            questions_data = self.run_question_generation(super_context)
+            questions_data = self.run_question_generation(matrix_manager)
             
             # B3: Explanations
             self.run_explanation_generation(questions_data)
@@ -204,5 +228,5 @@ class HSKPipeline:
 from datetime import datetime
 if __name__ == "__main__":
     # Test thử với HSK1
-    pipeline = HSKPipeline(pdf_folder=r"input/tóm tắt HSK/hsk5", hsk_level="hsk5")
+    pipeline = HSKPipeline(pdf_folder=r"input/tóm tắt HSK/hsk1", hsk_level="hsk1")
     pipeline.start()

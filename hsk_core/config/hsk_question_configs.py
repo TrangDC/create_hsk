@@ -31,27 +31,35 @@ from formatters.question_excel_formatter import (
 # Cấu hình HSK1: Đã tách thành 8 prompt riêng biệt
 HSK1_PROMPT_CONFIGS = {
     "hsk1_1_ds_img": {
-        "processors": [("ds_img_data", "ĐS (img) HSK1", populate_true_false_from_array)]
+        "processors": [("ds_img_data", "ĐS (img) HSK1", populate_true_false_from_array)],
+        "matrix_name": "Nghe từ/cụm từ + tranh Đ/S" 
     },
     "hsk1_2_tn_pa_dung_img": {
-        "processors": [("individual_image_matching", "TN PA đúng (img) (HSK1)", populate_individual_image_matching)]
+        "processors": [("individual_image_matching", "TN PA đúng (img) (HSK1)", populate_individual_image_matching)],
+        "matrix_name": "Nghe câu đơn + chọn tranh" 
     },
     "hsk1_3_tn_pa_dung_img_hl": {
+        "matrix_name": "Nghe hội thoại + nối tranh",
         "processors": [("shared_image_comprehension", "TN PA đúng (img) (HL) (HSK1)", populate_shared_image_comprehension)]
     },
     "hsk1_4_tn_pa_dung": {
-        "processors": [("reading_comprehension_choice", "TN PA đúng (HSK1)", populate_reading_comprehension_choice)]
+        "processors": [("reading_comprehension_choice", "TN PA đúng (HSK1)", populate_reading_comprehension_choice)],
+        "matrix_name": "Nghe câu / đoạn ngắn + trả lời"
     },
     "hsk1_5_ds_no_sub": {
+        "matrix_name": "Đọc từ + tranh Đ/S",
         "processors": [("ds_no_sub_data", "ĐS Ko phụ đề (img) HSK1", populate_true_false_from_array)]
     },
     "hsk1_6_tn_chon_anh_img_hl": {
+        "matrix_name": "Đọc câu + nối tranh",
         "processors": [("image_matching_questions", "TN chọn ảnh (img) (HL) (HSK1)", populate_image_matching_shared)]
     },
     "hsk1_7_tn_cau_tra_loi_dung_hl": {
+        "matrix_name": "Ghép câu hỏi với đáp án",
         "processors": [("sentence_matching_questions", "TN câu trả lời đúng (HL) (HSK1)", populate_sentence_matching_shared)]
     },
     "hsk1_8_tn_chon_tu_dung_hl": {
+        "matrix_name": "Điền từ vào chỗ trống",
         "processors": [("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK1)", populate_word_fill_in_shared)]
     }
 }

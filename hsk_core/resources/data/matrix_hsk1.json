@@ -1,0 +1,1286 @@
+{
+
+  "Lever": "HSK1",
+
+  "Nghe từ/cụm từ + tranh Đ/S": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 1,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Số lượng",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Số lượng đồ vật học tập",
+
+        "Tu_trong_tam": "三，本，书",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "×",
+
+        "Dac_ta_tao_de_tt": "Dùng số + lượng từ + danh từ; tranh chỉ khác số lượng hoặc vật."
+
+      },
+
+      {
+
+        "ID": 2,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Chào hỏi & Giao tiếp",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Xã giao cơ bản",
+
+        "Tu_trong_tam": "对不起",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "×",
+
+        "Dac_ta_tao_de_tt": "Ra cụm chào hỏi/xin lỗi/cảm ơn; tranh đúng-sai theo ngữ cảnh."
+
+      },
+
+      {
+
+        "ID": 3,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Khả năng",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Miêu tả ngoại hình / đồ vật",
+
+        "Tu_trong_tam": "很，漂亮",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "√",
+
+        "Dac_ta_tao_de_tt": "Dùng tính từ cơ bản như 大/小/漂亮; tranh thể hiện rõ đặc điểm."
+
+      },
+
+      {
+
+        "ID": 4,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Ăn uống",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Mua sắm quần áo",
+
+        "Tu_trong_tam": "买，衣服",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "√",
+
+        "Dac_ta_tao_de_tt": "Dùng động từ + danh từ quen thuộc trong mua sắm; tranh chỉ 1 hành động."
+
+      },
+
+      {
+
+        "ID": 5,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Thời gian",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Năm / con số",
+
+        "Tu_trong_tam": "二零零八年",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "√",
+
+        "Dac_ta_tao_de_tt": "Cho năm/tháng/ngày hoặc số điện thoại; tranh dùng chữ số dễ phân biệt."
+
+      }
+
+    ]
+
+  },
+
+  "Nghe câu đơn + chọn tranh": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 6,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Sở thích",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Hoạt động thường ngày",
+
+        "Tu_trong_tam": "他，在，睡觉，呢",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "A",
+
+        "Dac_ta_tao_de_tt": "Viết câu ngắn 5–7 từ mô tả 1 hành động rõ ràng; 2 tranh nhiễu bằng người/vật khác."
+
+      },
+
+      {
+
+        "ID": 7,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Khả năng",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Cảm xúc",
+
+        "Tu_trong_tam": "怎么了，不高兴",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "B",
+
+        "Dac_ta_tao_de_tt": "Dùng từ chỉ cảm xúc như 高兴/不高兴/累; tranh nhiễu bằng hành động gần nghĩa."
+
+      },
+
+      {
+
+        "ID": 8,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Thời tiết",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Uống nước / cảm giác nóng",
+
+        "Tu_trong_tam": "太热了，水，喝水",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "C",
+
+        "Dac_ta_tao_de_tt": "Kết hợp nhu cầu cơ thể với đồ ăn/uống; tranh nhiễu theo hành động ăn/uống."
+
+      },
+
+      {
+
+        "ID": 9,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Hoạt động hàng ngày",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Giờ giấc",
+
+        "Tu_trong_tam": "下午，一点，十分",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "B",
+
+        "Dac_ta_tao_de_tt": "Ra câu giờ giấc chuẩn HSK1; 3 tranh đồng hồ lệch 5–10 phút."
+
+      },
+
+      {
+
+        "ID": 10,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Giao thông",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Địa điểm đi lại",
+
+        "Tu_trong_tam": "去，火车站",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "B",
+
+        "Dac_ta_tao_de_tt": "Dùng 去 + địa điểm; tranh nhiễu bằng hành động mua sắm hoặc cầm hành lí."
+
+      }
+
+    ]
+
+  },
+
+  "Nghe hội thoại + nối tranh": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 11,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Nghề nghiệp",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Nghề nghiệp và tên người",
+
+        "Tu_trong_tam": "医生，叫，李明",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "A",
+
+        "Dac_ta_tao_de_tt": "Hội thoại 2 lượt ngắn, đáp án là 1 tranh nghề nghiệp / người / vật cụ thể."
+
+      },
+
+      {
+
+        "ID": 12,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Giao thông",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Đi taxi tới trường",
+
+        "Tu_trong_tam": "回家，出租车，学校",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "D",
+
+        "Dac_ta_tao_de_tt": "Dùng đang ở đâu / đang đi đâu; tranh nhiễu bằng nhà, trường, phương tiện."
+
+      },
+
+      {
+
+        "ID": 13,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Giao thông",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Máy bay và thời gian",
+
+        "Tu_trong_tam": "坐，飞机，上午九点",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "B",
+
+        "Dac_ta_tao_de_tt": "Cho 1 câu hỏi + 1 câu đáp về giờ hoặc phương tiện; tranh chọn 1 hình tiêu biểu."
+
+      },
+
+      {
+
+        "ID": 14,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Ăn uống",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Hoa quả",
+
+        "Tu_trong_tam": "谢谢，水果，苹果",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "F",
+
+        "Dac_ta_tao_de_tt": "Dùng lời cảm ơn và đồ ăn quen thuộc; tranh nên rõ 1 loại thực phẩm chính."
+
+      },
+
+      {
+
+        "ID": 15,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Trường học & Học tập",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Bạn bè ở Trung Quốc",
+
+        "Tu_trong_tam": "这些人，朋友，中国",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "E",
+
+        "Dac_ta_tao_de_tt": "Tạo hội thoại xác định quan hệ người-người; tranh nhóm người phù hợp nội dung."
+
+      }
+
+    ]
+
+  },
+
+  "Nghe câu / đoạn ngắn + trả lời": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 16,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Thời gian",
+
+        "Nhom_ngu_phap": "Cách diễn tả thời gian",
+
+        "Chu-de_tinh-huong": "Khi nào đi Bắc Kinh",
+
+        "Tu_trong_tam": "下个月，北京",
+
+        "Ngu-phap_mau-cau": "什么时候",
+
+        "Dap_an_mau": "C",
+
+        "Dac_ta_tao_de_tt": "Ra 1 câu trần thuật rất ngắn rồi hỏi 什么时候; 3 đáp án cùng trường nghĩa thời gian."
+
+      },
+
+      {
+
+        "ID": 17,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Nghề nghiệp",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Giáo viên tiểu học",
+
+        "Tu_trong_tam": "小学，老师，学生",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "A",
+
+        "Dac_ta_tao_de_tt": "Dùng nghề nghiệp + nơi làm việc; đáp án nhiễu giữa 小学/中学/大学."
+
+      },
+
+      {
+
+        "ID": 18,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Trường học & Học tập",
+
+        "Nhom_ngu_phap": "Ngữ pháp:Trợ từ kết cấu 的",
+
+        "Chu-de_tinh-huong": "Bạn cùng lớp của con trai",
+
+        "Tu_trong_tam": "儿子，同学，医院",
+
+        "Ngu-phap_mau-cau": "A 的 B / B 的 A; 谁",
+
+        "Dap_an_mau": "C",
+
+        "Dac_ta_tao_de_tt": "Tạo chuỗi quan hệ bằng 的; câu hỏi đổi sang 谁/谁的 để kiểm tra suy luận."
+
+      },
+
+      {
+
+        "ID": 19,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Hoạt động hàng ngày",
+
+        "Nhom_ngu_phap": "Từ chỉ thời gian làm trạng ngữ",
+
+        "Chu-de_tinh-huong": "Ở 3 ngày, Chủ nhật về",
+
+        "Tu_trong_tam": "住，三天，星期天，回来",
+
+        "Ngu-phap_mau-cau": "Thời gian + động từ",
+
+        "Dap_an_mau": "C",
+
+        "Dac_ta_tao_de_tt": "Cho 2 mốc thời gian trong câu, hỏi ngày/thời điểm quay lại hoặc đi."
+
+      },
+
+      {
+
+        "ID": 20,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Nghe",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Khả năng",
+
+        "Nhom_ngu_phap": "Động từ năng nguyện \"会\"",
+
+        "Chu-de_tinh-huong": "Khả năng tiếng Hán",
+
+        "Tu_trong_tam": "汉语，很好，会，写，汉字",
+
+        "Ngu-phap_mau-cau": "会 + 动词; 很 + tính từ",
+
+        "Dap_an_mau": "A",
+
+        "Dac_ta_tao_de_tt": "Dùng 会/能 + động từ; phương án nhiễu bằng 不会写 / 不会读."
+
+      }
+
+    ]
+
+  },
+
+  "Đọc từ + tranh Đ/S": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 21,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Sức khỏe",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Con vật",
+
+        "Tu_trong_tam": "猫",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "√",
+
+        "Dac_ta_tao_de_tt": "Dùng 1 danh từ đơn quen thuộc; tranh đúng-sai phân biệt rõ."
+
+      },
+
+      {
+
+        "ID": 22,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Số lượng",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Số đếm",
+
+        "Tu_trong_tam": "四",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "√",
+
+        "Dac_ta_tao_de_tt": "Dùng số đếm 1–10; tranh là nhóm đồ vật có số lượng rõ."
+
+      },
+
+      {
+
+        "ID": 23,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Tuổi tác",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Gia đình",
+
+        "Tu_trong_tam": "女儿",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "×",
+
+        "Dac_ta_tao_de_tt": "Dùng từ chỉ người thân; tranh nhiễu bằng 男孩/儿子/妈妈."
+
+      },
+
+      {
+
+        "ID": 24,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Ăn uống",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Đồ uống / món ăn",
+
+        "Tu_trong_tam": "茶",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "×",
+
+        "Dac_ta_tao_de_tt": "Dùng danh từ ăn uống cơ bản; tranh nhiễu bằng món gần chủ đề."
+
+      },
+
+      {
+
+        "ID": 25,
+
+        "Phan": "Phần 1",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Khả năng",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Hành động nói",
+
+        "Tu_trong_tam": "说话",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "×",
+
+        "Dac_ta_tao_de_tt": "Dùng động từ hoạt động cơ bản như 看/听/说/读; tranh cần rõ hành động."
+
+      }
+
+    ]
+
+  },
+
+  "Đọc câu + nối tranh": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 26,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Sức khỏe",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Chọn ghế",
+
+        "Tu_trong_tam": "想，坐，哪个，椅子",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "D",
+
+        "Dac_ta_tao_de_tt": "Viết câu hỏi ngắn có từ chỉ đồ vật; 6 tranh đáp án gồm 1 tranh đúng, 5 tranh chủ đề khác."
+
+      },
+
+      {
+
+        "ID": 27,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Ăn uống",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Mua đồ ở cửa hàng",
+
+        "Tu_trong_tam": "王先生，在，商店，买东西",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "B",
+
+        "Dac_ta_tao_de_tt": "Câu trần thuật ngắn mô tả người + nơi chốn + hành động mua."
+
+      },
+
+      {
+
+        "ID": 28,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Thời tiết",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Trời mưa, lạnh",
+
+        "Tu_trong_tam": "下雨，天气，很冷",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "A",
+
+        "Dac_ta_tao_de_tt": "Dùng thời tiết cơ bản 晴/雨/冷/热; tranh nên tránh nhiễu quá khó."
+
+      },
+
+      {
+
+        "ID": 29,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Số lượng",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Chụp ảnh và đếm",
+
+        "Tu_trong_tam": "看我这儿，一，二，三",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "C",
+
+        "Dac_ta_tao_de_tt": "Dùng mệnh lệnh đơn giản + số đếm; tranh đúng là người đang chụp ảnh."
+
+      },
+
+      {
+
+        "ID": 30,
+
+        "Phan": "Phần 2",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "NB",
+
+        "Trong_tam": "Từ vựng",
+
+        "Nhom_tu_vung": "Sở thích",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Học lái xe",
+
+        "Tu_trong_tam": "昨天，学习，开车",
+
+        "Ngu-phap_mau-cau": "—",
+
+        "Dap_an_mau": "F",
+
+        "Dac_ta_tao_de_tt": "Dùng quá khứ đơn giản 昨天 + 去 + 学习/工作; tranh nhiễu bằng người đang lái xe thật."
+
+      }
+
+    ]
+
+  },
+
+  "Ghép câu hỏi với đáp án": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 31,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Hoạt động hàng ngày",
+
+        "Nhom_ngu_phap": "Đại từ nghi vấn 怎么样",
+
+        "Chu-de_tinh-huong": "Hỏi cảm nhận về phim",
+
+        "Tu_trong_tam": "电影，怎么样",
+
+        "Ngu-phap_mau-cau": "……怎么样？",
+
+        "Dap_an_mau": "B",
+
+        "Dac_ta_tao_de_tt": "Tạo câu hỏi đánh giá như 怎么样/好吗; đáp án ngắn, tự nhiên."
+
+      },
+
+      {
+
+        "ID": 32,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Vị trí",
+
+        "Nhom_ngu_phap": "Ngữ pháp:Trợ từ kết cấu 的",
+
+        "Chu-de_tinh-huong": "Hỏi chủ sở hữu đồ vật",
+
+        "Tu_trong_tam": "这，是，谁，的，电脑",
+
+        "Ngu-phap_mau-cau": "谁的 / 的",
+
+        "Dap_an_mau": "E",
+
+        "Dac_ta_tao_de_tt": "Dùng mẫu 谁的 + danh từ; đáp án là tên người + 的."
+
+      },
+
+      {
+
+        "ID": 33,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Sở thích",
+
+        "Nhom_ngu_phap": null,
+
+        "Chu-de_tinh-huong": "Sở thích với chó",
+
+        "Tu_trong_tam": "对不起，不，喜欢，狗",
+
+        "Ngu-phap_mau-cau": "不 + 喜欢",
+
+        "Dap_an_mau": "D",
+
+        "Dac_ta_tao_de_tt": "Tạo câu hỏi yes/no về sở thích; đáp án xã giao như 没关系/喜欢/不喜欢."
+
+      },
+
+      {
+
+        "ID": 34,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Hoạt động hàng ngày",
+
+        "Nhom_ngu_phap": "Cấu trúc \"在...呢”",
+
+        "Chu-de_tinh-huong": "Ở nhà làm gì",
+
+        "Tu_trong_tam": "在家，做什么，呢",
+
+        "Ngu-phap_mau-cau": "在 + nơi + V + 呢",
+
+        "Dap_an_mau": "A",
+
+        "Dac_ta_tao_de_tt": "Dùng cấu trúc đang ở đâu làm gì; đáp án là động từ/ngữ động từ ngắn."
+
+      },
+
+      {
+
+        "ID": 35,
+
+        "Phan": "Phần 3",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Ăn uống",
+
+        "Nhom_ngu_phap": "Câu tồn hiện",
+
+        "Chu-de_tinh-huong": "Cốc ở đâu",
+
+        "Tu_trong_tam": "爸，我的，杯子，呢",
+
+        "Ngu-phap_mau-cau": "方位词：上 / 里",
+
+        "Dap_an_mau": "C",
+
+        "Dac_ta_tao_de_tt": "Cho câu hỏi tìm đồ vật; đáp án là cụm vị trí ngắn như 桌子上 / 书包里."
+
+      }
+
+    ]
+
+  },
+
+  "Điền từ vào chỗ trống": {
+
+    "SL_dang_bai": 5,
+
+    "data": [
+
+      {
+
+        "ID": 36,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Hoạt động hàng ngày",
+
+        "Nhom_ngu_phap": "Động từ năng nguyện \"能\"",
+
+        "Chu-de_tinh-huong": "Mời ăn cơm buổi trưa",
+
+        "Tu_trong_tam": "中午，请，你，吃饭",
+
+        "Ngu-phap_mau-cau": "能 + V + 吗",
+
+        "Dap_an_mau": "B",
+
+        "Dac_ta_tao_de_tt": "Tạo câu mời / đề nghị với 能/可以; ngân hàng từ chỉ 1 từ phù hợp."
+
+      },
+
+      {
+
+        "ID": 37,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Tuổi tác",
+
+        "Nhom_ngu_phap": "Trợ từ chỉ sự thay đổi 了",
+
+        "Chu-de_tinh-huong": "Tuổi của giáo viên",
+
+        "Tu_trong_tam": "今年，60，了",
+
+        "Ngu-phap_mau-cau": "数词 + 岁 + 了",
+
+        "Dap_an_mau": "C",
+
+        "Dac_ta_tao_de_tt": "Dùng số tuổi hoặc lớp học; ngân hàng từ nên cùng loại từ để tăng nhiễu nhẹ."
+
+      },
+
+      {
+
+        "ID": 38,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Sở thích",
+
+        "Nhom_ngu_phap": "Phó từ 都",
+
+        "Chu-de_tinh-huong": "Hai người đều thích xem TV",
+
+        "Tu_trong_tam": "和，妈妈，都，喜欢，看电视",
+
+        "Ngu-phap_mau-cau": "都 + V/Adj",
+
+        "Dap_an_mau": "F",
+
+        "Dac_ta_tao_de_tt": "Tạo câu có 2 chủ ngữ nối bằng 和; chỗ trống kiểm tra 都."
+
+      },
+
+      {
+
+        "ID": 39,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Ăn uống",
+
+        "Nhom_ngu_phap": "Cách diễn đạt số tiền",
+
+        "Chu-de_tinh-huong": "Hỏi giá món ăn",
+
+        "Tu_trong_tam": "爱吃，这个菜，钱",
+
+        "Ngu-phap_mau-cau": "多少钱",
+
+        "Dap_an_mau": "E",
+
+        "Dac_ta_tao_de_tt": "Dùng câu mua hàng / gọi món; chỗ trống là từ hỏi giá hoặc số lượng."
+
+      },
+
+      {
+
+        "ID": 40,
+
+        "Phan": "Phần 4",
+
+        "Skill": "Đọc",
+
+        "So_cau_hoi": 5,
+
+        "Do_kho": "TH",
+
+        "Trong_tam": "Ngữ pháp",
+
+        "Nhom_tu_vung": "Giao thông",
+
+        "Nhom_ngu_phap": "Giới từ 在",
+
+        "Chu-de_tinh-huong": "Ở trong nhà hàng",
+
+        "Tu_trong_tam": "在哪儿，饭店，看见",
+
+        "Ngu-phap_mau-cau": "在 + địa điểm + 里",
+
+        "Dap_an_mau": "A",
+
+        "Dac_ta_tao_de_tt": "Tạo hội thoại tìm người; chỗ trống kiểm tra 里/上/下/néi loại phương vị."
+
+      }
+
+    ]
+
+  }
+
+}
+ 

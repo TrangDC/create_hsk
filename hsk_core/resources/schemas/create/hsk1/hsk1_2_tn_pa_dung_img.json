@@ -10,6 +10,10 @@
           "question_id": {
             "type": "integer"
           },
+          "do_kho": {
+            "type": "string",
+            "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+          },
           "image_options": {
             "type": "array",
             "description": "Danh sách gồm 3 chuỗi, đánh thứ tự A., B., C., mô tả hình ảnh theo cấu trúc Ảnh: {mô tả} bằng Tiếng Việt.",
@@ -30,8 +34,9 @@
             "description": "Đáp án đúng, là số thứ tự của ảnh (1, 2, hoặc 3) trong 'image_options' khớp với script."
           }
         },
-        "required":[
+        "required": [
           "question_id",
+          "do_kho",
           "image_options",
           "script_chinese",
           "script_pinyin",

@@ -21,6 +21,10 @@
               "question_id": {
                 "type": "integer"
               },
+              "do_kho": {
+                "type": "string",
+                "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+              },
               "script_chinese": {
                 "type": "string",
                 "description": "Hội thoại tiếng Trung giữa 男 và 女."
@@ -34,8 +38,9 @@
                 "description": "Đáp án đúng, là số thứ tự của ảnh (1 đến 4) trong 'shared_material'."
               }
             },
-            "required":[
+            "required": [
               "question_id",
+              "do_kho",
               "script_chinese",
               "script_pinyin",
               "correct_answer"

@@ -10,6 +10,10 @@
           "question_id": {
             "type": "integer"
           },
+          "do_kho": {
+            "type": "string",
+            "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+          },
           "context_chinese": {
             "type": "string",
             "description": "Câu chứa thông tin. BẮT BUỘC chỉ là một câu kể, không phải hội thoại."
@@ -42,8 +46,9 @@
             "description": "Đáp án đúng, là số thứ tự của phương án (1, 2, hoặc 3)."
           }
         },
-        "required":[
+        "required": [
           "question_id",
+          "do_kho",
           "context_chinese",
           "query_chinese",
           "answer_options",

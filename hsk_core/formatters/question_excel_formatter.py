@@ -19,6 +19,7 @@ def populate_individual_image_matching(worksheet, data: list):
         script_chinese = question.get('script_chinese', '')
         content_f = f"{image_options_str}\n\n{script_chinese}"
         
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
         worksheet[f'F{i}'] = content_f
         
         # Cột H: Đáp án
@@ -45,9 +46,12 @@ def populate_true_false_from_array(worksheet, data: list):
             content_f = f"Ảnh: {item.get('image_des', '')}\nTừ vựng: {item.get('script', '')}\nPinyin: {item.get('pinyin', '')}"
             explanation = f"{item.get('explanation', '')}\n\nTạm dịch: {item.get('translation', '')}"
             
+        # Lấy độ khó từ item, mặc định là NB nếu không có
+        do_kho = item.get("do_kho", "NB")
+
         # Điền vào Excel
         worksheet.cell(row=i, column=3).value = "DS"
-        worksheet.cell(row=i, column=4).value = "NB"
+        worksheet.cell(row=i, column=4).value = do_kho
         worksheet.cell(row=i, column=6).value = content_f
         worksheet.cell(row=i, column=8).value = f"đúng sai: {item.get('correct_answer')}"
         worksheet.cell(row=i, column=9).value = explanation
@@ -96,6 +100,9 @@ def populate_shared_image_comprehension(worksheet, data: dict):
     for i, question in enumerate(questions):
         current_row = start_row + i
         
+        # Cột D: Độ khó
+        worksheet[f'D{current_row}'] = question.get('do_kho', 'NB')
+        
         # Cột E: Script câu hỏi
         worksheet[f'E{current_row}'] = question.get('script_chinese', '')
         
@@ -116,6 +123,7 @@ def populate_reading_comprehension_choice(worksheet, data: list):
         # Cột F: Ngữ cảnh + Câu hỏi
         context = question.get('context_chinese', '')
         query = question.get('query_chinese', '')
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
         worksheet[f'F{i}'] = f"{context}\n{query}"
         
         # Cột G: Các lựa chọn đáp án
@@ -165,6 +173,8 @@ def populate_image_matching_shared(worksheet, data: dict):
         worksheet[f'F{current_row}'] = f"{chinese} （ ）\n{pinyin}"
         # Cột H: Đáp án
         worksheet[f'H{current_row}'] = question.get('correct_answer')
+        # Cột D: Độ khó
+        worksheet[f'D{current_row}'] = question.get('do_kho', 'NB')
     print(f"   ✅ Hoàn thành điền học liệu và {num_questions} câu hỏi.")
 
 # Sheet TN câu trả lời đúng (HL) (HSK1)
@@ -204,6 +214,8 @@ def populate_sentence_matching_shared(worksheet, data: dict):
     # Cột F và H: Câu hỏi và đáp án
     for i, question in enumerate(questions):
         current_row = start_row + i
+        # Cột D: Độ khó
+        worksheet[f'D{current_row}'] = question.get('do_kho', 'NB')
         # Cột F: Câu hỏi
         chinese = question.get('question_text_chinese', '')
         pinyin = question.get('pinyin', '')
@@ -255,6 +267,9 @@ def populate_word_fill_in_shared(worksheet, data: dict):
     # Cột F và H: Câu hỏi và đáp án (Logic được nâng cấp)
     for i, question in enumerate(questions):
         current_row = start_row + i
+        
+        # Cột D: Độ khó
+        worksheet[f'D{current_row}'] = question.get('do_kho', 'NB')
         
         # Cột F: Câu hỏi (đã có thể xử lý hội thoại)
         question_lines_formatted = []

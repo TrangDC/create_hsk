@@ -7,10 +7,11 @@
         "type": "object",
         "properties": {
           "id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
           "kind": { 
             "type": "string",
-            "description": "Phân loại câu hỏi, ở đây luôn là 'tuvung_hinh_anh' cho HSK1.",
-            "enum": ["tuvung_hinh_anh"]
+            "enum": ["tuvung_hinh_anh"],
+            "description": "Phân loại câu hỏi, ở đây luôn là 'tuvung_hinh_anh' cho HSK1."
           },
           "script": { "type": "string", "description": "1 từ vựng duy nhất" },
           "pinyin": { "type": "string" },
@@ -19,7 +20,17 @@
           "correct_answer": { "type": "integer" },
           "explanation": { "type": "string" }
         },
-        "required": ["id", "kind", "script", "pinyin", "translation", "image_des", "correct_answer", "explanation"]
+        "required": [
+          "id",
+          "do_kho",
+          "kind",
+          "script",
+          "pinyin",
+          "translation",
+          "image_des",
+          "correct_answer",
+          "explanation"
+        ]
       }
     }
   },

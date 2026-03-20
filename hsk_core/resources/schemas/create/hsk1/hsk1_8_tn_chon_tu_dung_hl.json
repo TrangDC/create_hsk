@@ -37,6 +37,10 @@
               "question_id": {
                 "type": "integer"
               },
+              "do_kho": {
+                "type": "string",
+                "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+              },
               "is_dialogue": {
                 "type": "boolean",
                 "description": "True nếu đây là câu hỏi dạng hội thoại."
@@ -71,8 +75,9 @@
                 "description": "Đáp án đúng, là chữ cái (A-D) của từ trong 'shared_material'."
               }
             },
-            "required":[
+            "required": [
               "question_id",
+              "do_kho",
               "is_dialogue",
               "lines",
               "correct_answer"

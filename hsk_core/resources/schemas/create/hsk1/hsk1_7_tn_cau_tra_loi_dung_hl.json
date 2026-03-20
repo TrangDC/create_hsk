@@ -40,6 +40,10 @@
               "question_id": {
                 "type": "integer"
               },
+              "do_kho": {
+                "type": "string",
+                "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+              },
               "question_text_chinese": {
                 "type": "string"
               },
@@ -51,8 +55,9 @@
                 "description": "Đáp án đúng, là chữ cái in hoa (A-D) của phương án trong 'shared_material'."
               }
             },
-            "required":[
+            "required": [
               "question_id",
+              "do_kho",
               "question_text_chinese",
               "pinyin",
               "correct_answer"
