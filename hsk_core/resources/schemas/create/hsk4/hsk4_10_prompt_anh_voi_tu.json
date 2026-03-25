@@ -8,6 +8,7 @@
         "type": "object",
         "properties": {
           "question_id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
           "image_description": {
             "type": "string",
             "description": "Mô tả hình ảnh bằng tiếng Việt."
@@ -21,7 +22,7 @@
             "description": "Một câu trả lời mẫu hoàn chỉnh bằng tiếng Trung."
           }
         },
-        "required": ["question_id", "image_description", "vocabulary_word", "sample_sentence"]
+        "required": ["question_id", "do_kho", "image_description", "vocabulary_word", "sample_sentence"]
       }
     }
   },

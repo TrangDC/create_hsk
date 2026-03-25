@@ -8,6 +8,7 @@
         "type": "object",
         "properties": {
           "question_id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
           "components": {
             "type": "array",
             "description": "Danh sách 3 câu văn bị xáo trộn.",
@@ -22,7 +23,7 @@
           },
           "correct_order": { "type": "string", "description": "Chuỗi 3 chữ cái thể hiện thứ tự đúng, ví dụ: 'BCA'." }
         },
-        "required": ["question_id", "components", "correct_order"]
+        "required": ["question_id", "do_kho", "components", "correct_order"]
       }
     }
   },

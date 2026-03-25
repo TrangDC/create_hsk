@@ -25,11 +25,12 @@
             "type": "object",
             "properties": {
               "question_id": { "type": "integer" },
+              "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
               "question_text_chinese": { "type": "string", "description": "Câu trả lời." },
               "pinyin": { "type": "string" },
               "correct_answer": { "type": "string", "description": "Đáp án đúng, là chữ cái (A-D) của câu thoại trong học liệu." }
             },
-            "required": ["question_id", "question_text_chinese", "pinyin", "correct_answer"]
+            "required": ["question_id", "do_kho", "question_text_chinese", "pinyin", "correct_answer"]
           }
         }
       },

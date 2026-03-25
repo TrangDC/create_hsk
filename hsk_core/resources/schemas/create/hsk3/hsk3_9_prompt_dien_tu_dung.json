@@ -8,12 +8,13 @@
         "type": "object",
         "properties": {
           "question_id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
           "sentence_part_1": { "type": "string", "description": "Phần câu trước chỗ trống." },
           "correct_word": { "type": "string", "description": "Từ đúng cần điền." },
           "correct_word_pinyin": { "type": "string", "description": "Pinyin của từ đúng." },
           "sentence_part_2": { "type": "string", "description": "Phần câu sau chỗ trống." }
         },
-        "required": ["question_id", "sentence_part_1", "correct_word", "correct_word_pinyin", "sentence_part_2"]
+        "required": ["question_id", "do_kho", "sentence_part_1", "correct_word", "correct_word_pinyin", "sentence_part_2"]
       }
     }
   },

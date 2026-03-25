@@ -1,0 +1,312 @@
+
+{
+  "lesson_info": {
+    "number": 2,
+    "title_cn": "我叫李文",
+    "title_vn": "Tôi tên là Lý Văn"
+  },
+  "grammar_points": [
+    {
+      "id": 1,
+      "title": "Trật tự từ cơ bản trong câu - 汉语的基本语序",
+      "rules": [
+        {
+          "form": "Khẳng định",
+          "structure": "Chủ ngữ + Vị ngữ + Tân ngữ",
+          "usage": "Đây là cấu trúc câu cơ bản và phổ biến nhất trong tiếng Trung, trong đó Vị ngữ thường là động từ và Tân ngữ là đối tượng mà hành động tác động lên.",
+          "examples": [
+            {
+              "hz": "我叫陈天中。",
+              "py": "Wǒ jiào Chén Tiānzhōng.",
+              "vi": "Tôi tên là Trần Thiên Trung."
+            },
+            {
+              "hz": "我是学生。",
+              "py": "Wǒ shì xuéshēng.",
+              "vi": "Tôi là học sinh."
+            }
+          ]
+        }
+      ],
+      "notes": "Trật tự Chủ-Vị-Tân (SVO) là nền tảng của ngữ pháp tiếng Trung. Các thành phần khác như trạng ngữ, định ngữ sẽ được thêm vào xung quanh bộ khung này.",
+      "analysis_deep": [
+        {
+          "sentence": "我 (Chủ ngữ) 叫 (Vị ngữ) 陈天中 (Tân ngữ)。",
+          "breakdown": [
+            {
+              "part": "Chủ ngữ",
+              "content": "我"
+            },
+            {
+              "part": "Vị ngữ",
+              "content": "叫"
+            },
+            {
+              "part": "Tân ngữ",
+              "content": "陈天中"
+            }
+          ]
+        }
+      ],
+      "mini_exercise": [
+        {
+          "question": "Hãy đọc to các câu sau và xác định Chủ ngữ, Vị ngữ, Tân ngữ: \n1. 你叫什么名字? \n2. 我叫白家月。",
+          "options": [],
+          "answer": "1. Chủ ngữ: 你, Vị ngữ: 叫, Tân ngữ: 什么名字. \n2. Chủ ngữ: 我, Vị ngữ: 叫, Tân ngữ: 白家月."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Động từ \"叫\" - 动词 \"叫\"",
+      "rules": [
+        {
+          "form": "Khẳng định",
+          "structure": "Chủ ngữ + 叫 + Tên",
+          "usage": "Dùng để giới thiệu tên của một người.",
+          "examples": [
+            {
+              "hz": "我叫李文。",
+              "py": "Wǒ jiào Lǐ Wén.",
+              "vi": "Tôi tên là Lý Văn."
+            },
+            {
+              "hz": "我叫陈天中。",
+              "py": "Wǒ jiào Chén Tiānzhōng.",
+              "vi": "Tôi tên là Trần Thiên Trung."
+            }
+          ]
+        },
+        {
+          "form": "Phủ định",
+          "structure": "Chủ ngữ + 不叫 + Tên",
+          "usage": "Dùng để phủ nhận tên của một người.",
+          "examples": [
+            {
+              "hz": "我不叫安妮。",
+              "py": "Wǒ bú jiào Ānnī.",
+              "vi": "Tôi không tên là Annie."
+            }
+          ]
+        },
+        {
+          "form": "Nghi vấn",
+          "structure": "Chủ ngữ + 叫 + 什么 + 名字?",
+          "usage": "Dùng để hỏi tên của một người.",
+          "examples": [
+            {
+              "hz": "请问, 你叫什么名字?",
+              "py": "Qǐngwèn, nǐ jiào shénme míngzi?",
+              "vi": "Xin hỏi, bạn tên là gì?"
+            }
+          ]
+        }
+      ],
+      "notes": "Cấu trúc tên người Trung Quốc là: Họ + Tên (姓 + 名). Ví dụ: Trong tên 李文 (Lǐ Wén), họ là 李, tên là 文.",
+      "analysis_deep": [
+        {
+          "sentence": "你 叫 什么名字?",
+          "breakdown": [
+            {
+              "part": "Chủ ngữ",
+              "content": "你"
+            },
+            {
+              "part": "Vị ngữ",
+              "content": "叫"
+            },
+            {
+              "part": "Tân ngữ",
+              "content": "什么名字"
+            }
+          ]
+        }
+      ],
+      "mini_exercise": [
+        {
+          "question": "Làm việc theo cặp. Sử dụng tên của chính mình để hỏi và trả lời câu hỏi về tên.",
+          "options": [],
+          "answer": "Ví dụ: A: 你好, 你叫什么名字? B: 你好, 我叫 [Tên của bạn]."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Động từ \"是\" - 动词 \"是\"",
+      "rules": [
+        {
+          "form": "Khẳng định",
+          "structure": "Chủ ngữ + 是 + Danh từ/Cụm danh từ",
+          "usage": "Dùng để xác nhận, giới thiệu hoặc định nghĩa một sự vật, sự việc, con người.",
+          "examples": [
+            {
+              "hz": "我是白家月。",
+              "py": "Wǒ shì Bái Jiāyuè.",
+              "vi": "Tôi là Bạch Gia Nguyệt."
+            },
+            {
+              "hz": "我是学生。",
+              "py": "Wǒ shì xuéshēng.",
+              "vi": "Tôi là học sinh."
+            }
+          ]
+        },
+        {
+          "form": "Phủ định",
+          "structure": "Chủ ngữ + 不是 + Danh từ/Cụm danh từ",
+          "usage": "Dùng để phủ nhận một sự vật, sự việc, con người.",
+          "examples": [
+            {
+              "hz": "我不是安妮。",
+              "py": "Wǒ bú shì Ānnī.",
+              "vi": "Tôi không phải là Annie."
+            }
+          ]
+        },
+        {
+          "form": "Nghi vấn",
+          "structure": "Chủ ngữ + 是 + Danh từ/Cụm danh từ + 吗?",
+          "usage": "Dùng để đặt câu hỏi Có/Không.",
+          "examples": [
+            {
+              "hz": "你是安妮吗?",
+              "py": "Nǐ shì Ānnī ma?",
+              "vi": "Bạn là Annie phải không?"
+            }
+          ]
+        }
+      ],
+      "notes": "Khi \"不\" (bù - thanh 4) đứng trước một từ mang thanh 4 như \"是\" (shì), \"不\" sẽ biến điệu thành thanh 2, đọc là \"bú\".",
+      "analysis_deep": [
+        {
+          "sentence": "我 不是 安妮。",
+          "breakdown": [
+            {
+              "part": "Chủ ngữ",
+              "content": "我"
+            },
+            {
+              "part": "Vị ngữ",
+              "content": "不是"
+            },
+            {
+              "part": "Tân ngữ",
+              "content": "安妮"
+            }
+          ]
+        }
+      ],
+      "mini_exercise": [
+        {
+          "question": "Làm việc theo cặp, sử dụng tên thật để thực hành đối thoại. Một người nhầm tên người kia và người kia đính chính lại.",
+          "options": [],
+          "answer": "Ví dụ: A: 你好, [Tên sai]! B: 你好! 我不是 [Tên sai], 我是 [Tên đúng]."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Cách diễn đạt lời xin lỗi và đáp lại - 致歉语",
+      "rules": [
+        {
+          "form": "Xin lỗi",
+          "structure": "对不起!",
+          "usage": "Dùng để bày tỏ sự hối lỗi một cách trang trọng.",
+          "examples": [
+            {
+              "hz": "对不起!",
+              "py": "Duìbuqǐ!",
+              "vi": "Xin lỗi!"
+            }
+          ]
+        },
+        {
+          "form": "Đáp lại",
+          "structure": "没关系!",
+          "usage": "Dùng để đáp lại lời xin lỗi, thể hiện sự không phiền lòng.",
+          "examples": [
+            {
+              "hz": "没关系!",
+              "py": "Méi guānxi!",
+              "vi": "Không sao đâu! / Không có gì!"
+            }
+          ]
+        }
+      ],
+      "notes": "Trong khẩu ngữ hàng ngày, người ta cũng thường dùng \"没事\" (méishì) hoặc \"没事没事\" (méishì méishì) để đáp lại lời xin lỗi, mang sắc thái thân mật hơn.",
+      "analysis_deep": [],
+      "mini_exercise": [
+        {
+          "question": "Thực hành đóng vai theo tình huống trong Bài khóa 2: Một người chào nhầm tên người kia, sau đó xin lỗi và được đáp lại.",
+          "options": [],
+          "answer": "A: 你好, [Tên sai]! B: 你好! 我不是 [Tên sai], 我是 [Tên đúng]. A: 对不起! B: 没关系!"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Phó từ \"很\" và \"也\" - 副词 \"很\", \"也\"",
+      "rules": [
+        {
+          "form": "Phó từ \"很\"",
+          "structure": "Chủ ngữ + [很] + Tính từ",
+          "usage": "Đứng trước tính từ để chỉ mức độ \"rất\". Trong nhiều câu trần thuật đơn giản, \"很\" được thêm vào để câu cân đối về mặt âm luật, không nhất thiết mang nghĩa \"rất\".",
+          "examples": [
+            {
+              "hz": "很高兴认识你。",
+              "py": "Hěn gāoxìng rènshi nǐ.",
+              "vi": "Rất vui được làm quen với bạn."
+            }
+          ]
+        },
+        {
+          "form": "Phó từ \"也\"",
+          "structure": "Chủ ngữ + [也] + Động từ/Tính từ",
+          "usage": "Biểu thị sự tương đồng, có nghĩa là \"cũng\". Phó từ \"也\" luôn đứng trước động từ hoặc tính từ.",
+          "examples": [
+            {
+              "hz": "认识你我也很高兴。",
+              "py": "Rènshi nǐ wǒ yě hěn gāoxìng.",
+              "vi": "Làm quen bạn tôi cũng rất vui."
+            }
+          ]
+        }
+      ],
+      "notes": "Trật tự của phó từ trong câu là: Chủ ngữ + [Trạng ngữ (ví dụ: 也)] + Động từ/Tính từ.",
+      "analysis_deep": [
+        {
+          "sentence": "认识你 我 [也] [很] 高兴。",
+          "breakdown": [
+            {
+              "part": "Chủ đề",
+              "content": "认识你"
+            },
+            {
+              "part": "Chủ ngữ",
+              "content": "我"
+            },
+            {
+              "part": "Trạng ngữ",
+              "content": "也"
+            },
+            {
+              "part": "Trạng ngữ",
+              "content": "很"
+            },
+            {
+              "part": "Vị ngữ (Tính từ)",
+              "content": "高兴"
+            }
+          ]
+        }
+      ],
+      "mini_exercise": [
+        {
+          "question": "Làm việc theo cặp, thực hành giới thiệu bản thân và bày tỏ sự vui mừng khi được làm quen.",
+          "options": [],
+          "answer": "A: 你好! 我叫 [Tên A]. B: 你好! 我叫 [Tên B]. 很高兴认识你。 A: 认识你我也很高兴。"
+        }
+      ]
+    }
+  ]
+}

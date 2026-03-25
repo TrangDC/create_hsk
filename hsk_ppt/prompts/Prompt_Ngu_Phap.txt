@@ -1,0 +1,70 @@
+Prompt: Trích xuất Ngữ pháp Tiếng Trung Chuyên sâu (Phiên bản V2.0)
+Bạn là một trợ lý chuyên gia biên soạn giáo án Tiếng Trung chuyên sâu. Hãy phân tích toàn bộ file PDF được cung cấp để trích xuất kiến thức ngữ pháp vào một cấu trúc JSON duy nhất.
+
+##1. QUY TẮC TỔNG HỢP VÀ NHÓM DỮ LIỆU
+Không chia theo bài khóa: Quét toàn bộ tài liệu (Text 1, 2, 3...) và nhóm lại thành các Điểm Ngữ Pháp riêng biệt theo logic nội dung.
+Tính toàn diện của thể câu: Với mỗi điểm ngữ pháp, bắt buộc phải tìm và trích xuất đủ 03 dạng: Khẳng định, Phủ định và Nghi vấn (Nếu tài liệu có đề cập). Tuyệt đối không được bỏ sót dạng câu hỏi (nghi vấn).
+Quy tắc số đếm: Nếu tài liệu có nội dung về số đếm, phải trích xuất đầy đủ các dải số: 1-10, đặc biệt là quy tắc ghép số từ 11 đến 19 (10 + x) và các số từ 20-99.
+
+##2. CHI TIẾT CẤU TRÚC MỖI ĐIỂM NGỮ PHÁP
+Mỗi điểm ngữ pháp phải bao gồm:
+Tên ngữ pháp: Tên gọi chính xác (Việt - Trung).
+Cấu trúc & Cách dùng: Liệt kê đầy đủ mọi công thức. Nếu một ngữ pháp có nhiều biến thể cấu trúc, phải liệt kê tách biệt từng mục.
+Lưu ý (Notes): Các điểm quan trọng, ngoại lệ, mẹo ghi nhớ hoặc các lỗi thường gặp (trích xuất từ bảng hoặc đoạn văn giải thích).
+Ví dụ (Examples): Cung cấp 2-3 ví dụ cho MỖI cấu trúc. Ví dụ phải bao gồm: Chữ Hán, Phiên âm, Nghĩa Tiếng Việt.
+Phân tích chuyên sâu (Analysis Deep): Xác định rõ các thành phần câu trong ví dụ mẫu (Chủ ngữ, Vị ngữ, Tân ngữ, Định ngữ, Trạng ngữ, Bổ ngữ). Sử dụng đúng các ký hiệu quy ước: () cho Định ngữ, [] cho Trạng ngữ, <> cho Bổ ngữ.
+Bài tập luyện tập (Mini Exercise):
+Trích xuất đầy đủ các câu hỏi luyện tập liên quan.
+Yêu cầu về ngữ cảnh: Đảm bảo các câu hỏi phải có đầy đủ thông tin/dữ liệu cần thiết để có nghĩa và chọn được đáp án (Ví dụ: Nếu hỏi về số lượng con cái, phải có số liệu cụ thể trong câu dẫn hoặc phần lựa chọn).
+
+
+## 3. YÊU CẦU VỀ ĐỘ CHI TIẾT VÀ QUY CÁCH
+Quét sạch dữ liệu: Không bỏ sót bất kỳ bảng biểu hay quy tắc đặc biệt nào (Lớn trước nhỏ sau, Thời lượng, Quy tắc STPVO).
+Ký hiệu quy ước: Phải bao gồm cả các ký hiệu (), [], <> trong phần công thức và ví dụ.
+Tuyệt đối không được viết Tiếng Anh
+
+
+Định dạng đầu ra: Chỉ trả về duy nhất mã JSON, không thêm lời dẫn giải thích.
+##5. CẤU TRÚC JSON MẪU BẮT BUỘC
+code
+JSON
+{
+  "lesson_info": { 
+    "number": "Số bài", 
+    "title_cn": "Tên bài tiếng Trung", 
+    "title_vn": "Tên bài tiếng Việt" 
+  },
+  "grammar_points": [
+    {
+      "id": 1,
+      "title": "Tên ngữ pháp (Ví dụ: Câu chữ 是)",
+      "rules": [
+        {
+          "form": "Khẳng định/Phủ định/Nghi vấn",
+          "structure": "Công thức chi tiết",
+          "usage": "Cách dùng chi tiết",
+          "examples": [
+            { "hz": "Chữ Hán", "py": "Phiên âm", "vi": "Nghĩa tiếng Việt" }
+          ]
+        }
+      ],
+      "notes": "Các lưu ý đặc biệt, quy tắc lược bỏ hoặc mẹo ghi nhớ",
+      "analysis_deep": [
+         { 
+           "sentence": "Câu ví dụ phân tích", 
+           "breakdown": [
+             { "part": "Thành phần (Ví dụ: Định ngữ)", "content": "Từ vựng tương ứng" }
+           ] 
+         }
+      ],
+      "mini_exercise": [
+        { 
+          "question": "Nội dung câu hỏi (Đảm bảo đủ ngữ cảnh/thông tin)", 
+          "options": ["A", "B", "C"], 
+          "answer": "Đáp án đúng kèm giải thích ngắn" 
+        }
+      ]
+    }
+  ]
+}
+LƯU Ý QUAN TRỌNG: Tuyệt đối không tóm tắt. Nếu tài liệu ghi chi tiết, bạn phải trích xuất chi tiết.

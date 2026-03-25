@@ -17,11 +17,12 @@
             "type": "object",
             "properties": {
               "question_id": { "type": "integer" },
+              "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
               "question_text_chinese": { "type": "string" },
               "pinyin": { "type": "string" },
               "correct_answer": { "type": "integer", "description": "Đáp án đúng, là số thứ tự của ảnh (1 đến 4)." }
             },
-            "required": ["question_id", "question_text_chinese", "pinyin", "correct_answer"]
+            "required": ["question_id", "do_kho", "question_text_chinese", "pinyin", "correct_answer"]
           }
         }
       },

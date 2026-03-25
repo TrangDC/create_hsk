@@ -8,13 +8,14 @@
         "type": "object",
         "properties": {
           "question_id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
           "script_chinese": { "type": "string", "description": "Câu thông tin gốc." },
           "script_pinyin": { "type": "string" },
           "statement_chinese": { "type": "string", "description": "Câu nhận định cần phán đoán." },
           "statement_pinyin": { "type": "string" },
           "correct_answer": { "type": "integer", "description": "Đáp án: 1 cho Đúng, 0 cho Sai." }
         },
-        "required": ["question_id", "script_chinese", "script_pinyin", "statement_chinese", "statement_pinyin", "correct_answer"]
+        "required": ["question_id", "do_kho", "script_chinese", "script_pinyin", "statement_chinese", "statement_pinyin", "correct_answer"]
       }
     }
   },

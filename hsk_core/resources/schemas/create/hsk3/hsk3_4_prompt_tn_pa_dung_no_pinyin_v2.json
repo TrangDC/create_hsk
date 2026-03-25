@@ -8,6 +8,7 @@
         "type": "object",
         "properties": {
           "question_id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
           "dialogue": {
             "type": "array",
             "description": "Hội thoại gồm 4 lượt lời.",
@@ -35,7 +36,7 @@
           },
           "correct_answer": { "type": "integer", "description": "Đáp án đúng (1, 2, hoặc 3)." }
         },
-        "required": ["question_id", "dialogue", "query_chinese", "answer_options", "correct_answer"]
+        "required": ["question_id", "do_kho", "dialogue", "query_chinese", "answer_options", "correct_answer"]
       }
     }
   },

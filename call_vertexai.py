@@ -294,3 +294,32 @@ def generate_content(
     
     # Nếu vòng lặp kết thúc mà không thành công, raise lỗi cuối cùng gặp phải
     raise ConnectionError(f"Không thể lấy dữ liệu từ Vertex AI sau {max_retries} lần thử.")
+
+
+def get_credentials():
+    """Lấy credentials và project_id từ config."""
+    return vertex_ai_config.credentials, vertex_ai_config.project_id
+
+
+class VertexClient:
+    """Client wrapper để tương thích ngược với cách gọi cũ của api.callApi."""
+    def __init__(self, project_id, creds, model_name="gemini-2.5-pro", region="us-central1"):
+        # vertexai.init đã được gọi qua vertex_ai_config.initialize_vertex_ai() ở trên
+        self.model = GenerativeModel(model_name)
+
+    def send_data_to_AI(self, prompt, data=None, mime_type=None, temperature=0.5, top_p=0.8, file_paths=None):
+        parts = []
+        if data and mime_type:
+            parts.append(Part.from_data(data=data, mime_type=mime_type))
+        if file_paths:
+            import mimetypes
+            for path in file_paths:
+                with open(path, "rb") as f:
+                    file_data = f.read()
+                mt = mimetypes.guess_type(path)[0] or "application/pdf"
+                parts.append(Part.from_data(data=file_data, mime_type=mt))
+        
+        parts.append(Part.from_text(prompt))
+        generation_config = GenerationConfig(temperature=temperature, top_p=top_p)
+        response = self.model.generate_content(parts, generation_config=generation_config)
+        return response.text

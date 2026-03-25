@@ -15,6 +15,7 @@
               "type": "object",
               "properties": {
                 "question_id": { "type": "integer" },
+                "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
                 "query_chinese": { "type": "string", "description": "Nội dung câu hỏi." },
                 "answer_options": {
                   "type": "array",
@@ -23,7 +24,7 @@
                 },
                 "correct_answer": { "type": "integer", "description": "Đáp án đúng (1-4)." }
               },
-              "required": ["question_id", "query_chinese", "answer_options", "correct_answer"]
+              "required": ["question_id", "do_kho", "query_chinese", "answer_options", "correct_answer"]
             }
           }
         },

@@ -8,11 +8,12 @@
         "type": "object",
         "properties": {
           "question_id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
           "image_description": { "type": "string", "description": "Mô tả hình ảnh bằng tiếng Việt." },
           "sample_paragraph": { "type": "string", "description": "Đoạn văn mẫu mô tả hình ảnh." },
           "translation": { "type": "string", "description": "Bản dịch tiếng Việt của đoạn văn mẫu." }
         },
-        "required": ["question_id", "image_description", "sample_paragraph", "translation"]
+        "required": ["question_id", "do_kho", "image_description", "sample_paragraph", "translation"]
       }
     }
   },

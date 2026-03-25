@@ -26,6 +26,7 @@
             "type": "object",
             "properties": {
               "question_id": { "type": "integer" },
+              "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
               "lines": {
                 "type": "array",
                 "description": "Danh sách các dòng của câu hỏi. Câu đơn có 1 dòng, hội thoại có 2 dòng.",
@@ -41,7 +42,7 @@
               },
               "correct_answer": { "type": "string", "description": "Đáp án đúng, là chữ cái (A-D) của từ trong học liệu." }
             },
-            "required": ["question_id", "lines", "correct_answer"]
+            "required": ["question_id", "do_kho", "lines", "correct_answer"]
           }
         }
       },

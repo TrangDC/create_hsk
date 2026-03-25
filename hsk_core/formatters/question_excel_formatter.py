@@ -304,6 +304,9 @@ def populate_true_false_image(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2  # Bắt đầu điền từ hàng thứ 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Cột F: Mô tả ảnh + script
         image_des = question.get('image_des', '')
         script = question.get('script', '')
@@ -326,6 +329,9 @@ def populate_reading_comprehension_dialogue(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # --- Cột D: Độ khó ---
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # --- Cột F: Hội thoại + Câu hỏi ---
         dialogue_parts = []
         for line in question.get('dialogue', []):
@@ -366,6 +372,9 @@ def populate_true_false_statement(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Cột F: Script + Statement
         script_chinese = question.get('script_chinese', '')
         script_pinyin = question.get('script_pinyin', '')
@@ -419,6 +428,10 @@ def populate_sentence_matching_inverted(worksheet, data: dict):
     # Cột F và H: Câu hỏi và đáp án
     for i, question in enumerate(questions):
         current_row = start_row + i
+        
+        # Cột D: Độ khó
+        worksheet[f'D{current_row}'] = question.get('do_kho', 'NB')
+        
         # Cột F: Câu hỏi
         chinese = question.get('question_text_chinese', '')
         pinyin = question.get('pinyin', '')
@@ -443,6 +456,9 @@ def populate_true_false_listening_choice(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Cột F: Statement + Script
         statement = question.get('statement_chinese', '')
         script = question.get('script_chinese', '')
@@ -465,6 +481,9 @@ def populate_reading_comprehension_v3(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Cột F: Script + Query
         script = question.get('script_chinese', '')
         query = question.get('query_chinese', '')
@@ -488,6 +507,9 @@ def populate_sentence_reordering(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Cột G: Các thành phần câu
         components = question.get('components', [])
         worksheet[f'G{i}'] = "; ".join(components)
@@ -506,6 +528,9 @@ def populate_word_fill_in_display_answer(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Ghép các thành phần lại thành câu hoàn chỉnh
         part1 = question.get('sentence_part_1', '')
         word = question.get('correct_word', '')
@@ -548,6 +573,9 @@ def populate_passage_with_multiple_questions(worksheet, data: list):
 
         # --- Cột F, G, H: Điền từng câu hỏi ---
         for question in questions:
+            # Cột D: Độ khó
+            worksheet[f'D{current_row}'] = question.get('do_kho', 'NB')
+            
             worksheet[f'F{current_row}'] = question.get('query_chinese', '')
             
             options = question.get('answer_options', [])
@@ -568,6 +596,8 @@ def populate_sentence_sequence_reordering(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
         
         components = question.get('components', [])
         correct_order = question.get('correct_order', '')
@@ -594,6 +624,9 @@ def populate_image_with_word_sentence_creation(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Lấy dữ liệu từ JSON
         image_des = question.get('image_description', '')
         vocab = question.get('vocabulary_word', '')
@@ -656,6 +689,9 @@ def populate_main_idea_comprehension(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
+        # Cột D: Độ khó
+        worksheet[f'D{i}'] = question.get('do_kho', 'NB')
+        
         # Cột F: Đoạn văn
         worksheet[f'F{i}'] = question.get('passage_chinese', '')
         

@@ -67,48 +67,56 @@ HSK1_PROMPT_CONFIGS = {
 HSK2_PROMPT_CONFIGS = {
     # Dạng 1: Đúng sai (img) (HSK2)
     "hsk2_1_prompt_ds_img": {
+        "matrix_name": "Nghe từ/cụm từ + tranh Đ/S (HSK2)",
         "processors": [
             ("true_false_image_questions", "Đúng sai (img) (HSK2)", populate_true_false_image),
         ]
     },
     # Dạng 2: TN PA đúng (img) (HL) (HSK2) - Tái sử dụng hàm của HSK1
     "hsk2_2_prompt_tn_pa_dung_hl": {
+        "matrix_name": "Nghe câu đơn + chọn tranh (HSK2)",
         "processors": [
             ("shared_image_comprehension", "TN PA đúng (img) (HL) (HSK2)", populate_shared_image_comprehension),
         ]
     },
     # Dạng 3: TN PA đúng (HSK2)
     "hsk2_3_prompt_tn_pa_dung": {
+        "matrix_name": "Nghe hội thoại + nối tranh (HSK2)",
         "processors": [
             ("reading_comprehension_dialogue_2_lines", "TN PA đúng (HSK2)", populate_reading_comprehension_dialogue),
         ]
     },
     # Dạng 4: TN PA đúng_v2 (HSK2) - Có thể tái sử dụng hàm của Dạng 3
     "hsk2_4_prompt_tn_pa_dung_v2": {
+        "matrix_name": "Nghe câu / đoạn ngắn + trả lời (HSK2)",
         "processors": [
             ("reading_comprehension_dialogue_4_lines", "TN PA đúng_v2 (HSK2)", populate_reading_comprehension_dialogue),
         ]
     },
     # Dạng 5: TN chọn ảnh (img) (HL) (HSK2) - Tái sử dụng hàm của HSK1
     "hsk2_5_prompt_tn_chon_anh_hl": {
+        "matrix_name": "Đọc câu + nối tranh (HSK2)",
         "processors": [
             ("image_matching_questions", "TN chọn ảnh (img) (HL) (HSK2)", populate_image_matching_shared),
         ]
     },
-    # Dạng 7: TN chọn từ đúng (HL) (HSK2) - Tái sử dụng hàm của HSK1
-    "hsk2_7_prompt_tn_chon_tu_dung_hl": {
-        "processors": [
-            ("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK2)", populate_word_fill_in_shared),
-        ]
-    },
     # Dạng 6: ĐS lựa chọn (HSK2)
     "hsk2_6_prompt_ds_lua_chon": {
+        "matrix_name": "Đọc hiểu đoạn văn + Chọn Đ/S (HSK2)",
         "processors": [
             ("true_false_statement_questions", "ĐS lựa chọn (HSK2)", populate_true_false_statement),
         ]
     },
+    # Dạng 7: TN chọn từ đúng (HL) (HSK2) - Tái sử dụng hàm của HSK1
+    "hsk2_7_prompt_tn_chon_tu_dung_hl": {
+        "matrix_name": "Điền từ vào chỗ trống (HSK2)",
+        "processors": [
+            ("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK2)", populate_word_fill_in_shared),
+        ]
+    },
     # Dạng 8: TN câu trả lời đúng (HL) (HSK2)
     "hsk2_8_prompt_tn_cau_tra_loi_dung_hl": {
+        "matrix_name": "Ghép câu hỏi với đáp án (HSK2)",
         "processors": [
             ("sentence_matching_inverted_questions", "TN câu trả lời đúng (HL) (HSK2)", populate_sentence_matching_inverted),
         ]
@@ -117,107 +125,135 @@ HSK2_PROMPT_CONFIGS = {
 
 HSK3_PROMPT_CONFIGS = {
     "hsk3_1_prompt_tn_pa_dung_hl": {
+        "matrix_name": "Nghe đoạn thoại + chọn tranh (HSK3)",
         "processors": [
             ("shared_image_comprehension", "TN PA đúng (img) (HL) (HSK3)", populate_shared_image_comprehension),
         ]
     },
     "hsk3_2_prompt_ds_nghe_chon": {
+        "matrix_name": "Nghe câu / đoạn ngắn + phán đoán Đ/S (HSK3)",
         "processors": [
             ("true_false_listening_choice", "ĐS nghe chọn (HSK3)", populate_true_false_listening_choice)
         ]
     },
     "hsk3_3_prompt_tn_pa_dung_no_pinyin": {
+        "matrix_name": "Nghe hội thoại + trả lời câu hỏi (HSK3)",
         "processors": [
             ("reading_comprehension_dialogue_2_lines", "TN PA đúng ko pinyin (HSK3)", populate_reading_comprehension_dialogue),
         ]
     },
     "hsk3_4_prompt_tn_pa_dung_no_pinyin_v2": {
+        "matrix_name": "Nghe đoạn văn + trả lời câu hỏi (HSK3)",
         "processors": [
             ("reading_comprehension_dialogue_4_lines", "TN PA đúng ko pinyin_v2 (HSK3)", populate_reading_comprehension_dialogue),
         ]
     },
     "hsk3_5_prompt_tn_cau_tra_loi_dung_hl": {
+        "matrix_name": "Đọc câu + nối đáp án (HSK3)",
         "processors": [
             ("sentence_matching_inverted_questions", "TN câu trả lời đúng (HL) (HSK3)", populate_sentence_matching_inverted),
         ]
     },
     "hsk3_6_prompt_tn_chon_tu_dung_hl": {
+        "matrix_name": "Đọc đoạn văn + điền từ (HSK3)",
         "processors": [
             ("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK3)", populate_word_fill_in_shared),
         ]
     },
     "hsk3_7_prompt_tn_pa_dung_no_pinyin_v3": {
+        "matrix_name": "Đọc đoạn văn + chọn đáp án đúng (HSK3)",
         "processors": [
             ("reading_comprehension_no_pinyin_v3", "TN PA đúng ko pinyin_v3 (HSK3)", populate_reading_comprehension_v3)
         ]
     },
     "hsk3_8_prompt_sap_xep_cau": {
+        "matrix_name": "Sắp xếp từ thành câu (HSK3)",
         "processors" : [("sentence_reordering", "Sắp xếp câu (HSK3)", populate_sentence_reordering)]
     },
     "hsk3_9_prompt_dien_tu_dung": {
+        "matrix_name": "Viết chữ Hán theo Pinyin (HSK3)",
         "processors" : [("word_fill_in_display_answer", "Điền từ đúng (HSK3)", populate_word_fill_in_display_answer)]
     }
 }
 
 HSK4_PROMPT_CONFIGS = {
     "hsk4_1_prompt_ds_nghe_chon": {
+        "matrix_name": "Nghe đoạn ngắn + phán đoán Đ/S (HSK4)",
         "processors": [("true_false_listening_choice", "ĐS nghe chọn (HSK4)", populate_true_false_listening_choice)]
     },
     "hsk4_2_prompt_tn_pa_dung": {
+        "matrix_name": "Nghe hội thoại + trả lời câu hỏi (HSK4)",
         "processors": [("reading_comprehension_dialogue_2_lines", "TN PA đúng (HSK4)", populate_reading_comprehension_dialogue)]
     },
     "hsk4_3_prompt_tn_pa_dung_v2": {
+        "matrix_name": "Nghe đoạn văn + trả lời câu hỏi (HSK4)",
         "processors": [("reading_comprehension_dialogue_4_lines", "TN PA đúng_v2 (HSK4)", populate_reading_comprehension_dialogue)]
     },
     "hsk4_4_prompt_tn_nghe_hieu": {
+        "matrix_name": "Đọc hiểu đoạn văn + trả lời câu hỏi (HSK4)",
         "processors": [("listening_comprehension", "TN Nghe hiểu (HSK4)", populate_passage_with_multiple_questions)]
     },
     "hsk4_5_prompt_tn_chon_tu_dung_hl": {
+        "matrix_name": "Đọc đoạn văn + điền từ (HSK4)",
         "processors": [("word_fill_in_questions", "TN chọn từ đúng (HL) (HSK4)", populate_word_fill_in_shared)]
     },
     "hsk4_6_prompt_sap_xep_cac_cau": {
+        "matrix_name": "Sắp xếp các câu (HSK4)",
         "processors": [("sentence_sequence_reordering", "Sắp xếp các câu (HSK4)", populate_sentence_sequence_reordering)]
     },
     "hsk4_7_prompt_tn_pa_dung_no_pinyin_v3": {
+        "matrix_name": "Đọc đoạn văn + chọn đáp án đúng (HSK4)",
         "processors": [("reading_comprehension_no_pinyin_v3", "TN PA đúng ko pinyin_v3 (HSK4)", populate_reading_comprehension_v3)]
     },
     "hsk4_8_prompt_tn_doc_hieu_ngan": {
+        "matrix_name": "Đọc đoạn văn dài + trả lời câu hỏi (HSK4)",
         "processors": [("reading_comprehension_short_passage", "TN Đọc hiểu ngắn (HSK4)", populate_passage_with_multiple_questions)]
     },
     "hsk4_9_prompt_sap_xep_cau": {
+        "matrix_name": "Sắp xếp từ thành câu (HSK4)",
         "processors": [("sentence_reordering", "Sắp xếp câu (HSK4)", populate_sentence_reordering)]
     },
     "hsk4_10_prompt_anh_voi_tu": {
+        "matrix_name": "Viết câu dựa vào ảnh và từ (HSK4)",
         "processors": [("image_with_word_sentence_creation", "Ảnh với từ (img) (HSK4)", populate_image_with_word_sentence_creation)]
     }
 }
 
 HSK5_PROMPT_CONFIGS = {
     "hsk5_1_prompt_tn_pa_dung": {
+        "matrix_name": "Nghe hội thoại + trả lời câu hỏi (HSK5)",
         "processors": [("reading_comprehension_dialogue_2_lines","TN PA đúng (HSK5)",populate_reading_comprehension_dialogue)]
     },
     "hsk5_2_prompt_tn_pa_dung_v2": {
+        "matrix_name": "Nghe đoạn văn + trả lời câu hỏi (HSK5)",
         "processors": [("reading_comprehension_dialogue_4_lines","TN PA đúng_v2 (HSK5)",populate_reading_comprehension_dialogue)]
     },
     "hsk5_3_prompt_tn_nghe_hieu": {
+        "matrix_name": "Nghe đoạn văn dài + trả lời nhiều câu (HSK5)",
         "processors": [("listening_comprehension","TN Nghe hiểu (HSK5)",populate_passage_with_multiple_questions)]
     },
     "hsk5_4_prompt_dien_tu_doan_van": {
+        "matrix_name": "Đọc đoạn văn + điền từ (HSK5)",
         "processors": [("passage_cloze","Điền từ đoạn văn (HSK5)", populate_passage_cloze)]
     },
     "hsk5_5_prompt_chon_chu_de": {
+        "matrix_name": "Đọc đoạn văn + chọn ý chính (HSK5)",
         "processors": [("main_idea_comprehension","Chọn chủ đề đoạn văn (HSK5)", populate_main_idea_comprehension)]
     },
     "hsk5_6_prompt_tn_doc_hieu_img": {
+        "matrix_name": "Đọc đoạn văn dài + trả lời câu hỏi (HSK5)",
         "processors": [("long_passage_comprehension","TN Đọc hiểu (img) (HSK5)", populate_long_passage_comprehension)]
     },
     "hsk5_7_prompt_sap_xep_cau": {
+        "matrix_name": "Sắp xếp từ thành câu (HSK5)",
         "processors": [("sentence_reordering","Sắp xếp câu (HSK5)",populate_sentence_reordering)]
     },
     "hsk5_8_prompt_viet_dua_vao_tu": {
+        "matrix_name": "Viết đoạn văn dựa vào từ (HSK5)",
         "processors": [("writing_from_keywords","Viết dựa vào từ (HSK5)",populate_writing_from_keywords)]
     },
     "hsk5_9_prompt_viet_dua_vao_anh": {
+        "matrix_name": "Viết đoạn văn dựa vào ảnh (HSK5)",
         "processors": [("writing_from_image","Viết dựa vào ảnh (img) (HSK5)",populate_writing_from_image)]
     }
 }
