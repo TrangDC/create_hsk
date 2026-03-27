@@ -2,11 +2,12 @@ import json
 import math
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.util import Pt, Inches, Cm, Mm
+from pptx.util import Pt, Inches, Cm
 from pptx.enum.text import PP_ALIGN
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR
 import os
+import re
 
 class PPTGenerator:
     def __init__(self, template_path: str, json_path: str):
@@ -275,6 +276,30 @@ class PPTGenerator:
         )
         self._bring_to_front(new_shape)
 
+    def _add_hl_text(self, paragraph, text, default_font, default_size, default_color, hl_color="29741D"):
+        """
+        Hàm hỗ trợ bóc tách thẻ <hl>...</hl> và add vào paragraph với định dạng khác nhau.
+        """
+        # Tách chuỗi dựa trên thẻ <hl> và </hl>
+        parts = re.split(r'(<hl>.*?</hl>)', text)
+        
+        for part in parts:
+            run = paragraph.add_run()
+            if part.startswith('<hl>') and part.endswith('</hl>'):
+                # Phần nằm trong thẻ highlight: In đậm và màu xanh lá
+                content = part[4:-5]
+                run.text = content
+                run.font.bold = True
+                run.font.color.rgb = self.hex_to_rgb_color(hl_color)
+            else:
+                # Phần text bình thường: Không đậm và màu mặc định
+                run.text = part
+                run.font.bold = False
+                run.font.color.rgb = self.hex_to_rgb_color(default_color)
+            
+            run.font.name = default_font
+            run.font.size = Pt(default_size)
+
     # ================================================================
     # FIXED SLIDES — edit in-place
     # ================================================================
@@ -343,35 +368,29 @@ class PPTGenerator:
     # CONTENT SLIDES — Lập trình các hàm chèn nội dung vào đây
     # ================================================================
 
-    def add_dialogue_slide(self, sec: dict):
+    def add_dialogue_slide(self, sec: dict, force_simple: bool = False):
         """
-        Sinh slide Hội thoại (hỗ trợ cả có Pinyin và không có Pinyin).
-        Tự động phân trang nếu quá 6 câu thoại/slide.
+        Sinh slide Hội thoại. 
+        Tự động điều chỉnh Line Spacing linh hoạt để Case 6 câu không bị rời rạc.
         """
-        if "full_dialogue" in sec and sec["full_dialogue"]:
-            dialogue_data = sec["full_dialogue"]
-            has_pinyin = True
-        elif "simple_dialogue" in sec and sec["simple_dialogue"]:
-            dialogue_data = sec["simple_dialogue"]
+        if force_simple:
+            dialogue_data = sec.get("simple_dialogue")
             has_pinyin = False
         else:
-            return  
+            dialogue_data = sec.get("full_dialogue")
+            has_pinyin = True
 
-        hz_list = dialogue_data.get("hz",[])
-        py_list = dialogue_data.get("py",[]) if has_pinyin else []
-        vi_list = dialogue_data.get("vi",[])
+        if not dialogue_data: return  
+
+        hz_list = dialogue_data.get("hz", [])
+        py_list = dialogue_data.get("py", []) if has_pinyin else []
+        vi_list = dialogue_data.get("vi", [])
         
         num_sentences = len(hz_list)
-        if num_sentences == 0:
-            return
+        if num_sentences == 0: return
 
         MAX_PER_SLIDE = 6
-        chunks =[]
-        for i in range(0, num_sentences, MAX_PER_SLIDE):
-            chunk_hz = hz_list[i : i + MAX_PER_SLIDE]
-            chunk_py = py_list[i : i + MAX_PER_SLIDE] if has_pinyin else []
-            chunk_vi = vi_list[i : i + MAX_PER_SLIDE]
-            chunks.append((chunk_hz, chunk_py, chunk_vi))
+        chunks = [ (hz_list[i:i+6], py_list[i:i+6], vi_list[i:i+6]) for i in range(0, num_sentences, 6)]
 
         flower_icon_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\images\flower_point.png"
         section_title = sec.get("section_title", "Hội thoại")
@@ -380,119 +399,227 @@ class PPTGenerator:
             slide = self._next_slide()
             num_items = len(chunk_hz)
 
-            # ==========================================
-            # A. TEXTBOX TITLE (Trong suốt, đè lên Shape đỏ sẵn có)
-            # ==========================================
-            title_width = Cm(20.14)
-            title_height = Cm(2.67)
-            title_left = (self.prs.slide_width - title_width) / 2
-            title_top = Cm(1.26)
-            
-            # Chỉ tạo Textbox, không tô màu nền (fill)
+            # A. TITLE
+            title_width, title_height = Cm(20.14), Cm(2.67)
+            title_left, title_top = (self.prs.slide_width - title_width) / 2, Cm(1.26)
             title_box = slide.shapes.add_textbox(title_left, title_top, title_width, title_height)
             title_box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-            
-            self._set_text_exact_style(
-                title_box, section_title, font_name="Fraunces", font_size=57, 
-                color="FCF1D4", bold=False, align="center"
-            )
+            self._set_text_exact_style(title_box, section_title, font_name="Fraunces", font_size=57, color="FCF1D4", align="center")
 
-            # B. CÀI ĐẶT THÔNG SỐ THEO SỐ LƯỢNG CÂU THOẠI
-            # ==========================================
+            # B. CONFIG DYNAMIC SPACING
             slide_width_cm = self.prs.slide_width / 360000.0 
             
             if num_items >= 5: 
-                start_left = 7.95
-                start_top = 5.56
+                # --- CASE A: 5-6 CÂU THOẠI (Dùng spacing nhỏ hơn để gọn gàng) ---
+                start_left, start_top = 7.95, 5.56
                 box_width = slide_width_cm - start_left - 1.0 
                 box_height = 3.19  
-                
                 hz_size, hz_font = 29.3, "字由点字典楷"  
                 py_size, py_font = 18.2, "Muli"         
                 vi_size, vi_font, vi_italic = 18.2, "Muli", False
+                y_step = 3.7 
                 
-                # CHÍNH XÁC: 9.05 - 5.56 = 3.49 cm (Khoảng cách tịnh tiến chuẩn)
-                y_step = 3.49 
+                # Tự động tính Spacing gọn hơn (ví dụ: 28.5pt cho font 29.3pt)
+                line_spacing_val = Pt(28.5) 
             else: 
-                start_left = 11.95
-                start_top = 7.24
+                # --- CASE B: 1-4 CÂU THOẠI (Dùng spacing 33pt như bạn thấy phù hợp) ---
+                start_left, start_top = 11.95, 7.24
                 box_width = slide_width_cm - start_left - 1.5
                 box_height = 4.27  
-                
                 hz_size, hz_font = 39.5, "字由点字典楷" 
                 py_size, py_font = 23.5, "Muli"         
                 vi_size, vi_font, vi_italic = 24.5, "Muli", True
+                y_step = 4.72 
                 
-                # Nới rộng tịnh tiến cho case 4 câu (cũ là 4.27 -> mới là 4.7 cm)
-                y_step = 4.7 
+                line_spacing_val = Pt(33) 
 
-            # ==========================================
-            # C. RENDER CÁC CÂU THOẠI VÀ ICON
-            # ==========================================
+            # C. RENDER
+            # Tính toán line_spacing theo cm để đặt icon chính xác
+            line_spacing_cm = (line_spacing_val.pt / 72.0) * 2.54
+
             for i in range(num_items):
                 current_top = start_top + (i * y_step)
                 
+                # Tính icon_top bám theo dòng Hán tự
+                offset = line_spacing_cm if has_pinyin else (line_spacing_cm * 0.5)
+                icon_top_val = current_top + (box_height / 2.0) - offset - 0.4
+                
                 if os.path.exists(flower_icon_path):
-                    icon_left = Cm(start_left - 1.2)
-                    icon_top = Cm(current_top + 0.1) 
-                    icon_size = Cm(0.8) 
-                    slide.shapes.add_picture(flower_icon_path, icon_left, icon_top, width=icon_size, height=icon_size)
+                    slide.shapes.add_picture(flower_icon_path, Cm(start_left - 1.2), Cm(icon_top_val), Cm(0.8), Cm(0.8))
 
-                # Truyền đúng box_height vào hàm vẽ Textbox thay vì 2.0
-                textbox = slide.shapes.add_textbox(
-                    Cm(start_left), Cm(current_top), Cm(box_width), Cm(box_height)
-                )
+                textbox = slide.shapes.add_textbox(Cm(start_left), Cm(current_top), Cm(box_width), Cm(box_height))
                 tf = textbox.text_frame
                 tf.word_wrap = True
+                tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+                tf.margin_bottom = tf.margin_top = tf.margin_left = tf.margin_right = 0
                 
-                tf.margin_bottom = 0
-                tf.margin_top = 0
-                tf.margin_left = 0
-                tf.margin_right = 0
-                
-                # Dòng 1: Hán tự
-                p_hz = tf.paragraphs[0]
-                p_hz.space_before = Pt(0)
-                p_hz.space_after = Pt(0)
-                p_hz.line_spacing = Pt(hz_size * 1.15) 
-                
-                run_hz = p_hz.add_run()
-                run_hz.text = chunk_hz[i]
-                run_hz.font.name = hz_font
-                run_hz.font.size = Pt(hz_size)
-                run_hz.font.bold = True
-                run_hz.font.color.rgb = self.hex_to_rgb_color("000000")
-                
-                # Dòng 2: Pinyin
-                if has_pinyin and i < len(chunk_py):
-                    p_py = tf.add_paragraph()
-                    p_py.space_before = Pt(0)
-                    p_py.space_after = Pt(0)
-                    p_py.line_spacing = Pt(py_size * 1.15)
-                    
-                    run_py = p_py.add_run()
-                    run_py.text = chunk_py[i]
-                    run_py.font.name = py_font
-                    run_py.font.size = Pt(py_size)
-                    run_py.font.color.rgb = self.hex_to_rgb_color("545454")
-                    
-                # Dòng 3: Tiếng Việt
-                p_vi = tf.add_paragraph()
-                p_vi.space_before = Pt(0)
-                p_vi.space_after = Pt(0)
-                p_vi.line_spacing = Pt(vi_size * 1.15)
-                
-                run_vi = p_vi.add_run()
-                run_vi.text = chunk_vi[i]
-                run_vi.font.name = vi_font
-                run_vi.font.size = Pt(vi_size)
-                run_vi.font.color.rgb = self.hex_to_rgb_color("A40400")
-                if vi_italic:
-                    run_vi.font.italic = True
+                # Render các paragraph
+                def add_para(text, font, size, color, is_bold=False, is_italic=False):
+                    p = tf.add_paragraph() if len(tf.paragraphs[0].runs) > 0 else tf.paragraphs[0]
+                    p.space_before = p.space_after = Pt(0)
+                    p.line_spacing = line_spacing_val
+                    run = p.add_run()
+                    run.text = text
+                    run.font.name, run.font.size, run.font.bold, run.font.italic = font, Pt(size), is_bold, is_italic
+                    run.font.color.rgb = self.hex_to_rgb_color(color)
+
+                add_para(chunk_hz[i], hz_font, hz_size, "000000", is_bold=True)
+                if has_pinyin: add_para(chunk_py[i], py_font, py_size, "545454")
+                add_para(chunk_vi[i], vi_font, vi_size, "A40400", is_italic=vi_italic)
+
 
 
     def add_vocab_slides(self, sec: dict):
-        pass
+        """
+        Sinh các slide Từ vựng. 3 từ vựng / 1 slide.
+        Dữ liệu lấy từ slide content của template.
+        """
+        vocab_list = sec.get("vocabulary", [])
+        if not vocab_list:
+            return
+
+        # 1. Chia cụm 3 từ / slide
+        MAX_PER_SLIDE = 3
+        chunks = [vocab_list[i : i + MAX_PER_SLIDE] for i in range(0, len(vocab_list), MAX_PER_SLIDE)]
+
+        for chunk in chunks:
+            # Lấy slide content tiếp theo từ template
+            slide = self._next_slide()
+
+            # ==========================================
+            # A. TEXTBOX TITLE "Từ vựng"
+            # ==========================================
+            title_width = Cm(20.14)
+            title_height = Cm(2.67)
+            title_left = Cm(15.28)
+            title_top = Cm(1.26)
+            
+            title_box = slide.shapes.add_textbox(title_left, title_top, title_width, title_height)
+            title_box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+            self._set_text_exact_style(
+                title_box, "Từ vựng", font_name="Fraunces", font_size=57, 
+                color="FCF1D4", bold=False, align="center"
+            )
+
+            # ==========================================
+            # B. THÔNG SỐ VỊ TRÍ & BƯỚC NHẢY
+            # ==========================================
+            # Thông số Word Box (Cột trái)
+            word_left = 2.86
+            word_start_top = 6.71
+            word_width = 8.69
+            word_height = 5.54
+            word_y_step = 6.73 # 13.44 - 6.71
+
+            # Thông số Detail Box (Cột phải)
+            detail_left = 15.28
+            detail_start_top = 7.30
+            # Chiều rộng động: slide_width - detail_left - lề phải (1cm)
+            slide_width_cm = self.prs.slide_width / 360000.0
+            detail_width = slide_width_cm - detail_left - 1.0
+            detail_height = 4.59
+            detail_y_step = 6.87 # 14.17 - 7.30
+
+            # Màu sắc
+            color_gray = "545454"
+            color_red = "A40400"
+            color_black = "000000"
+            color_green = "29741D" # Màu xanh lá highlight
+
+            # ==========================================
+            # C. RENDER TỪNG TỪ VỰNG TRONG CHUNK
+            # ==========================================
+            for i, item in enumerate(chunk):
+                # --- 1. Vẽ Word Box (Hán tự to bên trái) ---
+                curr_word_top = word_start_top + (i * word_y_step)
+                hz_text = item.get("hz", "")
+                
+                # Quyết định font size dựa trên độ dài từ
+                hz_font_size = 116.5 if len(hz_text) <= 4 else 86
+                
+                word_box = slide.shapes.add_textbox(
+                    Cm(word_left), Cm(curr_word_top), Cm(word_width), Cm(word_height)
+                )
+                word_box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+                self._set_text_exact_style(
+                    word_box, hz_text, font_name="字由点字云霆楷体", 
+                    font_size=hz_font_size, color=color_black, bold=False, align="center"
+                )
+
+                # --- 2. Vẽ Detail Box (Pinyin, Nghĩa, Ví dụ bên phải) ---
+                curr_detail_top = detail_start_top + (i * detail_y_step)
+                detail_box = slide.shapes.add_textbox(
+                    Cm(detail_left), Cm(curr_detail_top), Cm(detail_width), Cm(detail_height)
+                )
+                tf = detail_box.text_frame
+                tf.word_wrap = True
+                # Tắt margin để text sát lề chuẩn
+                tf.margin_top = tf.margin_bottom = tf.margin_left = tf.margin_right = 0
+
+                # Paragraph 1: /pinyin/ (loại từ): nghĩa
+                p1 = tf.paragraphs[0]
+                p1.space_after = Pt(0)
+                
+                # Run: Pinyin (Xám)
+                run_py = p1.add_run()
+                run_py.text = f"/{item.get('pinyin', '')}/ "
+                run_py.font.name = "Muli"
+                run_py.font.size = Pt(32)
+                run_py.font.color.rgb = self.hex_to_rgb_color(color_gray)
+                
+                # Run: Loại từ & Nghĩa (Đỏ)
+                run_type_vi = p1.add_run()
+                type_str = f"({item.get('type', '')}): " if item.get('type') else ""
+                run_type_vi.text = f"{type_str}{item.get('vi', '')}"
+                run_type_vi.font.name = "Muli"
+                run_type_vi.font.size = Pt(32)
+                run_type_vi.font.color.rgb = self.hex_to_rgb_color(color_red)
+
+                # Lấy dữ liệu ví dụ
+                example = item.get("example", {})
+                ex_hz = example.get("hz", "")
+                ex_py = example.get("py", "")
+                ex_vi = example.get("vi", "")
+
+                # Paragraph 2: VD: Hán tự /Pinyin/
+                if ex_hz or ex_py:
+                    p2 = tf.add_paragraph()
+                    p2.space_after = Pt(0)
+                    
+                    # Run: Chữ "VD: " (Đen, Size 32)
+                    run_vd = p2.add_run()
+                    run_vd.text = "VD: "
+                    run_vd.font.name = "Muli"
+                    run_vd.font.size = Pt(32)
+                    run_vd.font.color.rgb = self.hex_to_rgb_color(color_black)
+                    
+                    # Chèn Hán tự ví dụ (Highlight thẻ <hl>) - Size 32
+                    self._add_hl_text(p2, ex_hz, "Muli", 32, color_black, color_green)
+                    
+                    # Chèn Pinyin ví dụ bọc trong dấu / / - Phải gán size cho cả dấu gạch
+                    if ex_py:
+                        # Dấu "/" mở đầu
+                        run_slash_start = p2.add_run()
+                        run_slash_start.text = " /"
+                        run_slash_start.font.name = "Muli"
+                        run_slash_start.font.size = Pt(32)
+                        run_slash_start.font.color.rgb = self.hex_to_rgb_color(color_black)
+
+                        # Pinyin chính (có highlight) - Size 32
+                        self._add_hl_text(p2, ex_py, "Muli", 32, color_black, color_green)
+
+                        # Dấu "/:" kết thúc
+                        run_slash_end = p2.add_run()
+                        run_slash_end.text = "/:"
+                        run_slash_end.font.name = "Muli"
+                        run_slash_end.font.size = Pt(32)
+                        run_slash_end.font.color.rgb = self.hex_to_rgb_color(color_black)
+
+                # Paragraph 3: Dịch nghĩa ví dụ (Đã có size 32 trong hàm _add_hl_text)
+                if ex_vi:
+                    p3 = tf.add_paragraph()
+                    p3.space_after = Pt(0)
+                    self._add_hl_text(p3, ex_vi, "Muli", 32, color_black, color_green)
 
     def add_extra_slide(self, extra: dict):
         pass
@@ -513,7 +640,20 @@ class PPTGenerator:
         self.add_table_of_content()
 
         for sec in self.data["sections"]:
-                self.add_dialogue_slide(sec)
+            # --- Phần 1: Hội thoại (Có Pinyin) ---
+            self.add_dialogue_slide(sec, force_simple=False)
+            
+            # --- Phần 2: Từ vựng (3 từ/slide) ---
+            self.add_vocab_slides(sec)
+            
+            # --- Phần 3: Kiến thức liên quan ---
+            self.add_extra_slide(sec) 
+            
+            # --- Phần 4: Hội thoại (KHÔNG Pinyin) ---
+            self.add_dialogue_slide(sec, force_simple=True)
+            
+            # --- Phần 5: Luyện tập ---
+            self.add_exercise_slide(sec)
 
         # [TODO: Gọi các hàm vẽ nội dung (dialogue, vocab...) ở đây]
 
