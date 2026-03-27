@@ -1,0 +1,743 @@
+===== Content of: test_output_baikhoa_new.pptx =====
+
+--- Slide 1 ---
+
+Shape 1: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 2: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 3: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 4: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 5: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 6: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 7: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 8: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 9: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 10: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 11: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 12: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 13: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 14: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 15: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 我爸爸也在医院工作
+      Run 1: 我爸爸也在医院工作
+        Font name: Arial
+        Font size: 952500
+        Bold: True, Italic: False
+        Color (RGB): B51F09
+
+Shape 16: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 17: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 18: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 19: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 20: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 21: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 22: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 23: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 24: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 25: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 26: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 27: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 28: AUTO_SHAPE (1)
+  [TEXT]
+    Paragraph 1: Bài Khóa - Bài 8
+      Run 1: Bài Khóa - Bài 8
+        Font name: Arial
+        Font size: 635000
+        Bold: True, Italic: False
+        Color (RGB): FFFFFF
+
+--- Slide 2 ---
+
+Shape 1: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 2: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 3: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 4: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 5: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 6: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 7: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 8: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 9: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 10: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 11: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 12: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 13: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 01. TỪ VỰNG
+      Run 1: 01. TỪ VỰNG
+        Font name: Anton
+        Font size: 711200
+        Bold: True, Italic: False
+        Color (RGB): FCF1D4
+
+Shape 14: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 目录
+      Run 1: 目录
+        Font name: Arial
+        Font size: 1143000
+        Bold: True, Italic: False
+        Color (RGB): B02012
+
+Shape 15: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 02. BÀI KHÓA
+      Run 1: 02. BÀI KHÓA
+        Font name: Anton
+        Font size: 711200
+        Bold: True, Italic: False
+        Color (RGB): FCF1D4
+
+--- Slide 3 ---
+
+Shape 1: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 2: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 3: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 4: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 5: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 6: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 7: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 8: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: Hội thoại 1
+      Run 1: Hội thoại 1
+        Font name: Fraunces
+        Font size: 723900
+        Bold: False, Italic: False
+        Color (RGB): FCF1D4
+
+Shape 9: PICTURE (13)
+  [IMAGE detected]
+
+Shape 10: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 白家月：房间外有一只小猫。
+      Run 1: 白家月：房间外有一只小猫。
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Bái Jiāyuè: Fángjiān wài yǒu yì zhī xiǎo māo.
+      Run 1: Bái Jiāyuè: Fángjiān wài yǒu yì zhī xiǎo māo.
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Bạch Gia Nguyệt: Bên ngoài phòng có một con mèo nhỏ.
+      Run 1: Bạch Gia Nguyệt: Bên ngoài phòng có một con mèo nhỏ.
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+Shape 11: PICTURE (13)
+  [IMAGE detected]
+
+Shape 12: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 陈天中：我没看见，它在哪儿呢？
+      Run 1: 陈天中：我没看见，它在哪儿呢？
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Chén Tiānzhōng: Wǒ méi kànjiàn, tā zài nǎr ne?
+      Run 1: Chén Tiānzhōng: Wǒ méi kànjiàn, tā zài nǎr ne?
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Trần Thiên Trung: Tôi không thấy, nó ở đâu vậy?
+      Run 1: Trần Thiên Trung: Tôi không thấy, nó ở đâu vậy?
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+Shape 13: PICTURE (13)
+  [IMAGE detected]
+
+Shape 14: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 白家月：它在桌子下呢。
+      Run 1: 白家月：它在桌子下呢。
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Bái Jiāyuè: Tā zài zhuōzi xià ne.
+      Run 1: Bái Jiāyuè: Tā zài zhuōzi xià ne.
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Bạch Gia Nguyệt: Nó ở dưới cái bàn đó.
+      Run 1: Bạch Gia Nguyệt: Nó ở dưới cái bàn đó.
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+Shape 15: PICTURE (13)
+  [IMAGE detected]
+
+Shape 16: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 陈天中：这只小猫真漂亮！
+      Run 1: 陈天中：这只小猫真漂亮！
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Chén Tiānzhōng: Zhè zhī xiǎo māo zhēn piàoliang!
+      Run 1: Chén Tiānzhōng: Zhè zhī xiǎo māo zhēn piàoliang!
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Trần Thiên Trung: Con mèo nhỏ này xinh thật!
+      Run 1: Trần Thiên Trung: Con mèo nhỏ này xinh thật!
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+--- Slide 4 ---
+
+Shape 1: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 2: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 3: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 4: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 5: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 6: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 7: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 8: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: Hội thoại 2
+      Run 1: Hội thoại 2
+        Font name: Fraunces
+        Font size: 723900
+        Bold: False, Italic: False
+        Color (RGB): FCF1D4
+
+Shape 9: PICTURE (13)
+  [IMAGE detected]
+
+Shape 10: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 白家月：我们在哪儿见呢？
+      Run 1: 白家月：我们在哪儿见呢？
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Bái Jiāyuè: Wǒmen zài nǎr jiàn ne?
+      Run 1: Bái Jiāyuè: Wǒmen zài nǎr jiàn ne?
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Bạch Gia Nguyệt: Chúng ta gặp nhau ở đâu nhỉ?
+      Run 1: Bạch Gia Nguyệt: Chúng ta gặp nhau ở đâu nhỉ?
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+Shape 11: PICTURE (13)
+  [IMAGE detected]
+
+Shape 12: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 李文：在学校书店前见吧。
+      Run 1: 李文：在学校书店前见吧。
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Lǐ Wén: Zài xuéxiào shūdiàn qián jiàn ba.
+      Run 1: Lǐ Wén: Zài xuéxiào shūdiàn qián jiàn ba.
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Lý Văn: Gặp nhau ở trước hiệu sách của trường đi.
+      Run 1: Lý Văn: Gặp nhau ở trước hiệu sách của trường đi.
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+Shape 13: PICTURE (13)
+  [IMAGE detected]
+
+Shape 14: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 白家月：好的。下午两点你能到吗？
+      Run 1: 白家月：好的。下午两点你能到吗？
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Bái Jiāyuè: Hǎo de. Xiàwǔ liǎng diǎn nǐ néng dào ma?
+      Run 1: Bái Jiāyuè: Hǎo de. Xiàwǔ liǎng diǎn nǐ néng dào ma?
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Bạch Gia Nguyệt: Được thôi. 2 giờ chiều cậu đến được không?
+      Run 1: Bạch Gia Nguyệt: Được thôi. 2 giờ chiều cậu đến được không?
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+Shape 15: PICTURE (13)
+  [IMAGE detected]
+
+Shape 16: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 李文：我能到。我在学校吃午饭。
+      Run 1: 李文：我能到。我在学校吃午饭。
+        Font name: 字由点字典楷
+        Font size: 501650
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Lǐ Wén: Wǒ néng dào. Wǒ zài xuéxiào chī wǔfàn.
+      Run 1: Lǐ Wén: Wǒ néng dào. Wǒ zài xuéxiào chī wǔfàn.
+        Font name: Muli
+        Font size: 298450
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Lý Văn: Mình đến được. Mình ăn trưa ở trường.
+      Run 1: Lý Văn: Mình đến được. Mình ăn trưa ở trường.
+        Font name: Muli
+        Font size: 311150
+        Bold: None, Italic: True
+        Color (RGB): A40400
+
+--- Slide 5 ---
+
+Shape 1: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 2: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 3: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 4: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 5: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 6: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 7: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 8: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: Hội thoại 3
+      Run 1: Hội thoại 3
+        Font name: Fraunces
+        Font size: 723900
+        Bold: False, Italic: False
+        Color (RGB): FCF1D4
+
+Shape 9: PICTURE (13)
+  [IMAGE detected]
+
+Shape 10: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 刘明：小胡，还没吃饭呢？
+      Run 1: 刘明：小胡，还没吃饭呢？
+        Font name: 字由点字典楷
+        Font size: 372110
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Liú Míng: Xiǎo Hú, hái méi chī fàn ne?
+      Run 1: Liú Míng: Xiǎo Hú, hái méi chī fàn ne?
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Lưu Minh: Tiểu Hồ, vẫn chưa ăn cơm à?
+      Run 1: Lưu Minh: Tiểu Hồ, vẫn chưa ăn cơm à?
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): A40400
+
+Shape 11: PICTURE (13)
+  [IMAGE detected]
+
+Shape 12: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 胡医生：没吃呢。
+      Run 1: 胡医生：没吃呢。
+        Font name: 字由点字典楷
+        Font size: 372110
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Hú yīshēng: Méi chī ne.
+      Run 1: Hú yīshēng: Méi chī ne.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Bác sĩ Hồ: Vẫn chưa ăn.
+      Run 1: Bác sĩ Hồ: Vẫn chưa ăn.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): A40400
+
+Shape 13: PICTURE (13)
+  [IMAGE detected]
+
+Shape 14: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 刘明：大医院病人多，医生非常忙。
+      Run 1: 刘明：大医院病人多，医生非常忙。
+        Font name: 字由点字典楷
+        Font size: 372110
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Liú Míng: Dà yīyuàn bìngrén duō, yīshēng fēicháng máng.
+      Run 1: Liú Míng: Dà yīyuàn bìngrén duō, yīshēng fēicháng máng.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Lưu Minh: Bệnh viện lớn bệnh nhân đông, bác sĩ vô cùng bận rộn.
+      Run 1: Lưu Minh: Bệnh viện lớn bệnh nhân đông, bác sĩ vô cùng bận rộn.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): A40400
+
+Shape 15: PICTURE (13)
+  [IMAGE detected]
+
+Shape 16: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 胡医生：是的。我爸爸也在医院工作，他也非常忙。
+      Run 1: 胡医生：是的。我爸爸也在医院工作，他也非常忙。
+        Font name: 字由点字典楷
+        Font size: 372110
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Hú yīshēng: Shì de. Wǒ bàba yě zài yīyuàn gōngzuò, tā yě fēicháng máng.
+      Run 1: Hú yīshēng: Shì de. Wǒ bàba yě zài yīyuàn gōngzuò, tā yě fēicháng máng.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Bác sĩ Hồ: Đúng vậy. Bố tôi cũng làm việc ở bệnh viện, ông ấy cũng rất bận.
+      Run 1: Bác sĩ Hồ: Đúng vậy. Bố tôi cũng làm việc ở bệnh viện, ông ấy cũng rất bận.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): A40400
+
+Shape 17: PICTURE (13)
+  [IMAGE detected]
+
+Shape 18: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 刘明：你家有两个医生？
+      Run 1: 刘明：你家有两个医生？
+        Font name: 字由点字典楷
+        Font size: 372110
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Liú Míng: Nǐ jiā yǒu liǎng gè yīshēng?
+      Run 1: Liú Míng: Nǐ jiā yǒu liǎng gè yīshēng?
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Lưu Minh: Nhà bạn có hai bác sĩ à?
+      Run 1: Lưu Minh: Nhà bạn có hai bác sĩ à?
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): A40400
+
+Shape 19: PICTURE (13)
+  [IMAGE detected]
+
+Shape 20: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 胡医生：对。
+      Run 1: 胡医生：对。
+        Font name: 字由点字典楷
+        Font size: 372110
+        Bold: True, Italic: None
+        Color (RGB): 000000
+    Paragraph 2: Hú yīshēng: Duì.
+      Run 1: Hú yīshēng: Duì.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): 545454
+    Paragraph 3: Bác sĩ Hồ: Đúng vậy.
+      Run 1: Bác sĩ Hồ: Đúng vậy.
+        Font name: Muli
+        Font size: 231140
+        Bold: None, Italic: None
+        Color (RGB): A40400
+
+--- Slide 6 ---
+
+Shape 1: GROUP (6)
+  [OTHER SHAPE]
+
+Shape 2: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 3: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 4: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 5: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 6: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 7: TEXT_BOX (17)
+  [TEXT]
+    Paragraph 1: 我爸爸也在医院工作
+      Run 1: 我爸爸也在医院工作
+        Font name: Arial
+        Font size: 952500
+        Bold: True, Italic: False
+        Color (RGB): B51F09
+
+Shape 8: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 9: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 10: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 11: PICTURE (13)
+  [IMAGE detected]
+
+Shape 12: PICTURE (13)
+  [IMAGE detected]
+
+Shape 13: PICTURE (13)
+  [IMAGE detected]
+
+Shape 14: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 15: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 16: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 17: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 18: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 19: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 20: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 21: FREEFORM (5)
+  [TEXT]
+    Paragraph 1: 
+
+Shape 22: AUTO_SHAPE (1)
+  [TEXT]
+    Paragraph 1: Bài Khóa - Bài 8
+      Run 1: Bài Khóa - Bài 8
+        Font name: Arial
+        Font size: 635000
+        Bold: True, Italic: False
+        Color (RGB): FFFFFF

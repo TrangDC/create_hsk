@@ -8,428 +8,515 @@
     {
       "section_title": "Hội thoại 1",
       "full_dialogue": {
-        "hz": "白家月：房间外有一只小猫。\n陈天中：我没看见，它在哪儿呢？\n白家月：它在桌子下呢。\n陈天中：这只小猫真漂亮！",
-        "py": "Bái Jiāyuè: Fángjiān wài yǒu yì zhī xiǎo māo.\nChén Tiānzhōng: Wǒ méi kànjiàn, tā zài nǎr ne?\nBái Jiāyuè: Tā zài zhuōzi xià ne.\nChén Tiānzhōng: Zhè zhī xiǎo māo zhēn piàoliang!",
-        "vi": "Bạch Gia Nguyệt: Bên ngoài phòng có một chú mèo con.\nTrần Thiên Trung: Tôi không thấy, nó ở đâu vậy?\nBạch Gia Nguyệt: Nó ở dưới bàn đó.\nTrần Thiên Trung: Chú mèo con này xinh thật!"
+        "hz": [
+          "白家月：房间外有一只小猫。",
+          "陈天中：我没看见，它在哪儿呢？",
+          "白家月：它在桌子下呢。",
+          "陈天中：这只小猫真漂亮！"
+        ],
+        "py": [
+          "Bái Jiāyuè: Fángjiān wài yǒu yì zhī xiǎo māo.",
+          "Chén Tiānzhōng: Wǒ méi kànjiàn, tā zài nǎr ne?",
+          "Bái Jiāyuè: Tā zài zhuōzi xià ne.",
+          "Chén Tiānzhōng: Zhè zhī xiǎo māo zhēn piàoliang!"
+        ],
+        "vi": [
+          "Bạch Gia Nguyệt: Bên ngoài phòng có một con mèo nhỏ.",
+          "Trần Thiên Trung: Tôi không thấy, nó ở đâu vậy?",
+          "Bạch Gia Nguyệt: Nó ở dưới cái bàn đó.",
+          "Trần Thiên Trung: Con mèo nhỏ này xinh thật!"
+        ]
       },
       "vocabulary": [
         {
           "hz": "房间",
           "pinyin": "fángjiān",
           "type": "Danh từ",
-          "vi": "Phòng, căn phòng",
-          "measure_word_usage": "",
+          "vi": "phòng",
           "example": {
-            "hz": "我的房间不大。",
-            "py": "Wǒ de fángjiān bù dà.",
-            "vi": "Phòng của tôi không lớn."
+            "hz": "我的<hl>房间</hl>里有一张桌子。",
+            "py": "Wǒ de <hl>fángjiān</hl> lǐ yǒu yì zhāng zhuōzi.",
+            "vi": "Trong <hl>phòng</hl> của tôi có một cái bàn."
           }
         },
         {
           "hz": "外",
           "pinyin": "wài",
           "type": "Danh từ",
-          "vi": "Bên ngoài",
-          "measure_word_usage": "",
+          "vi": "bên ngoài",
           "example": {
-            "hz": "请在门外等我。",
-            "py": "Qǐng zài mén wài děng wǒ.",
-            "vi": "Vui lòng đợi tôi ở ngoài cửa."
+            "hz": "学校<hl>外</hl>有一个书店。",
+            "py": "Xuéxiào <hl>wài</hl> yǒu yí ge shūdiàn.",
+            "vi": "<hl>Bên ngoài</hl> trường học có một hiệu sách."
           }
         },
         {
           "hz": "只",
           "pinyin": "zhī",
           "type": "Lượng từ",
-          "vi": "Con (dùng cho một số loài động vật)",
-          "measure_word_usage": "Dùng cho một số loài động vật, một trong hai bộ phận đối xứng của cơ thể. Ví dụ: 一只猫 (một con mèo), 一只手 (một bàn tay).",
+          "vi": "con (dùng cho động vật)",
+          "measure_word_usage": "Dùng cho một số loài động vật như chó, mèo, chim. Ví dụ: 一只猫 (yì zhī māo), 一只狗 (yì zhī gǒu).",
           "example": {
-            "hz": "我家有一只狗和两只猫。",
-            "py": "Wǒjiā yǒu yì zhī gǒu hé liǎng zhī māo.",
-            "vi": "Nhà tôi có một con chó và hai con mèo."
+            "hz": "我家有三<hl>只</hl>猫。",
+            "py": "Wǒ jiā yǒu sān <hl>zhī</hl> māo.",
+            "vi": "Nhà tôi có ba <hl>con</hl> mèo."
+          }
+        },
+        {
+          "hz": "小",
+          "pinyin": "xiǎo",
+          "type": "Tính từ",
+          "vi": "nhỏ, bé",
+          "example": {
+            "hz": "这只<hl>小</hl>猫很可爱。",
+            "py": "Zhè zhī <hl>xiǎo</hl> māo hěn kě'ài.",
+            "vi": "Con mèo <hl>nhỏ</hl> này rất đáng yêu."
           }
         },
         {
           "hz": "猫",
           "pinyin": "māo",
           "type": "Danh từ",
-          "vi": "Mèo",
-          "measure_word_usage": "",
+          "vi": "mèo",
           "example": {
-            "hz": "这只小猫很可爱。",
-            "py": "Zhè zhī xiǎo māo hěn kě'ài.",
-            "vi": "Chú mèo con này rất đáng yêu."
+            "hz": "我喜欢<hl>猫</hl>。",
+            "py": "Wǒ xǐhuan <hl>māo</hl>.",
+            "vi": "Tôi thích <hl>mèo</hl>."
           }
         },
         {
           "hz": "没",
           "pinyin": "méi",
           "type": "Phó từ",
-          "vi": "Chưa, không (dùng để phủ định cho động từ '有' và các hành động đã xảy ra)",
-          "measure_word_usage": "",
+          "vi": "không, chưa",
           "example": {
-            "hz": "我没吃饭。",
-            "py": "Wǒ méi chīfàn.",
-            "vi": "Tôi chưa ăn cơm."
+            "hz": "我<hl>没</hl>有钱。",
+            "py": "Wǒ <hl>méi</hl>yǒu qián.",
+            "vi": "Tôi <hl>không</hl> có tiền."
           }
         },
         {
           "hz": "看见",
           "pinyin": "kànjiàn",
           "type": "Động từ",
-          "vi": "Nhìn thấy",
-          "measure_word_usage": "",
+          "vi": "nhìn thấy",
           "example": {
-            "hz": "你看见我的手机了吗？",
-            "py": "Nǐ kànjiàn wǒ de shǒujī le ma?",
-            "vi": "Bạn có nhìn thấy điện thoại của tôi không?"
+            "hz": "我在学校<hl>看见</hl>他了。",
+            "py": "Wǒ zài xuéxiào <hl>kànjiàn</hl> tā le.",
+            "vi": "Tôi đã <hl>nhìn thấy</hl> anh ấy ở trường."
           }
         },
         {
           "hz": "桌子",
           "pinyin": "zhuōzi",
           "type": "Danh từ",
-          "vi": "Cái bàn",
-          "measure_word_usage": "",
+          "vi": "cái bàn",
           "example": {
-            "hz": "书在桌子上。",
-            "py": "Shū zài zhuōzi shàng.",
-            "vi": "Sách ở trên bàn."
+            "hz": "手机在<hl>桌子</hl>上。",
+            "py": "Shǒujī zài <hl>zhuōzi</hl> shàng.",
+            "vi": "Điện thoại ở trên <hl>cái bàn</hl>."
           }
         },
         {
           "hz": "下",
           "pinyin": "xià",
           "type": "Danh từ",
-          "vi": "Dưới, bên dưới",
-          "measure_word_usage": "",
+          "vi": "dưới, bên dưới",
           "example": {
-            "hz": "小狗在桌子下睡觉。",
-            "py": "Xiǎo gǒu zài zhuōzi xià shuìjiào.",
-            "vi": "Chó con ngủ ở dưới gầm bàn."
+            "hz": "小猫在桌子<hl>下</hl>。",
+            "py": "Xiǎo māo zài zhuōzi <hl>xià</hl>.",
+            "vi": "Con mèo ở <hl>dưới</hl> cái bàn."
           }
         },
         {
           "hz": "漂亮",
           "pinyin": "piàoliang",
           "type": "Tính từ",
-          "vi": "Xinh đẹp, đẹp",
-          "measure_word_usage": "",
+          "vi": "xinh đẹp, đẹp",
           "example": {
-            "hz": "她的衣服很漂亮。",
-            "py": "Tā de yīfu hěn piàoliang.",
-            "vi": "Quần áo của cô ấy rất đẹp."
+            "hz": "她的衣服很<hl>漂亮</hl>。",
+            "py": "Tā de yīfu hěn <hl>piàoliang</hl>.",
+            "vi": "Quần áo của cô ấy rất <hl>đẹp</hl>."
           }
         }
       ],
       "extra_knowledge": [
         {
-          "title": "Từ chỉ phương vị (方位词)",
-          "content": "Các từ chỉ phương vị như 上 (trên), 下 (dưới), 里 (trong), 外 (ngoài), 前 (trước), 后 (sau) được dùng để biểu thị phương hướng và vị trí. Chúng có thể đứng sau danh từ hoặc đại từ.",
+          "title": "Phân biệt \"不 (bù)\" và \"没 (méi)\"",
+          "content": "\"不 (bù)\" và \"没 (méi)\" đều là phó từ phủ định, nhưng cách dùng khác nhau. \"不\" dùng để phủ định cho hành động ở hiện tại, tương lai, hoặc một thói quen, sự thật; thường đứng trước động từ, tính từ. \"没\" dùng để phủ định cho hành động đã xảy ra trong quá khứ (tương đương \"chưa\") hoặc phủ định cho sự sở hữu (chỉ dùng với động từ \"有\").",
           "examples": [
             {
-              "hz": "小雪的手机在桌子上呢。",
-              "py": "Xiǎoxuě de shǒujī zài zhuōzi shàng ne.",
-              "vi": "Điện thoại của Tiểu Tuyết ở trên bàn."
+              "hz": "我不是学生。",
+              "py": "Wǒ bú shì xuéshēng.",
+              "vi": "Tôi không phải là học sinh. (Phủ định sự thật)"
             },
             {
-              "hz": "学校里有很多学生。",
-              "py": "Xuéxiào lǐ yǒu hěn duō xuéshēng.",
-              "vi": "Trong trường có rất nhiều học sinh."
+              "hz": "我昨天没去学校。",
+              "py": "Wǒ zuótiān méi qù xuéxiào.",
+              "vi": "Hôm qua tôi đã không đến trường. (Phủ định hành động trong quá khứ)"
+            },
+            {
+              "hz": "我没有猫。",
+              "py": "Wǒ méiyǒu māo.",
+              "vi": "Tôi không có mèo. (Phủ định sự sở hữu)"
             }
           ]
         }
       ],
       "simple_dialogue": {
-        "hz": "白家月：房间外有一只小猫。\n陈天中：我没看见，它在哪儿呢？\n白家月：它在桌子下呢。\n陈天中：这只小猫真漂亮！",
-        "vi": "Bạch Gia Nguyệt: Bên ngoài phòng có một chú mèo con.\nTrần Thiên Trung: Tôi không thấy, nó ở đâu vậy?\nBạch Gia Nguyệt: Nó ở dưới bàn đó.\nTrần Thiên Trung: Chú mèo con này xinh thật!"
+        "hz": [
+          "白家月：房间外有一只小猫。",
+          "陈天中：我没看见，它在哪儿呢？",
+          "白家月：它在桌子下呢。",
+          "陈天中：这只小猫真漂亮！"
+        ],
+        "vi": [
+          "Bạch Gia Nguyệt: Bên ngoài phòng có một con mèo nhỏ.",
+          "Trần Thiên Trung: Tôi không thấy, nó ở đâu vậy?",
+          "Bạch Gia Nguyệt: Nó ở dưới cái bàn đó.",
+          "Trần Thiên Trung: Con mèo nhỏ này xinh thật!"
+        ]
       },
       "exercise": {
-        "question": "A: 你看见我的书了吗？ (Nǐ kànjiàn wǒ de shū le ma?) B: ______。",
+        "question": "A: 你看见我的书了吗？ B: 在______下面。",
         "options": [
           {
-            "hz": "它在桌子下",
-            "py": "Tā zài zhuōzi xià"
+            "hz": "房间",
+            "py": "fángjiān"
           },
           {
-            "hz": "它很漂亮",
-            "py": "Tā hěn piàoliang"
+            "hz": "桌子",
+            "py": "zhuōzi"
           },
           {
-            "hz": "它是一只猫",
-            "py": "Tā shì yì zhī māo"
+            "hz": "猫",
+            "py": "māo"
+          },
+          {
+            "hz": "漂亮",
+            "py": "piàoliang"
           }
         ],
-        "answer": "A"
+        "answer": "B"
       }
     },
     {
       "section_title": "Hội thoại 2",
       "full_dialogue": {
-        "hz": "白家月：我们在哪儿见呢？\n李文：在学校书店前见吧。\n白家月：好的。下午两点你能到吗？\n李文：我能到。我在学校吃午饭。",
-        "py": "Bái Jiāyuè: Wǒmen zài nǎr jiàn ne?\nLǐ Wén: Zài xuéxiào shūdiàn qián jiàn ba.\nBái Jiāyuè: Hǎo de. Xiàwǔ liǎng diǎn nǐ néng dào ma?\nLǐ Wén: Wǒ néng dào. Wǒ zài xuéxiào chī wǔfàn.",
-        "vi": "Bạch Gia Nguyệt: Chúng ta gặp nhau ở đâu nhỉ?\nLý Văn: Gặp nhau ở trước hiệu sách của trường đi.\nBạch Gia Nguyệt: Được thôi. 2 giờ chiều bạn đến được không?\nLý Văn: Tôi đến được. Tôi ăn trưa ở trường."
+        "hz": [
+          "白家月：我们在哪儿见呢？",
+          "李文：在学校书店前见吧。",
+          "白家月：好的。下午两点你能到吗？",
+          "李文：我能到。我在学校吃午饭。"
+        ],
+        "py": [
+          "Bái Jiāyuè: Wǒmen zài nǎr jiàn ne?",
+          "Lǐ Wén: Zài xuéxiào shūdiàn qián jiàn ba.",
+          "Bái Jiāyuè: Hǎo de. Xiàwǔ liǎng diǎn nǐ néng dào ma?",
+          "Lǐ Wén: Wǒ néng dào. Wǒ zài xuéxiào chī wǔfàn."
+        ],
+        "vi": [
+          "Bạch Gia Nguyệt: Chúng ta gặp nhau ở đâu nhỉ?",
+          "Lý Văn: Gặp nhau ở trước hiệu sách của trường đi.",
+          "Bạch Gia Nguyệt: Được thôi. 2 giờ chiều cậu đến được không?",
+          "Lý Văn: Mình đến được. Mình ăn trưa ở trường."
+        ]
       },
       "vocabulary": [
         {
           "hz": "在",
           "pinyin": "zài",
           "type": "Giới từ",
-          "vi": "Ở, tại",
-          "measure_word_usage": "",
+          "vi": "ở, tại",
           "example": {
-            "hz": "我在家学习汉语。",
-            "py": "Wǒ zàijiā xuéxí Hànyǔ.",
-            "vi": "Tôi ở nhà học tiếng Hán."
+            "hz": "我<hl>在</hl>学校吃午饭。",
+            "py": "Wǒ <hl>zài</hl> xuéxiào chī wǔfàn.",
+            "vi": "Tôi ăn cơm trưa <hl>ở</hl> trường."
           }
         },
         {
           "hz": "学校",
           "pinyin": "xuéxiào",
           "type": "Danh từ",
-          "vi": "Trường học",
-          "measure_word_usage": "",
+          "vi": "trường học",
           "example": {
-            "hz": "这是我们的学校。",
-            "py": "Zhè shì wǒmen de xuéxiào.",
-            "vi": "Đây là trường học của chúng tôi."
+            "hz": "我儿子很喜欢去<hl>学校</hl>。",
+            "py": "Wǒ érzi hěn xǐhuān qù <hl>xuéxiào</hl>.",
+            "vi": "Con trai tôi rất thích đến <hl>trường học</hl>."
           }
         },
         {
           "hz": "书店",
           "pinyin": "shūdiàn",
           "type": "Danh từ",
-          "vi": "Hiệu sách",
-          "measure_word_usage": "",
+          "vi": "hiệu sách",
           "example": {
-            "hz": "我想去书店买一本书。",
-            "py": "Wǒ xiǎng qù shūdiàn mǎi yì běn shū.",
-            "vi": "Tôi muốn đến hiệu sách mua một quyển sách."
+            "hz": "在学校<hl>书店</hl>前见吧。",
+            "py": "Zài xuéxiào <hl>shūdiàn</hl> qián jiàn ba.",
+            "vi": "Gặp nhau ở trước <hl>hiệu sách</hl> của trường đi."
           }
         },
         {
           "hz": "前",
           "pinyin": "qián",
           "type": "Danh từ",
-          "vi": "Trước, phía trước",
-          "measure_word_usage": "",
+          "vi": "trước, phía trước",
           "example": {
-            "hz": "书店前有很多人。",
-            "py": "Shūdiàn qián yǒu hěn duō rén.",
-            "vi": "Phía trước hiệu sách có rất nhiều người."
+            "hz": "书店<hl>前</hl>有很多人。",
+            "py": "Shūdiàn <hl>qián</hl> yǒu hěn duō rén.",
+            "vi": "<hl>Phía trước</hl> hiệu sách có rất nhiều người."
           }
         },
         {
           "hz": "能",
           "pinyin": "néng",
           "type": "Động từ năng nguyện",
-          "vi": "Có thể, có khả năng",
-          "measure_word_usage": "",
+          "vi": "có thể",
           "example": {
-            "hz": "明天你能来我家吗？",
-            "py": "Míngtiān nǐ néng lái wǒjiā ma?",
-            "vi": "Ngày mai bạn có thể đến nhà tôi không?"
+            "hz": "下午两点你<hl>能</hl>到吗？",
+            "py": "Xiàwǔ liǎng diǎn nǐ <hl>néng</hl> dào ma?",
+            "vi": "2 giờ chiều cậu <hl>có thể</hl> đến không?"
           }
         },
         {
           "hz": "到",
           "pinyin": "dào",
           "type": "Động từ",
-          "vi": "Đến, tới",
-          "measure_word_usage": "",
+          "vi": "đến, tới",
           "example": {
-            "hz": "我下午五点到家。",
-            "py": "Wǒ xiàwǔ wǔ diǎn dàojiā.",
-            "vi": "Tôi về đến nhà lúc 5 giờ chiều."
+            "hz": "我下午三点<hl>到</hl>学校。",
+            "py": "Wǒ xiàwǔ sān diǎn <hl>dào</hl> xuéxiào.",
+            "vi": "3 giờ chiều tôi <hl>tới</hl> trường."
           }
         },
         {
           "hz": "午饭",
           "pinyin": "wǔfàn",
           "type": "Danh từ",
-          "vi": "Bữa trưa, cơm trưa",
-          "measure_word_usage": "",
+          "vi": "cơm trưa, bữa trưa",
           "example": {
-            "hz": "我们一起吃午饭吧。",
-            "py": "Wǒmen yìqǐ chī wǔfàn ba.",
-            "vi": "Chúng ta cùng nhau ăn trưa đi."
+            "hz": "今天的<hl>午饭</hl>很好吃。",
+            "py": "Jīntiān de <hl>wǔfàn</hl> hěn hǎochī.",
+            "vi": "<hl>Bữa trưa</hl> hôm nay rất ngon."
           }
         }
       ],
       "extra_knowledge": [
         {
-          "title": "Giới từ \"在\"",
-          "content": "Giới từ \"在\" kết hợp với các từ hoặc cụm từ chỉ vị trí, địa điểm, đứng trước động từ để chỉ hành động diễn ra ở đâu. Cấu trúc: S + 在 + Địa điểm + V.",
+          "title": "Phân biệt \"在\" (zài) và \"有\" (yǒu) khi chỉ vị trí",
+          "content": "Trong tiếng Trung, \"在\" (zài) và \"有\" (yǒu) đều có thể dùng để miêu tả vị trí, nhưng cách dùng và ý nghĩa nhấn mạnh khác nhau. \"在\" dùng để nói một người hoặc vật cụ thể đang ở đâu (Chủ thể + 在 + Vị trí). Ngược lại, \"有\" dùng để nói ở một vị trí nào đó có sự tồn tại của một người hoặc vật không xác định (Vị trí + 有 + Chủ thể).",
           "examples": [
             {
-              "hz": "我爸爸在医院工作。",
-              "py": "Wǒ bàba zài yīyuàn gōngzuò.",
-              "vi": "Bố tôi làm việc ở bệnh viện."
+              "hz": "学校里有书店。",
+              "py": "Xuéxiào lǐ yǒu shūdiàn.",
+              "vi": "Trong trường học có hiệu sách. (Nhấn mạnh sự tồn tại của 'hiệu sách' ở 'trường học')"
             },
             {
-              "hz": "你在哪儿买菜？",
-              "py": "Nǐ zài nǎr mǎi cài?",
-              "vi": "Bạn mua thức ăn ở đâu?"
-            }
-          ]
-        },
-        {
-          "title": "Động từ năng nguyện \"能\"",
-          "content": "Động từ năng nguyện \"能\" đứng trước động từ, biểu thị có khả năng, có điều kiện hoặc có thể làm một việc gì đó.",
-          "examples": [
-            {
-              "hz": "我能说汉语。",
-              "py": "Wǒ néng shuō Hànyǔ.",
-              "vi": "Tôi có thể nói tiếng Hán."
-            },
-            {
-              "hz": "我不能去学校吃午饭。",
-              "py": "Wǒ bù néng qù xuéxiào chī wǔfàn.",
-              "vi": "Tôi không thể đến trường ăn trưa."
+              "hz": "书店在学校里。",
+              "py": "Shūdiàn zài xuéxiào lǐ.",
+              "vi": "Hiệu sách ở trong trường học. (Nhấn mạnh vị trí của 'hiệu sách')"
             }
           ]
         }
       ],
       "simple_dialogue": {
-        "hz": "白家月：我们在哪儿见呢？\n李文：在学校书店前见吧。\n白家月：好的。下午两点你能到吗？\n李文：我能到。我在学校吃午饭。",
-        "vi": "Bạch Gia Nguyệt: Chúng ta gặp nhau ở đâu nhỉ?\nLý Văn: Gặp nhau ở trước hiệu sách của trường đi.\nBạch Gia Nguyệt: Được thôi. 2 giờ chiều bạn đến được không?\nLý Văn: Tôi đến được. Tôi ăn trưa ở trường."
+        "hz": [
+          "白家月：我们在哪儿见呢？",
+          "李文：在学校书店前见吧。",
+          "白家月：好的。下午两点你能到吗？",
+          "李文：我能到。我在学校吃午饭。"
+        ],
+        "vi": [
+          "Bạch Gia Nguyệt: Chúng ta gặp nhau ở đâu nhỉ?",
+          "Lý Văn: Gặp nhau ở trước hiệu sách của trường đi.",
+          "Bạch Gia Nguyệt: Được thôi. 2 giờ chiều cậu đến được không?",
+          "Lý Văn: Mình đến được. Mình ăn trưa ở trường."
+        ]
       },
       "exercise": {
-        "question": "明天下午你有时间吗？我们______一起去书店？ (Míngtiān xiàwǔ nǐ yǒu shíjiān ma? Wǒmen ______ yìqǐ qù shūdiàn?)",
+        "question": "小王下午三点想去买书，他应该去哪儿？",
         "options": [
           {
-            "hz": "能不能",
-            "py": "néng bù néng"
+            "hz": "学校",
+            "py": "xuéxiào"
           },
           {
-            "hz": "在不在",
-            "py": "zài bù zài"
+            "hz": "书店",
+            "py": "shūdiàn"
           },
           {
-            "hz": "是不是",
-            "py": "shì bù shì"
+            "hz": "医院",
+            "py": "yīyuàn"
+          },
+          {
+            "hz": "家里",
+            "py": "jiā lǐ"
           }
         ],
-        "answer": "A"
+        "answer": "B"
       }
     },
     {
       "section_title": "Hội thoại 3",
       "full_dialogue": {
-        "hz": "刘明：小胡，还没吃饭呢？\n胡医生：没吃呢。\n刘明：大医院病人多，医生非常忙。\n胡医生：是的。我爸爸也在医院工作，他也非常忙。\n刘明：你家有两个医生？\n胡医生：对。",
-        "py": "Liú Míng: Xiǎo Hú, hái méi chī fàn ne?\nHú yīshēng: Méi chī ne.\nLiú Míng: Dà yīyuàn bìngrén duō, yīshēng fēicháng máng.\nHú yīshēng: Shì de. Wǒ bàba yě zài yīyuàn gōngzuò, tā yě fēicháng máng.\nLiú Míng: Nǐ jiā yǒu liǎng gè yīshēng?\nHú yīshēng: Duì.",
-        "vi": "Lưu Minh: Tiểu Hồ, vẫn chưa ăn cơm à?\nBác sĩ Hồ: Vẫn chưa ăn.\nLưu Minh: Bệnh viện lớn nhiều bệnh nhân, bác sĩ vô cùng bận rộn.\nBác sĩ Hồ: Đúng vậy. Bố tôi cũng làm việc ở bệnh viện, ông ấy cũng rất bận.\nLưu Minh: Nhà bạn có hai bác sĩ à?\nBác sĩ Hồ: Đúng vậy."
+        "hz": [
+          "刘明：小胡，还没吃饭呢？",
+          "胡医生：没吃呢。",
+          "刘明：大医院病人多，医生非常忙。",
+          "胡医生：是的。我爸爸也在医院工作，他也非常忙。",
+          "刘明：你家有两个医生？",
+          "胡医生：对。"
+        ],
+        "py": [
+          "Liú Míng: Xiǎo Hú, hái méi chī fàn ne?",
+          "Hú yīshēng: Méi chī ne.",
+          "Liú Míng: Dà yīyuàn bìngrén duō, yīshēng fēicháng máng.",
+          "Hú yīshēng: Shì de. Wǒ bàba yě zài yīyuàn gōngzuò, tā yě fēicháng máng.",
+          "Liú Míng: Nǐ jiā yǒu liǎng gè yīshēng?",
+          "Hú yīshēng: Duì."
+        ],
+        "vi": [
+          "Lưu Minh: Tiểu Hồ, vẫn chưa ăn cơm à?",
+          "Bác sĩ Hồ: Vẫn chưa ăn.",
+          "Lưu Minh: Bệnh viện lớn bệnh nhân đông, bác sĩ vô cùng bận rộn.",
+          "Bác sĩ Hồ: Đúng vậy. Bố tôi cũng làm việc ở bệnh viện, ông ấy cũng rất bận.",
+          "Lưu Minh: Nhà bạn có hai bác sĩ à?",
+          "Bác sĩ Hồ: Đúng vậy."
+        ]
       },
       "vocabulary": [
         {
           "hz": "饭",
           "pinyin": "fàn",
           "type": "Danh từ",
-          "vi": "Cơm, bữa ăn",
-          "measure_word_usage": "",
+          "vi": "cơm, bữa ăn",
           "example": {
-            "hz": "你吃饭了吗？",
-            "py": "Nǐ chīfàn le ma?",
-            "vi": "Bạn ăn cơm chưa?"
+            "hz": "我还没吃<hl>饭</hl>呢。",
+            "py": "Wǒ hái méi chī<hl>fàn</hl> ne.",
+            "vi": "Tôi vẫn chưa ăn <hl>cơm</hl>."
           }
         },
         {
           "hz": "大",
           "pinyin": "dà",
           "type": "Tính từ",
-          "vi": "To, lớn",
-          "measure_word_usage": "",
+          "vi": "to, lớn",
           "example": {
-            "hz": "这个苹果很大。",
-            "py": "Zhège píngguǒ hěn dà.",
-            "vi": "Quả táo này rất to."
+            "hz": "这个医院很<hl>大</hl>。",
+            "py": "Zhège yīyuàn hěn <hl>dà</hl>.",
+            "vi": "Bệnh viện này rất <hl>lớn</hl>."
           }
         },
         {
           "hz": "病人",
           "pinyin": "bìngrén",
           "type": "Danh từ",
-          "vi": "Bệnh nhân",
-          "measure_word_usage": "",
+          "vi": "bệnh nhân",
           "example": {
-            "hz": "医院里有很多病人。",
-            "py": "Yīyuàn lǐ yǒu hěn duō bìngrén.",
-            "vi": "Trong bệnh viện có rất nhiều bệnh nhân."
+            "hz": "大医院<hl>病人</hl>多。",
+            "py": "Dà yīyuàn <hl>bìngrén</hl> duō.",
+            "vi": "Bệnh viện lớn có nhiều <hl>bệnh nhân</hl>."
           }
         },
         {
           "hz": "多",
           "pinyin": "duō",
           "type": "Tính từ",
-          "vi": "Nhiều",
-          "measure_word_usage": "",
+          "vi": "nhiều",
           "example": {
-            "hz": "今天人很多。",
-            "py": "Jīntiān rén hěn duō.",
-            "vi": "Hôm nay rất đông người."
+            "hz": "这家医院的病人很<hl>多</hl>。",
+            "py": "Zhè jiā yīyuàn de bìngrén hěn <hl>duō</hl>.",
+            "vi": "<hl>Nhiều</hl> bệnh nhân ở bệnh viện này."
           }
         },
         {
           "hz": "医生",
           "pinyin": "yīshēng",
           "type": "Danh từ",
-          "vi": "Bác sĩ",
-          "measure_word_usage": "",
+          "vi": "bác sĩ",
           "example": {
-            "hz": "他爸爸是医生。",
-            "py": "Tā bàba shì yīshēng.",
-            "vi": "Bố của anh ấy là bác sĩ."
+            "hz": "我爸爸也是<hl>医生</hl>。",
+            "py": "Wǒ bàba yě shì <hl>yīshēng</hl>.",
+            "vi": "Bố tôi cũng là <hl>bác sĩ</hl>."
           }
         },
         {
           "hz": "工作",
           "pinyin": "gōngzuò",
-          "type": "Động từ/Danh từ",
-          "vi": "Làm việc, công việc",
-          "measure_word_usage": "",
+          "type": "Động từ",
+          "vi": "làm việc",
           "example": {
-            "hz": "你在哪儿工作？",
-            "py": "Nǐ zài nǎr gōngzuò?",
-            "vi": "Bạn làm việc ở đâu?"
+            "hz": "我爸爸在医院<hl>工作</hl>。",
+            "py": "Wǒ bàba zài yīyuàn <hl>gōngzuò</hl>.",
+            "vi": "Bố tôi <hl>làm việc</hl> ở bệnh viện."
+          }
+        },
+        {
+          "hz": "胡医生",
+          "pinyin": "Hú yīshēng",
+          "type": "Danh từ riêng",
+          "vi": "Bác sĩ Hồ",
+          "example": {
+            "hz": "刘明和<hl>胡医生</hl>在聊天儿。",
+            "py": "Liú Míng hé <hl>Hú yīshēng</hl> zài liáotiānr.",
+            "vi": "Lưu Minh và <hl>Bác sĩ Hồ</hl> đang nói chuyện."
           }
         }
       ],
       "extra_knowledge": [
         {
-          "title": "Phó từ \"也\" (yě)",
-          "content": "\"也\" là phó từ, biểu thị sự tương đồng, có nghĩa là \"cũng\". Nó thường đứng trước động từ hoặc tính từ, và sau chủ ngữ.",
+          "title": "Phân biệt Phó từ '也' (yě) và '都' (dōu)",
+          "content": "Trong tiếng Trung, '也' (yě) và '都' (dōu) đều là phó từ nhưng có cách dùng khác nhau. '也' (yě) có nghĩa là 'cũng', dùng để chỉ sự tương đồng giữa các chủ thể khác nhau thực hiện cùng một hành động hoặc có cùng một tính chất. '都' (dōu) có nghĩa là 'đều', dùng để tổng hợp tất cả các đối tượng trong một phạm vi đã được đề cập, nhấn mạnh tính toàn bộ.",
           "examples": [
             {
               "hz": "我是学生，他也是学生。",
               "py": "Wǒ shì xuéshēng, tā yě shì xuéshēng.",
-              "vi": "Tôi là học sinh, anh ấy cũng là học sinh."
+              "vi": "Tôi là học sinh, anh ấy cũng là học sinh. (Hai chủ thể 'tôi' và 'anh ấy' có cùng đặc điểm là 'học sinh')."
             },
             {
-              "hz": "我爸爸在医院工作，他也非常忙。",
-              "py": "Wǒ bàba zài yīyuàn gōngzuò, tā yě fēicháng máng.",
-              "vi": "Bố tôi làm việc ở bệnh viện, ông ấy cũng rất bận."
+              "hz": "我们都是学生。",
+              "py": "Wǒmen dōu shì xuéshēng.",
+              "vi": "Chúng tôi đều là học sinh. (Tổng hợp tất cả trong chủ thể 'chúng tôi' đều là 'học sinh')."
             }
           ]
         }
       ],
       "simple_dialogue": {
-        "hz": "刘明：小胡，还没吃饭呢？\n胡医生：没吃呢。\n刘明：大医院病人多，医生非常忙。\n胡医生：是的。我爸爸也在医院工作，他也非常忙。\n刘明：你家有两个医生？\n胡医生：对。",
-        "vi": "Lưu Minh: Tiểu Hồ, vẫn chưa ăn cơm à?\nBác sĩ Hồ: Vẫn chưa ăn.\nLưu Minh: Bệnh viện lớn nhiều bệnh nhân, bác sĩ vô cùng bận rộn.\nBác sĩ Hồ: Đúng vậy. Bố tôi cũng làm việc ở bệnh viện, ông ấy cũng rất bận.\nLưu Minh: Nhà bạn có hai bác sĩ à?\nBác sĩ Hồ: Đúng vậy."
+        "hz": [
+          "刘明：小胡，还没吃饭呢？",
+          "胡医生：没吃呢。",
+          "刘明：大医院病人多，医生非常忙。",
+          "胡医生：是的。我爸爸也在医院工作，他也非常忙。",
+          "刘明：你家有两个医生？",
+          "胡医生：对。"
+        ],
+        "vi": [
+          "Lưu Minh: Tiểu Hồ, vẫn chưa ăn cơm à?",
+          "Bác sĩ Hồ: Vẫn chưa ăn.",
+          "Lưu Minh: Bệnh viện lớn bệnh nhân đông, bác sĩ vô cùng bận rộn.",
+          "Bác sĩ Hồ: Đúng vậy. Bố tôi cũng làm việc ở bệnh viện, ông ấy cũng rất bận.",
+          "Lưu Minh: Nhà bạn có hai bác sĩ à?",
+          "Bác sĩ Hồ: Đúng vậy."
+        ]
       },
       "exercise": {
-        "question": "A: 我是医生，你呢？ (Wǒ shì yīshēng, nǐ ne?) B: 我______是医生。(Wǒ ______ shì yīshēng.)",
+        "question": "A: 你妈妈在哪儿工作？\nB: 她是医生，在 ____ 工作。",
         "options": [
           {
-            "hz": "很",
-            "py": "hěn"
+            "hz": "A. 学校",
+            "py": "xuéxiào"
           },
           {
-            "hz": "也",
-            "py": "yě"
+            "hz": "B. 医院",
+            "py": "yīyuàn"
           },
           {
-            "hz": "多",
-            "py": "duō"
+            "hz": "C. 书店",
+            "py": "shūdiàn"
+          },
+          {
+            "hz": "D. 家里",
+            "py": "jiā lǐ"
           }
         ],
         "answer": "B"

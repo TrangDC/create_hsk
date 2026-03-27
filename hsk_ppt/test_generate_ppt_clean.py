@@ -2,9 +2,11 @@ import json
 import math
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.util import Pt, Inches
+from pptx.util import Pt, Inches, Cm, Mm
 from pptx.enum.text import PP_ALIGN
-
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.text import MSO_ANCHOR
+import os
 
 class PPTGenerator:
     def __init__(self, template_path: str, json_path: str):
@@ -176,48 +178,57 @@ class PPTGenerator:
         total_height_pt = total_lines * line_height_pt + 8
         return (total_height_pt / (SLIDE_HEIGHT * 72)) * SLIDE_HEIGHT
 
-    def _apply_title_styling(self, shape, text: str, max_font=135, min_font=75):
+    def _apply_title_styling(self, shape, text: str, max_font=135, min_font=40):
         """
         Căn chỉnh font-size tự động để title dài vừa vặn trên 1 dòng
-        và không bị vượt quá chiều rộng của khung Textbox.
+        mà không bị vượt quá chiều rộng và chiều cao của khung Textbox.
         """
-        # Đảm bảo chữ luôn nằm trên 1 dòng bằng cách cấm wrap text
+        if not text:
+            return
+
+        # Ép chữ nằm trên 1 dòng
         tf = shape.text_frame
         tf.word_wrap = False
         
-        # Chiều rộng tối đa của Textbox (tính bằng inch)
-        max_width_inch = shape.width / 914400.0 # 1 inch = 914400 EMUs
+        # 1 point (pt) = 12700 EMUs trong thư viện python-pptx
+        # Tính toán kích thước thực tế của text box (theo đơn vị Point)
+        shape_width_pt = shape.width / 12700.0
+        shape_height_pt = shape.height / 12700.0
         
-        # Hàm tính toán bề rộng của text dựa trên font size (tương tự logic trong get_text_height)
-        def _get_text_width_inch(text: str, font_size: int) -> float:
-            char_width_inch = (font_size * 0.6) / 72.0 # 1 point = 1/72 inch
-            
-            units = 0.0
-            for ch in text:
-                cp = ord(ch)
-                # Ký tự CJK full-width tính là 1 unit, các ký tự Latinh/số tính 0.5 unit
-                if (0x4E00 <= cp <= 0x9FFF or
-                    0x3000 <= cp <= 0x303F or
-                    0xFF00 <= cp <= 0xFFEF or
-                    0x3040 <= cp <= 0x30FF):
-                    units += 1.0
-                else:
-                    units += 0.5
-            
-            return units * char_width_inch
+        # Lấy thông số lề (margin) của Textbox. Nếu PPT không set thì lấy giá trị mặc định
+        margin_left = tf.margin_left / 12700.0 if tf.margin_left is not None else 7.2
+        margin_right = tf.margin_right / 12700.0 if tf.margin_right is not None else 7.2
+        margin_top = tf.margin_top / 12700.0 if tf.margin_top is not None else 3.6
+        margin_bottom = tf.margin_bottom / 12700.0 if tf.margin_bottom is not None else 3.6
+        
+        # Không gian thực tế an toàn được phép chứa chữ (đã trừ lề)
+        available_width_pt = shape_width_pt - margin_left - margin_right
+        available_height_pt = shape_height_pt - margin_top - margin_bottom
+        
+        # Tính "đơn vị" bề rộng (1 chữ Hán/Full-width = 1 unit, 1 chữ Latinh/Số = 0.55 unit)
+        units = 0.0
+        for ch in text:
+            cp = ord(ch)
+            if (0x4E00 <= cp <= 0x9FFF or 0x3000 <= cp <= 0x303F or 
+                0xFF00 <= cp <= 0xFFEF or 0x3040 <= cp <= 0x30FF):
+                units += 1.0
+            else:
+                units += 0.55
 
-        # Tìm font size tối ưu nhất bằng cách thử lùi dần từ max_font xuống min_font
-        optimal_font = max_font
-        for fs in range(max_font, min_font - 1, -1):
-            est_width = _get_text_width_inch(text, fs)
-            # Nếu bề rộng ước tính nhỏ hơn hoặc bằng bề rộng khung shape
-            # (trừ hao đi 5% margin an toàn) thì chọn font này
-            if est_width <= (max_width_inch * 0.95):
-                optimal_font = fs
-                break
+        if units == 0:
+            optimal_font = max_font
         else:
-            # Nếu vòng lặp chạy hết mà không break (text quá dài kể cả với min_font)
-            optimal_font = min_font
+            # 1. Ràng buộc Chiều rộng: Size chữ tối đa để dàn đủ số ký tự trên bề ngang
+            max_font_by_width = (available_width_pt / units) * 0.95 # Nhân 0.95 để trừ hao an toàn 5%
+            
+            # 2. Ràng buộc Chiều cao: Size chữ tối đa không được lớn hơn chiều cao Textbox
+            max_font_by_height = available_height_pt * 0.90 # Trừ hao 10% cho khoảng cách dòng (line spacing)
+            
+            # Lấy size chữ thoả mãn CẢ 2 ĐIỀU KIỆN (Không tràn ngang, không tràn dọc)
+            calculated_font = min(max_font_by_width, max_font_by_height)
+            
+            # Chốt font size cuối cùng nằm trong khoảng giới hạn cho phép
+            optimal_font = int(min(max_font, max(min_font, calculated_font)))
 
         self._set_text_exact_style(
             shape, text, font_size=optimal_font, color="B51F09", align="center"
@@ -225,8 +236,6 @@ class PPTGenerator:
 
     def _replace_subtitle_with_rounded_rect(self, slide, old_shape, text: str, font_size: int = 50):
         """Thay thế textbox cũ bằng khối bo tròn màu đỏ có chữ trắng căn giữa."""
-        from pptx.enum.shapes import MSO_SHAPE
-        from pptx.enum.text import MSO_ANCHOR
         
         center_x = old_shape.left + old_shape.width / 2.0
         center_y = old_shape.top + old_shape.height / 2.0
@@ -335,7 +344,152 @@ class PPTGenerator:
     # ================================================================
 
     def add_dialogue_slide(self, sec: dict):
-        pass
+        """
+        Sinh slide Hội thoại (hỗ trợ cả có Pinyin và không có Pinyin).
+        Tự động phân trang nếu quá 6 câu thoại/slide.
+        """
+        if "full_dialogue" in sec and sec["full_dialogue"]:
+            dialogue_data = sec["full_dialogue"]
+            has_pinyin = True
+        elif "simple_dialogue" in sec and sec["simple_dialogue"]:
+            dialogue_data = sec["simple_dialogue"]
+            has_pinyin = False
+        else:
+            return  
+
+        hz_list = dialogue_data.get("hz",[])
+        py_list = dialogue_data.get("py",[]) if has_pinyin else []
+        vi_list = dialogue_data.get("vi",[])
+        
+        num_sentences = len(hz_list)
+        if num_sentences == 0:
+            return
+
+        MAX_PER_SLIDE = 6
+        chunks =[]
+        for i in range(0, num_sentences, MAX_PER_SLIDE):
+            chunk_hz = hz_list[i : i + MAX_PER_SLIDE]
+            chunk_py = py_list[i : i + MAX_PER_SLIDE] if has_pinyin else []
+            chunk_vi = vi_list[i : i + MAX_PER_SLIDE]
+            chunks.append((chunk_hz, chunk_py, chunk_vi))
+
+        flower_icon_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\images\flower_point.png"
+        section_title = sec.get("section_title", "Hội thoại")
+
+        for chunk_idx, (chunk_hz, chunk_py, chunk_vi) in enumerate(chunks):
+            slide = self._next_slide()
+            num_items = len(chunk_hz)
+
+            # ==========================================
+            # A. TEXTBOX TITLE (Trong suốt, đè lên Shape đỏ sẵn có)
+            # ==========================================
+            title_width = Cm(20.14)
+            title_height = Cm(2.67)
+            title_left = (self.prs.slide_width - title_width) / 2
+            title_top = Cm(1.26)
+            
+            # Chỉ tạo Textbox, không tô màu nền (fill)
+            title_box = slide.shapes.add_textbox(title_left, title_top, title_width, title_height)
+            title_box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+            
+            self._set_text_exact_style(
+                title_box, section_title, font_name="Fraunces", font_size=57, 
+                color="FCF1D4", bold=False, align="center"
+            )
+
+            # B. CÀI ĐẶT THÔNG SỐ THEO SỐ LƯỢNG CÂU THOẠI
+            # ==========================================
+            slide_width_cm = self.prs.slide_width / 360000.0 
+            
+            if num_items >= 5: 
+                start_left = 7.95
+                start_top = 5.56
+                box_width = slide_width_cm - start_left - 1.0 
+                box_height = 3.19  
+                
+                hz_size, hz_font = 29.3, "字由点字典楷"  
+                py_size, py_font = 18.2, "Muli"         
+                vi_size, vi_font, vi_italic = 18.2, "Muli", False
+                
+                # CHÍNH XÁC: 9.05 - 5.56 = 3.49 cm (Khoảng cách tịnh tiến chuẩn)
+                y_step = 3.49 
+            else: 
+                start_left = 11.95
+                start_top = 7.24
+                box_width = slide_width_cm - start_left - 1.5
+                box_height = 4.27  
+                
+                hz_size, hz_font = 39.5, "字由点字典楷" 
+                py_size, py_font = 23.5, "Muli"         
+                vi_size, vi_font, vi_italic = 24.5, "Muli", True
+                
+                # Nới rộng tịnh tiến cho case 4 câu (cũ là 4.27 -> mới là 4.7 cm)
+                y_step = 4.7 
+
+            # ==========================================
+            # C. RENDER CÁC CÂU THOẠI VÀ ICON
+            # ==========================================
+            for i in range(num_items):
+                current_top = start_top + (i * y_step)
+                
+                if os.path.exists(flower_icon_path):
+                    icon_left = Cm(start_left - 1.2)
+                    icon_top = Cm(current_top + 0.1) 
+                    icon_size = Cm(0.8) 
+                    slide.shapes.add_picture(flower_icon_path, icon_left, icon_top, width=icon_size, height=icon_size)
+
+                # Truyền đúng box_height vào hàm vẽ Textbox thay vì 2.0
+                textbox = slide.shapes.add_textbox(
+                    Cm(start_left), Cm(current_top), Cm(box_width), Cm(box_height)
+                )
+                tf = textbox.text_frame
+                tf.word_wrap = True
+                
+                tf.margin_bottom = 0
+                tf.margin_top = 0
+                tf.margin_left = 0
+                tf.margin_right = 0
+                
+                # Dòng 1: Hán tự
+                p_hz = tf.paragraphs[0]
+                p_hz.space_before = Pt(0)
+                p_hz.space_after = Pt(0)
+                p_hz.line_spacing = Pt(hz_size * 1.15) 
+                
+                run_hz = p_hz.add_run()
+                run_hz.text = chunk_hz[i]
+                run_hz.font.name = hz_font
+                run_hz.font.size = Pt(hz_size)
+                run_hz.font.bold = True
+                run_hz.font.color.rgb = self.hex_to_rgb_color("000000")
+                
+                # Dòng 2: Pinyin
+                if has_pinyin and i < len(chunk_py):
+                    p_py = tf.add_paragraph()
+                    p_py.space_before = Pt(0)
+                    p_py.space_after = Pt(0)
+                    p_py.line_spacing = Pt(py_size * 1.15)
+                    
+                    run_py = p_py.add_run()
+                    run_py.text = chunk_py[i]
+                    run_py.font.name = py_font
+                    run_py.font.size = Pt(py_size)
+                    run_py.font.color.rgb = self.hex_to_rgb_color("545454")
+                    
+                # Dòng 3: Tiếng Việt
+                p_vi = tf.add_paragraph()
+                p_vi.space_before = Pt(0)
+                p_vi.space_after = Pt(0)
+                p_vi.line_spacing = Pt(vi_size * 1.15)
+                
+                run_vi = p_vi.add_run()
+                run_vi.text = chunk_vi[i]
+                run_vi.font.name = vi_font
+                run_vi.font.size = Pt(vi_size)
+                run_vi.font.color.rgb = self.hex_to_rgb_color("A40400")
+                if vi_italic:
+                    run_vi.font.italic = True
+
 
     def add_vocab_slides(self, sec: dict):
         pass
@@ -358,6 +512,9 @@ class PPTGenerator:
         self.add_cover_slide()
         self.add_table_of_content()
 
+        for sec in self.data["sections"]:
+                self.add_dialogue_slide(sec)
+
         # [TODO: Gọi các hàm vẽ nội dung (dialogue, vocab...) ở đây]
 
         self.add_end_slide()
@@ -377,7 +534,6 @@ class PPTGenerator:
     def save(self, output_path: str):
         self.prs.save(output_path)
         print(f"✅ Saved: {output_path}")
-
 
 # ================================================================
 # MAIN
