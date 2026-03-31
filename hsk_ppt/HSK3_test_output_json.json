@@ -1,0 +1,851 @@
+{
+  "lesson_info": {
+    "number": 2,
+    "title_cn": "你们想吃什么就点什么",
+    "title_vn": "Các bạn muốn ăn gì thì gọi nấy"
+  },
+  "sections": [
+    {
+      "section_title": "Hội thoại 1",
+      "full_dialogue": {
+        "hz": [
+          "王一雪：家月、李文，你们看看菜单，想吃点儿什么？",
+          "李文：谢谢一雪姐，我都可以，你们点吧。",
+          "白家月：飞了这么远，现在还真是又饿又渴。",
+          "王一雪：那多点点儿，别客气。你们喝什么饮料？",
+          "白家月：好久没喝中国茶，也好久没吃饺子了。我想喝绿茶、吃饺子，可以吗？",
+          "王一雪：没问题。你们看看还想吃什么。"
+        ],
+        "py": [
+          "Wáng Yīxuě: Jiāyuè, Lǐ Wén, nǐmen kànkan càidān, xiǎng chī diǎnr shénme?",
+          "Lǐ Wén: Xièxie Yīxuě jiě, wǒ dōu kěyǐ, nǐmen diǎn ba.",
+          "Bái Jiāyuè: Fēi le zhème yuǎn, xiànzài hái zhēnshi yòu è yòu kě.",
+          "Wáng Yīxuě: Nà duō diǎn diǎnr, bié kèqi. Nǐmen hē shénme yǐnliào?",
+          "Bái Jiāyuè: Hǎojiǔ méi hē Zhōngguó chá, yě hǎojiǔ méi chī jiǎozi le. Wǒ xiǎng hē lǜchá, chī jiǎozi, kěyǐ ma?",
+          "Wáng Yīxuě: Méi wèntí. Nǐmen kànkan hái xiǎng chī shénme."
+        ],
+        "vi": [
+          "Vương Nhất Tuyết: Gia Nguyệt, Lý Văn, các cậu xem thực đơn đi, muốn ăn chút gì không?",
+          "Lý Văn: Cảm ơn chị Nhất Tuyết, em ăn gì cũng được, mọi người gọi đi.",
+          "Bạch Gia Nguyệt: Bay xa như vậy, bây giờ thật sự là vừa đói vừa khát.",
+          "Vương Nhất Tuyết: Vậy thì gọi nhiều một chút, đừng khách sáo. Các cậu uống đồ uống gì?",
+          "Bạch Gia Nguyệt: Lâu rồi chưa uống trà Trung Quốc, cũng lâu rồi chưa ăn sủi cảo. Tớ muốn uống trà xanh, ăn sủi cảo, được không?",
+          "Vương Nhất Tuyết: Không vấn đề gì. Các cậu xem xem còn muốn ăn gì nữa không."
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "菜单",
+          "pinyin": "càidān",
+          "type": "Danh từ",
+          "vi": "thực đơn, menu",
+          "example": {
+            "hz": "服务员，请给我看一下<hl>菜单</hl>。",
+            "py": "Fúwùyuán, qǐng gěi wǒ kàn yíxià <hl>càidān</hl>.",
+            "vi": "Phục vụ, cho tôi xem qua <hl>thực đơn</hl> một chút."
+          }
+        },
+        {
+          "hz": "又",
+          "pinyin": "yòu",
+          "type": "Phó từ",
+          "vi": "lại, vừa... vừa...",
+          "example": {
+            "hz": "这个西瓜<hl>又</hl>大<hl>又</hl>甜。",
+            "py": "Zhège xīguā <hl>yòu</hl> dà <hl>yòu</hl> tián.",
+            "vi": "Quả dưa hấu này <hl>vừa</hl> to <hl>vừa</hl> ngọt."
+          }
+        },
+        {
+          "hz": "饿",
+          "pinyin": "è",
+          "type": "Tính từ",
+          "vi": "đói",
+          "example": {
+            "hz": "我<hl>饿</hl>了，我们去吃饭吧。",
+            "py": "Wǒ <hl>è</hl> le, wǒmen qù chīfàn ba.",
+            "vi": "Tớ <hl>đói</hl> rồi, chúng mình đi ăn cơm thôi."
+          }
+        },
+        {
+          "hz": "渴",
+          "pinyin": "kě",
+          "type": "Tính từ",
+          "vi": "khát",
+          "example": {
+            "hz": "我很<hl>渴</hl>，想喝水。",
+            "py": "Wǒ hěn <hl>kě</hl>, xiǎng hē shuǐ.",
+            "vi": "Tôi rất <hl>khát</hl>, muốn uống nước."
+          }
+        },
+        {
+          "hz": "客气",
+          "pinyin": "kèqi",
+          "type": "Tính từ",
+          "vi": "khách sáo, khách khí",
+          "example": {
+            "hz": "别<hl>客气</hl>，就像在自己家一样。",
+            "py": "Bié <hl>kèqi</hl>, jiù xiàng zài zìjǐ jiā yíyàng.",
+            "vi": "Đừng <hl>khách sáo</hl>, cứ như ở nhà mình nhé."
+          }
+        },
+        {
+          "hz": "饮料",
+          "pinyin": "yǐnliào",
+          "type": "Danh từ",
+          "vi": "đồ uống, nước giải khát",
+          "example": {
+            "hz": "你想喝点什么<hl>饮料</hl>？茶还是咖啡？",
+            "py": "Nǐ xiǎng hē diǎn shénme <hl>yǐnliào</hl>? Chá háishì kāfēi?",
+            "vi": "Bạn muốn uống chút <hl>đồ uống</hl> gì? Trà hay cà phê?"
+          }
+        },
+        {
+          "hz": "好久",
+          "pinyin": "hǎojiǔ",
+          "type": "Cụm từ",
+          "vi": "rất lâu, đã lâu",
+          "example": {
+            "hz": "<hl>好久</hl>不见，你最近怎么样？",
+            "py": "<hl>Hǎojiǔ</hl> bú jiàn, nǐ zuìjìn zěnmeyàng?",
+            "vi": "<hl>Lâu rồi</hl> không gặp, dạo này bạn thế nào?"
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "grammar_formula",
+          "grammar_formula": {
+            "title": "Cấu trúc \"又...又...\" (yòu...yòu...)",
+            "formula": "又 + Tính từ 1 + 又 + Tính từ 2",
+            "usage": "Dùng để diễn tả hai đặc điểm hoặc trạng thái cùng tồn tại ở một người hoặc sự vật. Hai tính từ thường cùng mang nghĩa tích cực hoặc cùng mang nghĩa tiêu cực.",
+            "examples": [
+              {
+                "hz": "这件衣服又便宜又好看。",
+                "py": "Zhè jiàn yīfu yòu piányi yòu hǎokàn.",
+                "vi": "Bộ quần áo này vừa rẻ vừa đẹp."
+              },
+              {
+                "hz": "他跑得又快又稳。",
+                "py": "Tā pǎo de yòu kuài yòu wěn.",
+                "vi": "Anh ấy chạy vừa nhanh vừa vững."
+              },
+              {
+                "hz": "妹妹做的饭又咸又辣。",
+                "py": "Mèimei zuò de fàn yòu xián yòu là.",
+                "vi": "Cơm em gái nấu vừa mặn vừa cay."
+              }
+            ]
+          }
+        },
+        {
+          "type": "vocab_list",
+          "vocab_list": {
+            "title": "Các loại đồ uống phổ biến (常见饮料)",
+            "category_desc": "Dưới đây là một số loại đồ uống thường gặp trong các nhà hàng hoặc quán nước.",
+            "items": [
+              {
+                "hz": "可乐",
+                "py": "kělè",
+                "vi": "Coca-cola"
+              },
+              {
+                "hz": "橙汁",
+                "py": "chéngzhī",
+                "vi": "Nước cam ép"
+              },
+              {
+                "hz": "啤酒",
+                "py": "píjiǔ",
+                "vi": "Bia"
+              },
+              {
+                "hz": "牛奶",
+                "py": "niúnǎi",
+                "vi": "Sữa bò"
+              },
+              {
+                "hz": "柠檬水",
+                "py": "níngméng shuǐ",
+                "vi": "Nước chanh"
+              },
+              {
+                "hz": "矿泉水",
+                "py": "kuàngquánshuǐ",
+                "vi": "Nước khoáng"
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "王一雪：家月、李文，你们看看菜单，想吃点儿什么？",
+          "李文：谢谢一雪姐，我都可以，你们点吧。",
+          "白家月：飞了这么远，现在还真是又饿又渴。",
+          "王一雪：那多点点儿，别客气。你们喝什么饮料？",
+          "白家月：好久没喝中国茶，也好久没吃饺子了。我想喝绿茶、吃饺子，可以吗？",
+          "王一雪：没问题。你们看看还想吃什么。"
+        ],
+        "vi": [
+          "Vương Nhất Tuyết: Gia Nguyệt, Lý Văn, các cậu xem thực đơn đi, muốn ăn chút gì không?",
+          "Lý Văn: Cảm ơn chị Nhất Tuyết, em ăn gì cũng được, mọi người gọi đi.",
+          "Bạch Gia Nguyệt: Bay xa như vậy, bây giờ thật sự là vừa đói vừa khát.",
+          "Vương Nhất Tuyết: Vậy thì gọi nhiều một chút, đừng khách sáo. Các cậu uống đồ uống gì?",
+          "Bạch Gia Nguyệt: Lâu rồi chưa uống trà Trung Quốc, cũng lâu rồi chưa ăn sủi cảo. Tớ muốn uống trà xanh, ăn sủi cảo, được không?",
+          "Vương Nhất Tuyết: Không vấn đề gì. Các cậu xem xem còn muốn ăn gì nữa không."
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "A: 你怎么了？看起来不太舒服。\nB: 我走了一天，现在______。",
+            "pinyin": "A: Nǐ zěnme le? Kàn qǐlái bú tài shūfu.\nB: Wǒ zǒu le yì tiān, xiànzài ______.",
+            "answer": "A",
+            "options": [
+              {
+                "label": "A",
+                "hz": "又饿又渴",
+                "py": "yòu è yòu kě"
+              },
+              {
+                "label": "B",
+                "hz": "又高又帅",
+                "py": "yòu gāo yòu shuài"
+              },
+              {
+                "label": "C",
+                "hz": "又好又快",
+                "py": "yòu hǎo yòu kuài"
+              },
+              {
+                "label": "D",
+                "hz": "又唱又跳",
+                "py": "yòu chàng yòu tiào"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "section_title": "Hội thoại 2",
+      "full_dialogue": {
+        "hz": [
+          "王一雪：服务员，再给我们拿一双筷子、一个勺子和一个碗。",
+          "服务员：好的，请等一下，我马上去拿。",
+          "王一雪：这家饭馆的服务很热情，菜也都做得很好吃。你们尝尝，看喜不喜欢这些菜。",
+          "白家月：哪个菜都好吃。您点的这些菜真不错。",
+          "王一雪：这里的饭菜又便宜又好吃，我们经常来，服务员都记住我们爱吃的菜了。",
+          "服务员：王姐，您经常来吃饭，今天送您一些水果，请慢用。"
+        ],
+        "py": [
+          "Wáng Yīxuě: Fúwùyuán, zài gěi wǒmen ná yī shuāng kuàizi, yī ge sháozi hé yī ge wǎn.",
+          "Fúwùyuán: Hǎo de, qǐng děng yīxià, wǒ mǎshàng qù ná.",
+          "Wáng Yīxuě: Zhè jiā fànguǎn de fúwù hěn rèqíng, cài yě dōu zuò de hěn hǎochī. Nǐmen chángchang, kàn xǐ bù xǐhuān zhèxiē cài.",
+          "Bái Jiāyuè: Nǎge cài dōu hǎochī. Nín diǎn de zhèxiē cài zhēn bùcuò.",
+          "Wáng Yīxuě: Zhèlǐ de fàncài yòu piányi yòu hǎochī, wǒmen jīngcháng lái, fúwùyuán dōu jìzhù wǒmen ài chī de cài le.",
+          "Fúwùyuán: Wáng jiě, nín jīngcháng lái chīfàn, jīntiān sòng nín yīxiē shuǐguǒ, qǐng màn yòng."
+        ],
+        "vi": [
+          "Vương Nhất Tuyết: Phục vụ, lấy thêm cho chúng tôi một đôi đũa, một cái thìa và một cái bát.",
+          "Nhân viên phục vụ: Vâng ạ, xin đợi một lát, tôi đi lấy ngay.",
+          "Vương Nhất Tuyết: Phục vụ của nhà hàng này rất nhiệt tình, món ăn cũng làm rất ngon. Các bạn nếm thử xem có thích những món này không.",
+          "Bạch Gia Nguyệt: Món nào cũng ngon cả. Những món chị gọi thật tuyệt.",
+          "Vương Nhất Tuyết: Đồ ăn ở đây vừa rẻ vừa ngon, chúng tôi thường xuyên đến, nhân viên phục vụ đều nhớ món chúng tôi thích ăn rồi.",
+          "Nhân viên phục vụ: Chị Vương, chị thường xuyên đến ăn cơm, hôm nay tặng chị một ít hoa quả, mời chị dùng từ từ."
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "服务",
+          "pinyin": "fúwù",
+          "type": "Động từ",
+          "vi": "phục vụ",
+          "example": {
+            "hz": "这家饭馆的<hl>服务</hl>很好。",
+            "py": "Zhè jiā fànguǎn de <hl>fúwù</hl> hěn hǎo.",
+            "vi": "<hl>Phục vụ</hl> của nhà hàng này rất tốt."
+          }
+        },
+        {
+          "hz": "员",
+          "pinyin": "yuán",
+          "type": "Hậu tố",
+          "vi": "viên (chỉ người)",
+          "example": {
+            "hz": "这位服务<hl>员</hl>很热情。",
+            "py": "Zhè wèi fúwù<hl>yuán</hl> hěn rèqíng.",
+            "vi": "Nhân <hl>viên</hl> phục vụ này rất nhiệt tình."
+          }
+        },
+        {
+          "hz": "双",
+          "pinyin": "shuāng",
+          "type": "Lượng từ",
+          "vi": "đôi, cặp",
+          "measure_word_usage": "Dùng cho những vật có đôi có cặp. Ví dụ: 一双筷子 (một đôi đũa), 一双鞋 (một đôi giày).",
+          "example": {
+            "hz": "请给我一<hl>双</hl>筷子。",
+            "py": "Qǐng gěi wǒ yī <hl>shuāng</hl> kuàizi.",
+            "vi": "Xin cho tôi một <hl>đôi</hl> đũa."
+          }
+        },
+        {
+          "hz": "筷子",
+          "pinyin": "kuàizi",
+          "type": "Danh từ",
+          "vi": "đũa",
+          "example": {
+            "hz": "中国人用<hl>筷子</hl>吃饭。",
+            "py": "Zhōngguó rén yòng <hl>kuàizi</hl> chīfàn.",
+            "vi": "Người Trung Quốc dùng <hl>đũa</hl> để ăn cơm."
+          }
+        },
+        {
+          "hz": "勺子",
+          "pinyin": "sháozi",
+          "type": "Danh từ",
+          "vi": "thìa, muỗng",
+          "example": {
+            "hz": "喝汤的时候要用<hl>勺子</hl>。",
+            "py": "Hē tāng de shíhòu yào yòng <hl>sháozi</hl>.",
+            "vi": "Khi uống canh cần dùng <hl>thìa</hl>."
+          }
+        },
+        {
+          "hz": "碗",
+          "pinyin": "wǎn",
+          "type": "Danh từ",
+          "vi": "bát, chén",
+          "measure_word_usage": "Dùng làm lượng từ cho đồ ăn đựng trong bát. Ví dụ: 一碗米饭 (một bát cơm), 一碗面条 (một bát mì).",
+          "example": {
+            "hz": "我想再吃一<hl>碗</hl>米饭。",
+            "py": "Wǒ xiǎng zài chī yī <hl>wǎn</hl> mǐfàn.",
+            "vi": "Tôi muốn ăn thêm một <hl>bát</hl> cơm nữa."
+          }
+        },
+        {
+          "hz": "马上",
+          "pinyin": "mǎshàng",
+          "type": "Phó từ",
+          "vi": "ngay lập tức, liền",
+          "example": {
+            "hz": "你等一下，我<hl>马上</hl>就来。",
+            "py": "Nǐ děng yīxià, wǒ <hl>mǎshàng</hl> jiù lái.",
+            "vi": "Bạn đợi một chút, tôi đến <hl>ngay đây</hl>."
+          }
+        },
+        {
+          "hz": "热情",
+          "pinyin": "rèqíng",
+          "type": "Tính từ",
+          "vi": "nhiệt tình",
+          "example": {
+            "hz": "这里的人都很<hl>热情</hl>。",
+            "py": "Zhèlǐ de rén dōu hěn <hl>rèqíng</hl>.",
+            "vi": "Người ở đây đều rất <hl>nhiệt tình</hl>."
+          }
+        },
+        {
+          "hz": "尝",
+          "pinyin": "cháng",
+          "type": "Động từ",
+          "vi": "nếm, thử (món ăn)",
+          "example": {
+            "hz": "你快<hl>尝</hl>一<hl>尝</hl>我做的菜。",
+            "py": "Nǐ kuài <hl>cháng</hl> yī <hl>cháng</hl> wǒ zuò de cài.",
+            "vi": "Bạn mau <hl>nếm thử</hl> món ăn tôi nấu đi."
+          }
+        },
+        {
+          "hz": "记",
+          "pinyin": "jì",
+          "type": "Động từ",
+          "vi": "nhớ, ghi nhớ",
+          "example": {
+            "hz": "我<hl>记</hl>不住他的电话号码。",
+            "py": "Wǒ <hl>jì</hl> bù zhù tā de diànhuà hàomǎ.",
+            "vi": "Tôi không <hl>nhớ</hl> được số điện thoại của anh ấy."
+          }
+        },
+        {
+          "hz": "用",
+          "pinyin": "yòng",
+          "type": "Động từ",
+          "vi": "dùng, sử dụng",
+          "example": {
+            "hz": "你会<hl>用</hl>筷子吗？",
+            "py": "Nǐ huì <hl>yòng</hl> kuàizi ma?",
+            "vi": "Bạn biết <hl>dùng</hl> đũa không?"
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "grammar_formula",
+          "grammar_formula": {
+            "title": "Cấu trúc \"Đại từ nghi vấn + 都/也\"",
+            "formula": "Đại từ nghi vấn (谁, 什么, 哪儿, 怎么...) + 都/也 + Động từ/Tính từ",
+            "usage": "Dùng để chỉ một phạm vi toàn bộ, mang nghĩa \"bất cứ ai/cái gì/nơi nào/thế nào... cũng đều...\". Trong cấu trúc này, đại từ nghi vấn không dùng để hỏi mà để phiếm chỉ (chỉ chung, không cụ thể).",
+            "examples": [
+              {
+                "hz": "我什么都不想吃。",
+                "py": "Wǒ shénme dōu bùxiǎng chī.",
+                "vi": "Tôi không muốn ăn bất cứ thứ gì."
+              },
+              {
+                "hz": "这个商店里，哪个都很贵。",
+                "py": "Zhège shāngdiàn lǐ, nǎge dōu hěn guì.",
+                "vi": "Trong cửa hàng này, cái nào cũng rất đắt."
+              },
+              {
+                "hz": "他谁也不认识。",
+                "py": "Tā shéi yě bù rènshì.",
+                "vi": "Anh ấy không quen biết bất kỳ ai."
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "服务员，再给我们拿一双筷子、一个勺子和一个碗。",
+          "好的，请等一下，我马上去拿。",
+          "这家饭馆的服务很热情，菜也都做得很好吃。你们尝尝，看喜不喜欢这些菜。",
+          "哪个菜都好吃。您点的这些菜真不错。",
+          "这里的饭菜又便宜又好吃，我们经常来，服务员都记住我们爱吃的菜了。",
+          "王姐，您经常来吃饭，今天送您一些水果，请慢用。"
+        ],
+        "vi": [
+          "Phục vụ, lấy thêm cho chúng tôi một đôi đũa, một cái thìa và một cái bát.",
+          "Vâng ạ, xin đợi một lát, tôi đi lấy ngay.",
+          "Phục vụ của nhà hàng này rất nhiệt tình, món ăn cũng làm rất ngon. Các bạn nếm thử xem có thích những món này không.",
+          "Món nào cũng ngon cả. Những món chị gọi thật tuyệt.",
+          "Đồ ăn ở đây vừa rẻ vừa ngon, chúng tôi thường xuyên đến, nhân viên phục vụ đều nhớ món chúng tôi thích ăn rồi.",
+          "Chị Vương, chị thường xuyên đến ăn cơm, hôm nay tặng chị một ít hoa quả, mời chị dùng từ từ."
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "A: 你觉得这家饭馆怎么样？ B: 服务员很______，菜也很好吃。",
+            "pinyin": "A: Nǐ juéde zhè jiā fànguǎn zěnmeyàng? B: Fúwùyuán hěn ______, cài yě hěn hǎochī.",
+            "answer": "A",
+            "options": [
+              {
+                "label": "A",
+                "hz": "热情",
+                "py": "rèqíng"
+              },
+              {
+                "label": "B",
+                "hz": "马上",
+                "py": "mǎshàng"
+              },
+              {
+                "label": "C",
+                "hz": "简单",
+                "py": "jiǎndān"
+              },
+              {
+                "label": "D",
+                "hz": "方便",
+                "py": "fāngbiàn"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "section_title": "Hội thoại 3",
+      "full_dialogue": {
+        "hz": [
+          "白家月：这个鸡肉饭太好吃了，我要再来吃一次。",
+          "李文：你可以拿走这张菜单，看看下次还吃点儿什么。",
+          "王一雪：不用拿菜单，在手机上就能看到，也可以选好了让他们给你送。",
+          "白家月：他们家还能送外卖？",
+          "王一雪：对，现在很多饭馆都能送外卖，想吃什么就点什么。",
+          "白家月：那真是太方便了！"
+        ],
+        "py": [
+          "Bái Jiāyuè: Zhège jīròu fàn tài hǎochī le, wǒ yào zàilái chī yí cì.",
+          "Lǐ Wén: Nǐ kěyǐ názǒu zhè zhāng càidān, kànkan xià cì hái chī diǎnr shénme.",
+          "Wáng Yīxuě: Búyòng ná càidān, zài shǒujī shàng jiù néng kàndào, yě kěyǐ xuǎn hǎo le ràng tāmen gěi nǐ sòng.",
+          "Bái Jiāyuè: Tāmen jiā hái néng sòng wàimài?",
+          "Wáng Yīxuě: Duì, xiànzài hěnduō fànguǎn dōu néng sòng wàimài, xiǎng chī shénme jiù diǎn shénme.",
+          "Bái Jiāyuè: Nà zhēnshi tài fāngbiàn le!"
+        ],
+        "vi": [
+          "Bạch Gia Nguyệt: Cơm gà này ngon quá, tôi muốn đến ăn lần nữa.",
+          "Lý Văn: Cậu có thể cầm thực đơn này đi, xem lần sau còn muốn ăn gì.",
+          "Vương Nhất Tuyết: Không cần cầm thực đơn đâu, trên điện thoại là xem được rồi, cũng có thể chọn xong rồi để họ giao cho cậu.",
+          "Bạch Gia Nguyệt: Quán họ còn giao hàng tận nơi được à?",
+          "Vương Nhất Tuyết: Đúng vậy, bây giờ nhiều quán ăn đều có thể giao hàng tận nơi, muốn ăn gì thì gọi nấy.",
+          "Bạch Gia Nguyệt: Vậy thì thật là tiện lợi quá!"
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "鸡",
+          "pinyin": "jī",
+          "type": "Danh từ",
+          "vi": "gà",
+          "example": {
+            "hz": "这个<hl>鸡</hl>肉饭太好吃了。",
+            "py": "Zhège <hl>jī</hl>ròu fàn tài hǎochī le.",
+            "vi": "Cơm thịt <hl>gà</hl> này ngon quá."
+          }
+        },
+        {
+          "hz": "张",
+          "pinyin": "zhāng",
+          "type": "Lượng từ",
+          "vi": "tờ, tấm, chiếc",
+          "measure_word_usage": "Dùng cho những vật có bề mặt phẳng, mỏng như giấy, bàn, giường, ảnh. Ví dụ: 一张纸 (một tờ giấy), 一张桌子 (một cái bàn).",
+          "example": {
+            "hz": "你可以拿走这<hl>张</hl>菜单。",
+            "py": "Nǐ kěyǐ názǒu zhè <hl>zhāng</hl> càidān.",
+            "vi": "Cậu có thể cầm <hl>tờ</hl> thực đơn này đi."
+          }
+        },
+        {
+          "hz": "选",
+          "pinyin": "xuǎn",
+          "type": "Động từ",
+          "vi": "chọn, lựa chọn",
+          "example": {
+            "hz": "你也可以<hl>选</hl>好了让他们给你送。",
+            "py": "Nǐ yě kěyǐ <hl>xuǎn</hl> hǎo le ràng tāmen gěi nǐ sòng.",
+            "vi": "Cậu cũng có thể <hl>chọn</hl> xong rồi để họ giao cho cậu."
+          }
+        },
+        {
+          "hz": "外卖",
+          "pinyin": "wàimài",
+          "type": "Danh từ/Động từ",
+          "vi": "đồ ăn mang đi, giao hàng tận nơi",
+          "example": {
+            "hz": "现在很多饭馆都能送<hl>外卖</hl>。",
+            "py": "Xiànzài hěnduō fànguǎn dōu néng sòng <hl>wàimài</hl>.",
+            "vi": "Bây giờ nhiều quán ăn đều có thể <hl>giao hàng tận nơi</hl>."
+          }
+        },
+        {
+          "hz": "不用",
+          "pinyin": "búyòng",
+          "type": "Phó từ",
+          "vi": "không cần",
+          "example": {
+            "hz": "<hl>不用</hl>拿菜单，在手机上就能看到。",
+            "py": "<hl>Búyòng</hl> ná càidān, zài shǒujī shàng jiù néng kàndào.",
+            "vi": "<hl>Không cần</hl> cầm thực đơn, trên điện thoại là xem được rồi."
+          }
+        },
+        {
+          "hz": "方便",
+          "pinyin": "fāngbiàn",
+          "type": "Tính từ",
+          "vi": "tiện lợi, thuận tiện",
+          "example": {
+            "hz": "那真是太<hl>方便</hl>了！",
+            "py": "Nà zhēnshi tài <hl>fāngbiàn</hl> le!",
+            "vi": "Vậy thì thật là <hl>tiện lợi</hl> quá!"
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "grammar_formula",
+          "grammar_formula": {
+            "title": "Cách dùng lặp lại của Đại từ nghi vấn để phiếm chỉ",
+            "formula": "Đại từ nghi vấn + ... + 就 + Đại từ nghi vấn + ...",
+            "usage": "Cấu trúc này dùng hai đại từ nghi vấn giống nhau, một ở mệnh đề trước và một ở mệnh đề sau, để chỉ bất kỳ người, sự vật, địa điểm, hoặc cách thức nào. '就' được đặt ở đầu mệnh đề thứ hai. Nếu chủ ngữ của hai mệnh đề khác nhau, chủ ngữ thứ hai phải đứng trước '就'.",
+            "examples": [
+              {
+                "hz": "你想吃什么，我们就点什么。",
+                "py": "Nǐ xiǎng chī shénme, wǒmen jiù diǎn shénme.",
+                "vi": "Bạn muốn ăn gì, chúng tôi sẽ gọi món đó."
+              },
+              {
+                "hz": "哪个饭馆的菜好吃，我们就去哪个。",
+                "py": "Nǎge fànguǎn de cài hǎochī, wǒmen jiù qù nǎge.",
+                "vi": "Quán ăn nào có món ngon, chúng ta sẽ đến quán đó."
+              },
+              {
+                "hz": "你想什么时候来，就什么时候来。",
+                "py": "Nǐ xiǎng shénme shíhou lái, jiù shénme shíhou lái.",
+                "vi": "Bạn muốn khi nào đến thì khi đó đến."
+              }
+            ]
+          }
+        },
+        {
+          "type": "vocab_list",
+          "vocab_list": {
+            "title": "Từ vựng chủ đề: Đặt đồ ăn online",
+            "category_desc": "Cùng học một số từ vựng hữu ích khi bạn muốn đặt đồ ăn qua các ứng dụng ở Trung Quốc nhé!",
+            "items": [
+              {
+                "hz": "点餐",
+                "py": "diǎncān",
+                "vi": "Gọi món"
+              },
+              {
+                "hz": "外卖平台",
+                "py": "wàimài píngtái",
+                "vi": "Nền tảng giao đồ ăn"
+              },
+              {
+                "hz": "配送费",
+                "py": "pèisòngfèi",
+                "vi": "Phí giao hàng"
+              },
+              {
+                "hz": "骑手",
+                "py": "qíshǒu",
+                "vi": "Tài xế giao hàng (Shipper)"
+              },
+              {
+                "hz": "优惠券",
+                "py": "yōuhuìquàn",
+                "vi": "Phiếu giảm giá"
+              },
+              {
+                "hz": "在线支付",
+                "py": "zàixiàn zhīfù",
+                "vi": "Thanh toán trực tuyến"
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "白家月：这个鸡肉饭太好吃了，我要再来吃一次。",
+          "李文：你可以拿走这张菜单，看看下次还吃点儿什么。",
+          "王一雪：不用拿菜单，在手机上就能看到，也可以选好了让他们给你送。",
+          "白家月：他们家还能送外卖？",
+          "王一雪：对，现在很多饭馆都能送外卖，想吃什么就点什么。",
+          "白家月：那真是太方便了！"
+        ],
+        "vi": [
+          "Bạch Gia Nguyệt: Cơm gà này ngon quá, tôi muốn đến ăn lần nữa.",
+          "Lý Văn: Cậu có thể cầm thực đơn này đi, xem lần sau còn muốn ăn gì.",
+          "Vương Nhất Tuyết: Không cần cầm thực đơn đâu, trên điện thoại là xem được rồi, cũng có thể chọn xong rồi để họ giao cho cậu.",
+          "Bạch Gia Nguyệt: Quán họ còn giao hàng tận nơi được à?",
+          "Vương Nhất Tuyết: Đúng vậy, bây giờ nhiều quán ăn đều có thể giao hàng tận nơi, muốn ăn gì thì gọi nấy.",
+          "Bạch Gia Nguyệt: Vậy thì thật là tiện lợi quá!"
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "A: 我们晚饭吃什么？ B: 我都可以，你______就______。",
+            "pinyin": "A: Wǒmen wǎnfàn chī shénme? B: Wǒ dōu kěyǐ, nǐ ______ jiù ______.",
+            "answer": "A",
+            "options": [
+              {
+                "label": "A",
+                "hz": "想吃什么 / 点什么",
+                "py": "xiǎng chī shénme / diǎn shénme"
+              },
+              {
+                "label": "B",
+                "hz": "方便 / 选",
+                "py": "fāngbiàn / xuǎn"
+              },
+              {
+                "label": "C",
+                "hz": "外卖 / 鸡",
+                "py": "wàimài / jī"
+              },
+              {
+                "label": "D",
+                "hz": "不用 / 张",
+                "py": "búyòng / zhāng"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "section_title": "Đoạn văn",
+      "full_dialogue": {
+        "hz": [
+          "这些年在国外，我很少自己做饭。早饭我吃一个面包，有时候吃一块蛋糕，再喝一杯咖啡。午饭和晚饭也都在外面吃。快要考试的时候又忙又累，没时间出去吃饭，家里又什么吃的都没有，我可能好几天只吃方便面。现在回到中国了，每天能吃到妈妈做的饭，我真是太高兴了！有时候妈妈只做几个简单的菜，我也非常爱吃，因为什么都没有妈妈做的饭好吃。"
+        ],
+        "py": [
+          "Zhèxiē nián zài guówài, wǒ hěn shǎo zìjǐ zuòfàn. Zǎofàn wǒ chī yí ge miànbāo, yǒu shíhou chī yí kuài dàngāo, zài hē yì bēi kāfēi. Wǔfàn hé wǎnfàn yě dōu zài wàimiàn chī. Kuàiyào kǎoshì de shíhou yòu máng yòu lèi, méi shíjiān chūqù chīfàn, jiālǐ yòu shénme chī de dōu méiyǒu, wǒ kěnéng hǎo jǐ tiān zhǐ chī fāngbiànmiàn. Xiànzài huí dào Zhōngguó le, měitiān néng chī dào māma zuò de fàn, wǒ zhēnshi tài gāoxìng le! Yǒu shíhou māma zhǐ zuò jǐ ge jiǎndān de cài, wǒ yě fēicháng ài chī, yīnwèi shénme dōu méiyǒu māma zuò de fàn hǎochī."
+        ],
+        "vi": [
+          "Những năm nay ở nước ngoài, tôi rất ít khi tự nấu cơm. Bữa sáng tôi ăn một cái bánh mì, có lúc ăn một miếng bánh ngọt, rồi uống một ly cà phê. Bữa trưa và bữa tối cũng đều ăn ở ngoài. Lúc sắp thi vừa bận vừa mệt, không có thời gian ra ngoài ăn, trong nhà lại chẳng có gì ăn, tôi có thể đã mấy ngày liền chỉ ăn mì gói. Bây giờ đã về Trung Quốc rồi, mỗi ngày đều được ăn cơm mẹ nấu, tôi thật sự quá vui! Có lúc mẹ chỉ làm vài món đơn giản, tôi cũng rất thích ăn, vì không có gì ngon bằng cơm mẹ nấu."
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "蛋糕",
+          "pinyin": "dàngāo",
+          "type": "Danh từ",
+          "vi": "Bánh ngọt, bánh gato",
+          "example": {
+            "hz": "我生日的时候，妈妈给我买了一个很大的<hl>蛋糕</hl>。",
+            "py": "Wǒ shēngrì de shíhou, māma gěi wǒ mǎi le yí ge hěn dà de <hl>dàngāo</hl>.",
+            "vi": "Vào sinh nhật tôi, mẹ đã mua cho tôi một chiếc <hl>bánh ngọt</hl> rất to."
+          }
+        },
+        {
+          "hz": "只",
+          "pinyin": "zhǐ",
+          "type": "Phó từ",
+          "vi": "Chỉ",
+          "example": {
+            "hz": "我今天很忙，<hl>只</hl>有时间吃一个面包。",
+            "py": "Wǒ jīntiān hěn máng, <hl>zhǐ</hl> yǒu shíjiān chī yí ge miànbāo.",
+            "vi": "Hôm nay tôi rất bận, <hl>chỉ</hl> có thời gian ăn một cái bánh mì."
+          }
+        },
+        {
+          "hz": "方便面",
+          "pinyin": "fāngbiànmiàn",
+          "type": "Danh từ",
+          "vi": "Mì ăn liền, mì gói",
+          "example": {
+            "hz": "考试的时候，我常常吃<hl>方便面</hl>。",
+            "py": "Kǎoshì de shíhou, wǒ chángcháng chī <hl>fāngbiànmiàn</hl>.",
+            "vi": "Lúc thi cử, tôi thường ăn <hl>mì ăn liền</hl>."
+          }
+        },
+        {
+          "hz": "简单",
+          "pinyin": "jiǎndān",
+          "type": "Tính từ",
+          "vi": "Đơn giản",
+          "example": {
+            "hz": "这个问题很<hl>简单</hl>，我很快就回答了。",
+            "py": "Zhè ge wèntí hěn <hl>jiǎndān</hl>, wǒ hěn kuài jiù huídá le.",
+            "vi": "Vấn đề này rất <hl>đơn giản</hl>, tôi đã trả lời rất nhanh."
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "grammar_formula",
+          "grammar_formula": {
+            "title": "Cấu trúc biểu thị sự đồng thời: 又...又... (yòu...yòu...)",
+            "formula": "Chủ ngữ + 又 + Tính từ/Động từ 1 + 又 + Tính từ/Động từ 2",
+            "usage": "Dùng để diễn tả hai đặc điểm, trạng thái hoặc hành động cùng tồn tại hoặc xảy ra đồng thời. Hai từ/cụm từ đi sau '又' thường cùng loại (cùng là tính từ, cùng là động từ) và có cùng sắc thái ý nghĩa (cùng tích cực hoặc cùng tiêu cực).",
+            "examples": [
+              {
+                "hz": "这个西瓜又大又甜。",
+                "py": "Zhège xīguā yòu dà yòu tián.",
+                "vi": "Quả dưa hấu này vừa to vừa ngọt."
+              },
+              {
+                "hz": "他做的菜又好看又好吃。",
+                "py": "Tā zuò de cài yòu hǎokàn yòu hǎochī.",
+                "vi": "Món ăn anh ấy làm vừa đẹp mắt vừa ngon miệng."
+              },
+              {
+                "hz": "快要考试的时候又忙又累。",
+                "py": "Kuàiyào kǎoshì de shíhou yòu máng yòu lèi.",
+                "vi": "Lúc sắp thi vừa bận vừa mệt."
+              }
+            ]
+          }
+        },
+        {
+          "type": "vocab_list",
+          "vocab_list": {
+            "title": "Từ vựng về các bữa ăn trong ngày",
+            "category_desc": "Trong tiếng Trung, ba bữa ăn chính trong ngày được gọi là '一日三餐' (yī rì sān cān). Dưới đây là các từ vựng liên quan.",
+            "items": [
+              {
+                "hz": "早饭",
+                "py": "zǎofàn",
+                "vi": "Bữa sáng"
+              },
+              {
+                "hz": "午饭",
+                "py": "wǔfàn",
+                "vi": "Bữa trưa"
+              },
+              {
+                "hz": "晚饭",
+                "py": "wǎnfàn",
+                "vi": "Bữa tối"
+              },
+              {
+                "hz": "夜宵",
+                "py": "yèxiāo",
+                "vi": "Bữa ăn khuya"
+              },
+              {
+                "hz": "点心",
+                "py": "diǎnxīn",
+                "vi": "Bữa ăn nhẹ, điểm tâm"
+              },
+              {
+                "hz": "自己做饭",
+                "py": "zìjǐ zuòfàn",
+                "vi": "Tự nấu cơm"
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "这些年在国外，我很少自己做饭。早饭我吃面包或蛋糕。午饭和晚饭也都在外面吃。快要考试的时候又忙又累，没时间出去，只吃方便面。现在回到中国了，每天能吃到妈妈做的饭，我太高兴了！因为什么都没有妈妈做的饭好吃。"
+        ],
+        "vi": [
+          "Những năm nay ở nước ngoài, tôi rất ít khi tự nấu cơm. Bữa sáng tôi ăn bánh mì hoặc bánh ngọt. Bữa trưa và bữa tối cũng đều ăn ở ngoài. Lúc sắp thi vừa bận vừa mệt, không có thời gian ra ngoài, chỉ ăn mì gói. Bây giờ đã về Trung Quốc rồi, mỗi ngày đều được ăn cơm mẹ nấu, tôi vui quá! Vì không có gì ngon bằng cơm mẹ nấu."
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "他早上起晚了，没时间吃早饭，______吃了一个苹果就去上班了。",
+            "pinyin": "Tā zǎoshang qǐ wǎn le, méi shíjiān chī zǎofàn, ______ chī le yí ge píngguǒ jiù qù shàngbān le.",
+            "answer": "B",
+            "options": [
+              {
+                "label": "A",
+                "hz": "马上",
+                "py": "mǎshàng"
+              },
+              {
+                "label": "B",
+                "hz": "只",
+                "py": "zhǐ"
+              },
+              {
+                "label": "C",
+                "hz": "又",
+                "py": "yòu"
+              },
+              {
+                "label": "D",
+                "hz": "简单",
+                "py": "jiǎndān"
+              }
+            ]
+          }
+        },
+        {
+          "type": "true_false",
+          "true_false": {
+            "statement": "“方便面”是一种做起来很简单的菜。",
+            "answer": false
+          }
+        }
+      ]
+    }
+  ]
+}

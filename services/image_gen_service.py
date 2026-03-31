@@ -18,7 +18,7 @@ class ImageGenerationService:
     def __init__(self):
         self.credentials = self._get_vertex_ai_credentials()
         self.project_id = PROJECT_ID
-        self.model_name = "gemini-3-pro-image-preview"
+        self.model_name = "gemini-3.1-flash-image-preview"
         self.location = "global"
         self.client = None
 

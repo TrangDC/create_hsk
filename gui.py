@@ -709,12 +709,95 @@ class AudioTTSWorker(QObject):
 
             self.progress.emit(f"\n🎉 HOÀN THÀNH! Audio thư mục: {os.path.abspath(audio_folder)}")
             self.finished.emit(f"✅ Thành công!\nFolder audio: {os.path.abspath(audio_folder)}")
-            
+
         except Exception as e:
             error_details = traceback.format_exc()
             self.progress.emit(f"❌ Lỗi: {str(e)}")
             self.error.emit(f"{str(e)}\n\nChi tiết:\n{error_details}")
-                   
+
+class PPTGeneratorWorker(QObject):
+    finished = pyqtSignal(str)
+    error = pyqtSignal(str)
+    progress = pyqtSignal(str)
+
+    def __init__(self, pdf_path, output_folder, hsk_level, ppt_type):
+        super().__init__()
+        self.pdf_path = pdf_path
+        self.output_folder = output_folder
+        self.hsk_level = hsk_level
+        self.ppt_type = ppt_type
+
+    def run(self):
+        try:
+            import os
+            import sys
+            import traceback
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Đảm bảo import được module trong hsk_ppt
+            if base_dir not in sys.path:
+                sys.path.append(base_dir)
+
+            base_name = os.path.basename(self.pdf_path).replace('.pdf', '')
+            bk_json_path = os.path.join(self.output_folder, f"{base_name}_bk.json")
+            gr_json_path = os.path.join(self.output_folder, f"{base_name}_grammar.json")
+            bk_ppt_path = os.path.join(self.output_folder, f"{base_name}_Bai_Khoa.pptx")
+            gr_ppt_path = os.path.join(self.output_folder, f"{base_name}_Ngu_Phap.pptx")
+            
+            index_file = os.path.join(base_dir, "hsk_ppt", "template", "hsk_index.json")
+            bk_template = os.path.join(base_dir, "hsk_ppt", "template", "HSK1 Bài Khóa template.pptx")
+            gr_template = os.path.join(base_dir, "hsk_ppt", "template", "HSK1 Ngữ pháp template.pptx")
+            bk_prompt = os.path.join(base_dir, "hsk_ppt", "prompts", "Prompt_Bai_Khoa_1_bai.txt")
+            gr_prompt = os.path.join(base_dir, "hsk_ppt", "prompts", "Prompt_Ngu_Phap_New.txt")
+
+            from hsk_ppt.test_extract_json_bk import process_full_hsk_lesson
+            from hsk_ppt.test_extract_json_grammar import process_grammar_lesson
+            from hsk_ppt.prepare_images import prepare_images_for_json
+            from hsk_ppt.test_generate_ppt_bk import PPTGenerator
+            from hsk_ppt.test_generate_ppt_grammar import GrammarPPTGenerator
+            
+            with open(bk_prompt, 'r', encoding='utf-8') as f:
+                bk_prompt_text = f.read()
+            with open(gr_prompt, 'r', encoding='utf-8') as f:
+                gr_prompt_text = f.read()
+
+            if self.ppt_type in ["Cả hai", "Bài khóa"]:
+                self.progress.emit(f"Đang trích xuất JSON Bài Khóa ({self.hsk_level})...")
+                process_full_hsk_lesson(self.pdf_path, bk_prompt_text, self.hsk_level, bk_json_path)
+
+            if self.ppt_type in ["Cả hai", "Ngữ pháp"]:
+                self.progress.emit(f"Đang trích xuất JSON Ngữ Pháp ({self.hsk_level})...")
+                process_grammar_lesson(self.pdf_path, gr_prompt_text, self.hsk_level, index_file, gr_json_path)
+
+            # Step 2: Prepare Images
+            if self.ppt_type in ["Cả hai", "Bài khóa"]:
+                self.progress.emit("Đang sinh ảnh minh họa AI (Bài Khóa)...")
+                prepare_images_for_json(bk_json_path)
+
+            if self.ppt_type in ["Cả hai", "Ngữ pháp"]:
+                self.progress.emit("Đang sinh ảnh minh họa AI (Ngữ Pháp)...")
+                prepare_images_for_json(gr_json_path)
+
+            # Step 3: Render PPT
+            if self.ppt_type in ["Cả hai", "Bài khóa"]:
+                self.progress.emit("Đang render PPT Bài Khóa...")
+                if os.path.exists(bk_json_path):
+                    gen_bk = PPTGenerator(bk_template, bk_json_path)
+                    gen_bk.build()
+                    gen_bk.save(bk_ppt_path)
+                
+            if self.ppt_type in ["Cả hai", "Ngữ pháp"]:
+                self.progress.emit("Đang render PPT Ngữ Pháp...")
+                if os.path.exists(gr_json_path):
+                    gen_gr = GrammarPPTGenerator(gr_template, gr_json_path)
+                    gen_gr.build()
+                    gen_gr.save(gr_ppt_path)
+
+            self.finished.emit(self.output_folder)
+        except Exception as e:
+            import traceback
+            self.error.emit(traceback.format_exc())
+
 # Lớp Giao diện chính với Tab
 class HSKGeneratorApp(QWidget):
     def __init__(self):
@@ -758,6 +841,9 @@ class HSKGeneratorApp(QWidget):
         # --- TAB AUDIO TTS (VERTEX AI) ---
         self.audio_tts_tab = self.create_audio_tts_tab()
         self.tab_widget.addTab(self.audio_tts_tab, "🎙️ Audio TTS")
+
+        self.ppt_tab = self.create_ppt_gen_tab()
+        self.tab_widget.addTab(self.ppt_tab, "Tạo PPT HSK")
 
         self.summary_tab = self.create_summary_tab()
         self.tab_widget.addTab(self.summary_tab, "Tóm tắt HSK")
@@ -1993,6 +2079,162 @@ class HSKGeneratorApp(QWidget):
         self.fc_run_btn.setEnabled(True)
         self.fc_run_btn.setText("🚀 TẠO FLASHCARD HSK")
         QMessageBox.information(self, "Hoàn tất", msg)
+
+    def create_ppt_gen_tab(self):
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(15)
+        layout.setContentsMargins(25, 25, 25, 25)
+
+        # 1. Input PDF
+        pdf_layout = QHBoxLayout()
+        self.ppt_pdf_label = QLabel('File PDF Bài học:')
+        self.ppt_pdf_input = QLineEdit()
+        self.ppt_pdf_browse_btn = QPushButton('Duyệt...')
+        self.ppt_pdf_browse_btn.setStyleSheet("background-color: #28a745;")
+        self.ppt_pdf_browse_btn.clicked.connect(self._browse_ppt_pdf)
+        pdf_layout.addWidget(self.ppt_pdf_label)
+        pdf_layout.addWidget(self.ppt_pdf_input)
+        pdf_layout.addWidget(self.ppt_pdf_browse_btn)
+        layout.addLayout(pdf_layout)
+
+        # 2. HSK Level & PPT Type
+        level_layout = QHBoxLayout()
+        self.ppt_level_label = QLabel('Cấp độ HSK:')
+        self.ppt_level_combo = QComboBox()
+        self.ppt_level_combo.addItems(["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"])
+        
+        self.ppt_type_label = QLabel('Loại PPT:')
+        self.ppt_type_combo = QComboBox()
+        self.ppt_type_combo.addItems(["Cả hai", "Bài khóa", "Ngữ pháp"])
+
+        level_layout.addWidget(self.ppt_level_label)
+        level_layout.addWidget(self.ppt_level_combo)
+        level_layout.addSpacing(20)
+        level_layout.addWidget(self.ppt_type_label)
+        level_layout.addWidget(self.ppt_type_combo)
+        level_layout.addStretch()
+        layout.addLayout(level_layout)
+
+        # 3. Output Folder
+        out_layout = QHBoxLayout()
+        self.ppt_out_label = QLabel('Thư mục Output:')
+        self.ppt_out_input = QLineEdit()
+        self.ppt_out_input.setText(os.path.join(os.getcwd(), "output", "ppt_hsk"))
+        self.ppt_out_browse = QPushButton('Duyệt...')
+        self.ppt_out_browse.clicked.connect(self._browse_ppt_out)
+        out_layout.addWidget(self.ppt_out_label)
+        out_layout.addWidget(self.ppt_out_input)
+        out_layout.addWidget(self.ppt_out_browse)
+        layout.addLayout(out_layout)
+
+        # 4. Nút Chạy và Nút Mở thư mục
+        btn_layout = QHBoxLayout()
+        self.ppt_run_btn = QPushButton('🚀 TẠO PPT HSK')
+        self.ppt_run_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E91E63;
+                color: white;
+                font-size: 14pt; padding: 15px; font-weight: bold;
+                border-radius: 8px;
+            }
+            QPushButton:hover { background-color: #C2185B; }
+        """)
+        self.ppt_run_btn.clicked.connect(self._start_ppt_gen)
+        
+        self.ppt_open_btn = QPushButton('📂 Mở thư mục')
+        self.ppt_open_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #17a2b8;
+                color: white;
+                font-size: 14pt; padding: 15px; font-weight: bold;
+                border-radius: 8px;
+            }
+            QPushButton:hover { background-color: #138496; }
+        """)
+        self.ppt_open_btn.clicked.connect(self._open_ppt_out)
+        self.ppt_open_btn.setEnabled(False) # Chỉ bật khi làm xong
+
+        btn_layout.addWidget(self.ppt_run_btn)
+        btn_layout.addWidget(self.ppt_open_btn)
+        layout.addLayout(btn_layout)
+
+        # 5. Text Log
+        self.ppt_log = QPlainTextEdit()
+        self.ppt_log.setReadOnly(True)
+        self.ppt_log.setStyleSheet("background-color: #f8f9fa; font-family: Consolas; font-size: 11pt;")
+        layout.addWidget(self.ppt_log)
+
+        tab.setLayout(layout)
+        return tab
+
+    def _browse_ppt_pdf(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Chọn file PDF Bài học', '', 'PDF Files (*.pdf)')
+        if file_path:
+            self.ppt_pdf_input.setText(file_path)
+
+    def _browse_ppt_out(self):
+        folder_path = QFileDialog.getExistingDirectory(self, "Chọn thư mục Output")
+        if folder_path:
+            self.ppt_out_input.setText(folder_path)
+
+    def _open_ppt_out(self):
+        out_dir = self.ppt_out_input.text()
+        if os.path.exists(out_dir):
+            if os.name == 'nt':
+                os.startfile(out_dir)
+            elif sys.platform == 'darwin':
+                subprocess.Popen(['open', out_dir])
+            else:
+                subprocess.Popen(['xdg-open', out_dir])
+        else:
+            QMessageBox.warning(self, "Lỗi", "Thư mục không tồn tại!")
+
+    def _start_ppt_gen(self):
+        pdf_path = self.ppt_pdf_input.text().strip()
+        out_dir = self.ppt_out_input.text().strip()
+        hsk_level = self.ppt_level_combo.currentText()
+        ppt_type = self.ppt_type_combo.currentText()
+
+        if not pdf_path or not os.path.exists(pdf_path):
+            QMessageBox.warning(self, "Lỗi", "Vui lòng chọn file PDF hợp lệ.")
+            return
+
+        os.makedirs(out_dir, exist_ok=True)
+
+        self.ppt_run_btn.setEnabled(False)
+        self.ppt_open_btn.setEnabled(False)
+        self.ppt_run_btn.setText("⏳ Đang chạy...")
+        self.ppt_log.clear()
+
+        # Thread Setup
+        self.ppt_thread = QThread()
+        self.ppt_worker = PPTGeneratorWorker(pdf_path, out_dir, hsk_level, ppt_type)
+        self.ppt_worker.moveToThread(self.ppt_thread)
+
+        self.ppt_thread.started.connect(self.ppt_worker.run)
+        self.ppt_worker.progress.connect(lambda text: self.ppt_log.appendPlainText(text)) 
+        self.ppt_worker.finished.connect(self._finish_ppt_gen)
+        self.ppt_worker.error.connect(lambda err: self.ppt_log.appendPlainText(f"❌ {err}"))
+        self.ppt_worker.error.connect(lambda err: self._finish_ppt_error())
+
+        # Cleanup
+        self.ppt_worker.finished.connect(self.ppt_thread.quit)
+        self.ppt_worker.error.connect(self.ppt_thread.quit)
+        self.ppt_thread.finished.connect(self.ppt_thread.deleteLater)
+
+        self.ppt_thread.start()
+
+    def _finish_ppt_error(self):
+        self.ppt_run_btn.setEnabled(True)
+        self.ppt_run_btn.setText("🚀 TẠO PPT HSK")
+
+    def _finish_ppt_gen(self, msg):
+        self.ppt_run_btn.setEnabled(True)
+        self.ppt_open_btn.setEnabled(True)
+        self.ppt_run_btn.setText("🚀 TẠO PPT HSK")
+        self.ppt_log.appendPlainText("✅ HOÀN TẤT TẠO PPT!")
+        QMessageBox.information(self, "Hoàn tất", f"Đã tạo xong PPT.\nThư mục: {msg}")
 
 
 if __name__ == '__main__':

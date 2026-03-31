@@ -1,0 +1,755 @@
+{
+  "lesson_info": {
+    "number": 4,
+    "title_cn": "你穿红色的很好看",
+    "title_vn": "Bạn mặc màu đỏ rất đẹp"
+  },
+  "sections": [
+    {
+      "section_title": "Hội thoại 1",
+      "image_description": "A cartoon illustration of a Chinese mother and her young daughter standing outside a modern, newly opened shopping mall. The daughter is pointing towards the entrance, looking curious. The mother is smiling and looking at her daughter. The scene is bright and welcoming. Simple, clean art style.",
+      "full_dialogue": {
+        "hz": [
+          "刘小雪：妈妈，我们来过这家商场吗？",
+          "王一雪：没来过，这是新开的。",
+          "刘小雪：我们进去看看吧。",
+          "王一雪：好啊！你想买点儿什么？",
+          "刘小雪：我想买条裤子。",
+          "王一雪：没问题。"
+        ],
+        "py": [
+          "Liú Xiǎoxuě: Māma, wǒmen láiguo zhè jiā shāngchǎng ma?",
+          "Wáng Yīxuě: Méi láiguo, zhè shì xīn kāi de.",
+          "Liú Xiǎoxuě: Wǒmen jìnqù kànkan ba.",
+          "Wáng Yīxuě: Hǎo a! Nǐ xiǎng mǎi diǎnr shénme?",
+          "Liú Xiǎoxuě: Wǒ xiǎng mǎi tiáo kùzi.",
+          "Wáng Yīxuě: Méi wèntí."
+        ],
+        "vi": [
+          "Lưu Tiểu Tuyết: Mẹ ơi, chúng ta đã đến trung tâm thương mại này bao giờ chưa?",
+          "Vương Nhất Tuyết: Chưa đến, nơi này mới mở.",
+          "Lưu Tiểu Tuyết: Chúng ta vào trong xem đi ạ.",
+          "Vương Nhất Tuyết: Được thôi! Con muốn mua gì nào?",
+          "Lưu Tiểu Tuyết: Con muốn mua một chiếc quần.",
+          "Vương Nhất Tuyết: Không vấn đề."
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "过",
+          "pinyin": "guo",
+          "type": "Trợ từ",
+          "vi": "qua, từng (biểu thị hành động đã xảy ra trong quá khứ)",
+          "example": {
+            "hz": "我没看<hl>过</hl>这个电影。",
+            "py": "Wǒ méi kàn<hl>guo</hl> zhège diànyǐng.",
+            "vi": "Tôi chưa <hl>từng</hl> xem bộ phim này."
+          }
+        },
+        {
+          "hz": "商场",
+          "pinyin": "shāngchǎng",
+          "type": "Danh từ",
+          "vi": "trung tâm thương mại",
+          "example": {
+            "hz": "周末我喜欢去<hl>商场</hl>买东西。",
+            "py": "Zhōumò wǒ xǐhuān qù <hl>shāngchǎng</hl> mǎi dōngxī.",
+            "vi": "Cuối tuần tôi thích đến <hl>trung tâm thương mại</hl> mua đồ."
+          }
+        },
+        {
+          "hz": "进去",
+          "pinyin": "jìnqù",
+          "type": "Động từ",
+          "vi": "đi vào, vào trong",
+          "example": {
+            "hz": "外面太冷了，我们快<hl>进去</hl>吧。",
+            "py": "Wàimiàn tài lěng le, wǒmen kuài <hl>jìnqù</hl> ba.",
+            "vi": "Bên ngoài lạnh quá, chúng ta mau <hl>vào trong</hl> đi."
+          }
+        },
+        {
+          "hz": "条",
+          "pinyin": "tiáo",
+          "type": "Lượng từ",
+          "vi": "chiếc, con (dùng cho vật dài, hẹp)",
+          "measure_word_usage": "Dùng cho những vật dài, hẹp như quần, váy, sông, đường. Ví dụ: 一条裤子 (một chiếc quần), 一条河 (một con sông).",
+          "example": {
+            "hz": "这条鱼很大。",
+            "py": "Zhè <hl>tiáo</hl> yú hěn dà.",
+            "vi": "Con cá này rất to."
+          }
+        },
+        {
+          "hz": "裤子",
+          "pinyin": "kùzi",
+          "type": "Danh từ",
+          "vi": "quần",
+          "example": {
+            "hz": "我想买一条黑色的<hl>裤子</hl>。",
+            "py": "Wǒ xiǎng mǎi yītiáo hēisè de <hl>kùzi</hl>.",
+            "vi": "Tôi muốn mua một chiếc <hl>quần</hl> màu đen."
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "grammar_formula",
+          "grammar_formula": {
+            "title": "Cách dùng Trợ từ động thái '过' (guo)",
+            "formula": "Chủ ngữ + Động từ + 过 (+ Tân ngữ)",
+            "usage": "Dùng sau động từ để biểu thị một hành động đã xảy ra trong quá khứ và đã kết thúc, nhấn mạnh về một kinh nghiệm hoặc trải nghiệm đã có. Thể phủ định dùng '没(有) + Động từ + 过'.",
+            "examples": [
+              {
+                "hz": "我吃过中国菜。",
+                "py": "Wǒ chīguo Zhōngguó cài.",
+                "vi": "Tôi đã từng ăn món ăn Trung Quốc.",
+                "image_description": "A happy cartoon character sitting at a table filled with various Chinese dishes like dumplings and noodles, holding chopsticks and smiling. Simple flat illustration style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\db1cc985d3960c7f3914508357c7f638.png"
+              },
+              {
+                "hz": "他没去过上海。",
+                "py": "Tā méi qùguo Shànghǎi.",
+                "vi": "Anh ấy chưa từng đến Thượng Hải.",
+                "image_description": "A cartoon man looking at a postcard of the Shanghai skyline with a wistful expression, shaking his head. The background is his simple room. Cute, expressive art style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\21ea50bdd060c4b42607bf0092e6890f.png"
+              },
+              {
+                "hz": "你见过他吗？",
+                "py": "Nǐ jiànguo tā ma?",
+                "vi": "Bạn đã gặp anh ấy bao giờ chưa?",
+                "image_description": "A cartoon character asking another character a question with a curious expression. A thought bubble above the second character's head shows a question mark. Simple, clean character design.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\21d3d7e3af8473c3d66d9890c2f140fd.png"
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "妈妈，我们来过这家商场吗？",
+          "没来过，这是新开的。",
+          "我们进去看看吧。",
+          "好啊！你想买点儿什么？",
+          "我想买条裤子。",
+          "没问题。"
+        ],
+        "vi": [
+          "Mẹ ơi, chúng ta đã đến trung tâm thương mại này bao giờ chưa?",
+          "Chưa đến, nơi này mới mở.",
+          "Chúng ta vào trong xem đi ạ.",
+          "Được thôi! Con muốn mua gì nào?",
+          "Con muốn mua một chiếc quần.",
+          "Không vấn đề."
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "A: 你去过那个新开的______吗？ B: 还没呢，我们明天一起去吧。",
+            "pinyin": "A: Nǐ qùguo nàge xīn kāi de ______ ma? B: Hái méi ne, wǒmen míngtiān yīqǐ qù ba.",
+            "answer": "B",
+            "options": [
+              {
+                "label": "A",
+                "hz": "裤子",
+                "py": "kùzi"
+              },
+              {
+                "label": "B",
+                "hz": "商场",
+                "py": "shāngchǎng"
+              },
+              {
+                "label": "C",
+                "hz": "条",
+                "py": "tiáo"
+              },
+              {
+                "label": "D",
+                "hz": "颜色",
+                "py": "yánsè"
+              }
+            ]
+          }
+        }
+      ],
+      "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\7b57b37841db8c69d4b27f3b72cd8f6d.png"
+    },
+    {
+      "section_title": "Hội thoại 2",
+      "image_description": "A mother and her teenage daughter are in a bright, modern clothing store. The daughter is holding up a pair of white pants, looking hesitant. The mother is smiling and pointing towards a pair of vibrant red pants on a rack, encouraging her daughter to try them. The style is a clean, colorful animation.",
+      "full_dialogue": {
+        "hz": [
+          "刘小雪：妈妈，我想买这条白色的裤子。",
+          "王一雪：你有很多白色的衣服，为什么还买白色的？",
+          "刘小雪：因为我喜欢白色啊！",
+          "王一雪：我觉得这条白色的不太好看，你试试那条红色的吧。",
+          "刘小雪：我没穿过红色的，红色的好看吗？",
+          "王一雪：就是因为没穿过，所以要试试啊！"
+        ],
+        "py": [
+          "Liú Xiǎoxuě: Māma, wǒ xiǎng mǎi zhè tiáo báisè de kùzi.",
+          "Wáng Yīxuě: Nǐ yǒu hěn duō báisè de yīfu, wèi shénme hái mǎi báisè de?",
+          "Liú Xiǎoxuě: Yīnwèi wǒ xǐhuan báisè a!",
+          "Wáng Yīxuě: Wǒ juéde zhè tiáo báisè de bú tài hǎokàn, nǐ shìshi nà tiáo hóngsè de ba.",
+          "Liú Xiǎoxuě: Wǒ méi chuānguo hóngsè de, hóngsè de hǎokàn ma?",
+          "Wáng Yīxuě: Jiù shì yīnwèi méi chuānguo, suǒyǐ yào shìshi a!"
+        ],
+        "vi": [
+          "Lưu Tiểu Tuyết: Mẹ ơi, con muốn mua chiếc quần màu trắng này.",
+          "Vương Nhất Tuyết: Con có nhiều quần áo màu trắng rồi, tại sao vẫn mua màu trắng nữa?",
+          "Lưu Tiểu Tuyết: Vì con thích màu trắng ạ!",
+          "Vương Nhất Tuyết: Mẹ thấy chiếc quần màu trắng này không đẹp lắm, con thử chiếc màu đỏ kia đi.",
+          "Lưu Tiểu Tuyết: Con chưa từng mặc màu đỏ, màu đỏ có đẹp không ạ?",
+          "Vương Nhất Tuyết: Chính vì chưa từng mặc nên mới phải thử chứ!"
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "白色",
+          "pinyin": "báisè",
+          "type": "Danh từ",
+          "vi": "màu trắng",
+          "example": {
+            "hz": "我最喜欢的颜色是<hl>白色</hl>。",
+            "py": "Wǒ zuì xǐhuan de yánsè shì <hl>báisè</hl>.",
+            "vi": "Màu sắc tôi thích nhất là <hl>màu trắng</hl>."
+          }
+        },
+        {
+          "hz": "因为",
+          "pinyin": "yīnwèi",
+          "type": "Liên từ",
+          "vi": "bởi vì, vì",
+          "example": {
+            "hz": "<hl>因为</hl>下雨了，所以我们不出去玩了。",
+            "py": "<hl>Yīnwèi</hl> xià yǔ le, suǒyǐ wǒmen bù chūqù wán le.",
+            "vi": "<hl>Bởi vì</hl> trời mưa rồi, nên chúng tôi không ra ngoài chơi nữa."
+          }
+        },
+        {
+          "hz": "试",
+          "pinyin": "shì",
+          "type": "Động từ",
+          "vi": "thử",
+          "example": {
+            "hz": "这件衣服很好看，你可以<hl>试</hl>一下。",
+            "py": "Zhè jiàn yīfu hěn hǎokàn, nǐ kěyǐ <hl>shì</hl> yíxià.",
+            "vi": "Bộ quần áo này rất đẹp, bạn có thể <hl>thử</hl> một chút."
+          }
+        },
+        {
+          "hz": "红色",
+          "pinyin": "hóngsè",
+          "type": "Danh từ",
+          "vi": "màu đỏ",
+          "example": {
+            "hz": "她今天穿了一件<hl>红色</hl>的裙子。",
+            "py": "Tā jīntiān chuānle yí jiàn <hl>hóngsè</hl> de qúnzi.",
+            "vi": "Hôm nay cô ấy mặc một chiếc váy <hl>màu đỏ</hl>."
+          }
+        },
+        {
+          "hz": "所以",
+          "pinyin": "suǒyǐ",
+          "type": "Liên từ",
+          "vi": "cho nên, vì vậy",
+          "example": {
+            "hz": "他生病了，<hl>所以</hl>今天没来上课。",
+            "py": "Tā shēngbìng le, <hl>suǒyǐ</hl> jīntiān méi lái shàngkè.",
+            "vi": "Cậu ấy bị ốm rồi, <hl>cho nên</hl> hôm nay không đến lớp."
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "vocab_list",
+          "vocab_list": {
+            "title": "Mở rộng từ vựng về màu sắc",
+            "category_desc": "Trong bài chúng ta đã học về màu đỏ (红色) và màu trắng (白色). Cùng học thêm một số từ vựng về các màu sắc cơ bản khác nhé!",
+            "items": [
+              {
+                "hz": "蓝色",
+                "py": "lánsè",
+                "vi": "màu xanh lam",
+                "image_description": "A simple cartoon illustration of a vast, clear blue sky with a few fluffy white clouds. Minimalist style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\4b93297fe50f1ce70feac697aeced093.png"
+              },
+              {
+                "hz": "黄色",
+                "py": "huángsè",
+                "vi": "màu vàng",
+                "image_description": "A simple cartoon illustration of a bright yellow banana, perfectly ripe. Clean background.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\4368c2dcd137762beae7fdb9ca6488f2.png"
+              },
+              {
+                "hz": "绿色",
+                "py": "lǜsè",
+                "vi": "màu xanh lá",
+                "image_description": "A simple cartoon illustration of a patch of vibrant green grass. Minimalist and fresh.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\9290526343ccaa1293ed815f63803510.png"
+              },
+              {
+                "hz": "黑色",
+                "py": "hēisè",
+                "vi": "màu đen",
+                "image_description": "A cute, simple cartoon illustration of a black cat with big yellow eyes, sitting calmly. Clean background.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\aa3e0fff9208e6b7e8cf42b1a389f81c.png"
+              },
+              {
+                "hz": "粉色",
+                "py": "fěnsè",
+                "vi": "màu hồng",
+                "image_description": "A simple cartoon illustration of a beautiful pink cherry blossom flower. Soft and delicate.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\3d77b049ded54a839e7f22fb786c3d79.png"
+              },
+              {
+                "hz": "橙色",
+                "py": "chéngsè",
+                "vi": "màu cam",
+                "image_description": "A simple cartoon illustration of a round, juicy orange fruit with a small green leaf on top. Bright and cheerful.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\3bd486ca667d32bbb64fa8dffd9c01ee.png"
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "刘小雪：妈妈，我想买这条白色的裤子。",
+          "王一雪：你有很多白色的衣服，为什么还买白色的？",
+          "刘小雪：因为我喜欢白色啊！",
+          "王一雪：我觉得这条白色的不太好看，你试试那条红色的吧。",
+          "刘小雪：我没穿过红色的，红色的好看吗？",
+          "王一雪：就是因为没穿过，所以要试试啊！"
+        ],
+        "vi": [
+          "Lưu Tiểu Tuyết: Mẹ ơi, con muốn mua chiếc quần màu trắng này.",
+          "Vương Nhất Tuyết: Con có nhiều quần áo màu trắng rồi, tại sao vẫn mua màu trắng nữa?",
+          "Lưu Tiểu Tuyết: Vì con thích màu trắng ạ!",
+          "Vương Nhất Tuyết: Mẹ thấy chiếc quần màu trắng này không đẹp lắm, con thử chiếc màu đỏ kia đi.",
+          "Lưu Tiểu Tuyết: Con chưa từng mặc màu đỏ, màu đỏ có đẹp không ạ?",
+          "Vương Nhất Tuyết: Chính vì chưa từng mặc nên mới phải thử chứ!"
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "A: 你为什么想买这条裤子？ B: ______我没有红色的裤子，______我想试试。",
+            "pinyin": "A: Nǐ wèishéme xiǎng mǎi zhè tiáo kùzi? B: ______ wǒ méiyǒu hóngsè de kùzi, ______ wǒ xiǎng shìshi.",
+            "answer": "A",
+            "options": [
+              {
+                "label": "A",
+                "hz": "因为，所以",
+                "py": "yīnwèi, suǒyǐ"
+              },
+              {
+                "label": "B",
+                "hz": "所以，因为",
+                "py": "suǒyǐ, yīnwèi"
+              },
+              {
+                "label": "C",
+                "hz": "但是，所以",
+                "py": "dànshì, suǒyǐ"
+              },
+              {
+                "label": "D",
+                "hz": "因为，但是",
+                "py": "yīnwèi, dànshì"
+              }
+            ]
+          }
+        }
+      ],
+      "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\05abd5c90381e189d3d0d36c5d1d4680.png"
+    },
+    {
+      "section_title": "Hội thoại 3",
+      "image_description": "A mother and her young daughter are in a bright, modern shopping mall, standing in front of a display of colorful schoolbags. The daughter is pointing at a green backpack, and the mother is smiling and nodding in agreement. The scene is cheerful and full of light. Cartoon style.",
+      "full_dialogue": {
+        "hz": [
+          "刘小雪：妈妈, 我想买个新书包。",
+          "王一雪：好, 那边卖书包, 我们过去看看吧。",
+          "刘小雪：这么多漂亮的书包!",
+          "王一雪：红色的、绿色的、黑色的, 你想买哪个?",
+          "刘小雪：绿色的吧。",
+          "王一雪：不错, 我也觉得绿色的更好看。"
+        ],
+        "py": [
+          "Liú Xiǎoxuě: Māma, wǒ xiǎng mǎi gè xīn shūbāo.",
+          "Wáng Yīxuě: Hǎo, nàbiān mài shūbāo, wǒmen guòqù kànkan ba.",
+          "Liú Xiǎoxuě: Zhème duō piàoliang de shūbāo!",
+          "Wáng Yīxuě: Hóngsè de, lǜsè de, hēisè de, nǐ xiǎng mǎi nǎge?",
+          "Liú Xiǎoxuě: Lǜsè de ba.",
+          "Wáng Yīxuě: Búcuò, wǒ yě juéde lǜsè de gèng hǎokàn."
+        ],
+        "vi": [
+          "Lưu Tiểu Tuyết: Mẹ ơi, con muốn mua một cái cặp sách mới.",
+          "Vương Nhất Tuyết: Được, bên kia bán cặp sách, chúng ta qua đó xem đi.",
+          "Lưu Tiểu Tuyết: Nhiều cặp sách đẹp quá!",
+          "Vương Nhất Tuyết: Cái màu đỏ, cái màu xanh lá, cái màu đen, con muốn mua cái nào?",
+          "Lưu Tiểu Tuyết: Cái màu xanh lá đi ạ.",
+          "Vương Nhất Tuyết: Không tồi, mẹ cũng thấy cái màu xanh lá đẹp hơn."
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "书包",
+          "pinyin": "shūbāo",
+          "type": "Danh từ",
+          "vi": "cặp sách",
+          "example": {
+            "hz": "我想买个新<hl>书包</hl>。",
+            "py": "Wǒ xiǎng mǎi gè xīn <hl>shūbāo</hl>.",
+            "vi": "Tôi muốn mua một cái <hl>cặp sách</hl> mới."
+          }
+        },
+        {
+          "hz": "过去",
+          "pinyin": "guòqù",
+          "type": "Động từ",
+          "vi": "đi qua, qua đó",
+          "example": {
+            "hz": "我们<hl>过去</hl>看看吧。",
+            "py": "Wǒmen <hl>guòqù</hl> kànkan ba.",
+            "vi": "Chúng ta <hl>qua đó</hl> xem đi."
+          }
+        },
+        {
+          "hz": "绿色",
+          "pinyin": "lǜsè",
+          "type": "Danh từ",
+          "vi": "màu xanh lá",
+          "example": {
+            "hz": "我觉得<hl>绿色</hl>的更好看。",
+            "py": "Wǒ juéde <hl>lǜsè</hl> de gèng hǎokàn.",
+            "vi": "Tôi thấy cái <hl>màu xanh lá</hl> đẹp hơn."
+          }
+        },
+        {
+          "hz": "黑色",
+          "pinyin": "hēisè",
+          "type": "Danh từ",
+          "vi": "màu đen",
+          "example": {
+            "hz": "他有一只<hl>黑色</hl>的猫。",
+            "py": "Tā yǒu yì zhī <hl>hēisè</hl> de māo.",
+            "vi": "Anh ấy có một con mèo <hl>màu đen</hl>."
+          }
+        },
+        {
+          "hz": "更",
+          "pinyin": "gèng",
+          "type": "Phó từ",
+          "vi": "càng, hơn",
+          "example": {
+            "hz": "我觉得绿色的<hl>更</hl>好看。",
+            "py": "Wǒ juéde lǜsè de <hl>gèng</hl> hǎokàn.",
+            "vi": "Tôi thấy cái màu xanh lá đẹp <hl>hơn</hl>."
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "grammar_formula",
+          "grammar_formula": {
+            "title": "Cấu trúc \"Tính từ/Danh từ + 的\" (Cụm chữ 的)",
+            "formula": "Tính từ / Danh từ / Cụm động từ + 的",
+            "usage": "Cấu trúc này tạo thành một cụm danh từ, thường được gọi là 'cụm chữ 的'. Nó có chức năng như một danh từ, dùng để chỉ người hoặc vật có đặc điểm được nêu trước '的'. Danh từ chính thường được lược bỏ khi ngữ cảnh đã rõ ràng.",
+            "examples": [
+              {
+                "hz": "红色的、绿色的, 你想买哪个?",
+                "py": "Hóngsè de, lǜsè de, nǐ xiǎng mǎi nǎge?",
+                "vi": "Cái màu đỏ, cái màu xanh lá, bạn muốn mua cái nào?",
+                "image_description": "A hand pointing between a red backpack and a green backpack on a store shelf. The background is blurred. Simple, clean illustration.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\27fe4f0fff2389feb83a7aa1eedf2635.png"
+              },
+              {
+                "hz": "这件衣服是新买的。",
+                "py": "Zhè jiàn yīfu shì xīn mǎi de.",
+                "vi": "Bộ quần áo này là đồ mới mua.",
+                "image_description": "A person holding up a brand new T-shirt with the price tag still on it, looking happy. Bright and colorful cartoon style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\b61d95e5486783ee4e6de7ed623f7c4e.png"
+              },
+              {
+                "hz": "桌子上那本书是我的。",
+                "py": "Zhuōzi shàng nà běn shū shì wǒ de.",
+                "vi": "Cuốn sách trên bàn là của tôi.",
+                "image_description": "A hand pointing to a book lying on a wooden table. The scene is in a cozy room with warm lighting. Flat design style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\101b70be25a303f1a943f40639959d01.png"
+              }
+            ]
+          }
+        },
+        {
+          "type": "vocab_list",
+          "vocab_list": {
+            "title": "Mở rộng từ vựng về màu sắc",
+            "category_desc": "Dưới đây là một số màu sắc phổ biến khác trong tiếng Trung mà bạn có thể sử dụng.",
+            "items": [
+              {
+                "hz": "白色",
+                "py": "báisè",
+                "vi": "màu trắng",
+                "image_description": "A fluffy white cloud in a clear blue sky. Simple cartoon style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\002e4aefadb323b40c14e300e59653ad.png"
+              },
+              {
+                "hz": "蓝色",
+                "py": "lánsè",
+                "vi": "màu xanh lam",
+                "image_description": "A calm blue ocean wave gently washing onto a sandy beach. Minimalist illustration.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\8f978ea3c1e038d3f7e4488e7cf25a00.png"
+              },
+              {
+                "hz": "黄色",
+                "py": "huángsè",
+                "vi": "màu vàng",
+                "image_description": "A bright yellow sun with smiling face. Simple and cheerful cartoon drawing.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\681b5a540409c170103efba4280df296.png"
+              },
+              {
+                "hz": "粉色",
+                "py": "fěnsè",
+                "vi": "màu hồng",
+                "image_description": "A delicate pink cherry blossom flower on a branch. Soft and beautiful illustration.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\f5c3b83251dffb84ab7e0f453aa97742.png"
+              },
+              {
+                "hz": "灰色",
+                "py": "huīsè",
+                "vi": "màu xám",
+                "image_description": "A cute, chubby gray cat sleeping peacefully. Simple and adorable cartoon style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\f575699a80c8a57b83db7806105bf72d.png"
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "刘小雪：妈妈, 我想买个新书包。",
+          "王一雪：好, 那边卖书包, 我们过去看看吧。",
+          "刘小雪：这么多漂亮的书包!",
+          "王一雪：红色的、绿色的、黑色的, 你想买哪个?",
+          "刘小雪：绿色的吧。",
+          "王一雪：不错, 我也觉得绿色的更好看。"
+        ],
+        "vi": [
+          "Lưu Tiểu Tuyết: Mẹ ơi, con muốn mua một cái cặp sách mới.",
+          "Vương Nhất Tuyết: Được, bên kia bán cặp sách, chúng ta qua đó xem đi.",
+          "Lưu Tiểu Tuyết: Nhiều cặp sách đẹp quá!",
+          "Vương Nhất Tuyết: Cái màu đỏ, cái màu xanh lá, cái màu đen, con muốn mua cái nào?",
+          "Lưu Tiểu Tuyết: Cái màu xanh lá đi ạ.",
+          "Vương Nhất Tuyết: Không tồi, mẹ cũng thấy cái màu xanh lá đẹp hơn."
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "A: 你喜欢哪个书包？ B: 我觉得______的更好看。",
+            "pinyin": "A: Nǐ xǐhuān nǎge shūbāo? B: Wǒ juéde ______ de gèng hǎokàn.",
+            "answer": "A",
+            "options": [
+              {
+                "label": "A",
+                "hz": "绿色",
+                "py": "lǜsè"
+              },
+              {
+                "label": "B",
+                "hz": "更",
+                "py": "gèng"
+              },
+              {
+                "label": "C",
+                "hz": "书包",
+                "py": "shūbāo"
+              },
+              {
+                "label": "D",
+                "hz": "过去",
+                "py": "guòqù"
+              }
+            ]
+          }
+        }
+      ],
+      "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\9c6484a58e59de0e0e3742d67a9c84c3.png"
+    },
+    {
+      "section_title": "Đoạn văn",
+      "image_description": "A teenage girl writing in her diary in a cozy, sunlit bedroom. A thought bubble above her head shows her and her mom at a bright, modern shopping mall. The girl is happily trying on a pair of red pants in front of a mirror, and her mom is smiling and giving a thumbs-up. The style is a simple, clean cartoon with vibrant colors.",
+      "full_dialogue": {
+        "hz": [
+          "我和妈妈去了一家商场。因为是新开的，所以这几天东西很便宜。商场里的衣服颜色很多。我没穿过红色的裤子，妈妈让我试了试，我觉得我穿红色的也很好看。"
+        ],
+        "py": [
+          "Wǒ hé māma qùle yì jiā shāngchǎng. Yīnwèi shì xīn kāi de, suǒyǐ zhè jǐ tiān dōngxi hěn piányi. Shāngchǎng lǐ de yīfu yánsè hěn duō. Wǒ méi chuānguo hóngsè de kùzi, māma ràng wǒ shì le shì, wǒ juéde wǒ chuān hóngsè de yě hěn hǎokàn."
+        ],
+        "vi": [
+          "Tôi và mẹ đã đến một trung tâm thương mại. Vì mới khai trương nên mấy ngày nay đồ đạc rất rẻ. Quần áo trong trung tâm thương mại có rất nhiều màu sắc. Tôi chưa từng mặc quần màu đỏ, mẹ bảo tôi thử một chút, tôi cảm thấy mình mặc màu đỏ cũng rất đẹp."
+        ]
+      },
+      "vocabulary": [
+        {
+          "hz": "颜色",
+          "pinyin": "yánsè",
+          "type": "Danh từ",
+          "vi": "màu sắc, màu",
+          "example": {
+            "hz": "商场里的衣服<hl>颜色</hl>很多。",
+            "py": "Shāngchǎng lǐ de yīfu <hl>yánsè</hl> hěn duō.",
+            "vi": "Quần áo trong trung tâm thương mại có rất nhiều <hl>màu sắc</hl>."
+          }
+        },
+        {
+          "hz": "便宜",
+          "pinyin": "piányi",
+          "type": "Tính từ",
+          "vi": "rẻ",
+          "example": {
+            "hz": "因为是新开的，所以这几天东西很<hl>便宜</hl>。",
+            "py": "Yīnwèi shì xīn kāi de, suǒyǐ zhè jǐ tiān dōngxi hěn <hl>piányi</hl>.",
+            "vi": "Vì mới khai trương nên mấy ngày nay đồ đạc rất <hl>rẻ</hl>."
+          }
+        }
+      ],
+      "extra_knowledge": [
+        {
+          "type": "vocab_list",
+          "vocab_list": {
+            "title": "Mở rộng từ vựng: Các màu sắc phổ biến",
+            "category_desc": "Trong bài chúng ta đã học về màu đỏ (红色) và màu trắng (白色). Hãy cùng học thêm một số màu sắc cơ bản khác nhé!",
+            "items": [
+              {
+                "hz": "蓝色",
+                "py": "lánsè",
+                "vi": "màu xanh lam",
+                "image_description": "A simple cartoon drawing of a bright blue sky with a few fluffy white clouds. Minimalist style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\468c5cbdbae9e224130637a804125e97.png"
+              },
+              {
+                "hz": "黄色",
+                "py": "huángsè",
+                "vi": "màu vàng",
+                "image_description": "A cheerful cartoon drawing of a large, smiling yellow sun. Simple lines and bright colors.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\cbd19f8ef4be1bdfcf959309dd86592a.png"
+              },
+              {
+                "hz": "绿色",
+                "py": "lǜsè",
+                "vi": "màu xanh lá",
+                "image_description": "A simple cartoon illustration of a single, vibrant green leaf. Clean and minimalist design.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\468f2f39c76151b5b6a41682cad90af6.png"
+              },
+              {
+                "hz": "黑色",
+                "py": "hēisè",
+                "vi": "màu đen",
+                "image_description": "A cute cartoon drawing of a black cat with big yellow eyes, sitting calmly. Simple and iconic.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\580e151086083445f846d77723befea9.png"
+              },
+              {
+                "hz": "粉色",
+                "py": "fěnsè",
+                "vi": "màu hồng",
+                "image_description": "A simple cartoon illustration of a pink cherry blossom flower. Soft and delicate colors.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\2202d8f177635dd01e027a4d951f41b1.png"
+              }
+            ]
+          }
+        },
+        {
+          "type": "grammar_formula",
+          "grammar_formula": {
+            "title": "Cấu trúc nhấn mạnh: 是 ... 的",
+            "formula": "是 + [Thông tin cần nhấn mạnh] + 的",
+            "usage": "Cấu trúc \"是...的\" được dùng để nhấn mạnh thời gian, địa điểm, phương thức, đối tượng... của một hành động đã xảy ra. Trong bài, \"因为是新开的\" nhấn mạnh lý do là \"mới khai trương\".",
+            "examples": [
+              {
+                "hz": "这本书是我昨天买的。",
+                "py": "Zhè běn shū shì wǒ zuótiān mǎi de.",
+                "vi": "Quyển sách này là do tôi mua hôm qua.",
+                "image_description": "A cartoon character proudly holding a new book. A calendar icon with yesterday's date is highlighted next to them. Simple and clear illustration.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\751b8bfcd0325abc1ad97d6541a7b6e9.png"
+              },
+              {
+                "hz": "我们是坐飞机来的。",
+                "py": "Wǒmen shì zuò fēijī lái de.",
+                "vi": "Chúng tôi đến đây bằng máy bay.",
+                "image_description": "A cartoon airplane flying in the sky with two happy passengers looking out the window. The airplane is the main focus. Fun and simple style.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\bb101e78aeab2d25879a8e97c0d2419e.png"
+              },
+              {
+                "hz": "你是在哪儿看见他的？",
+                "py": "Nǐ shì zài nǎr kànjiàn tā de?",
+                "vi": "Bạn đã nhìn thấy anh ấy ở đâu vậy?",
+                "image_description": "A cartoon character with a magnifying glass, looking around with a puzzled expression. A big question mark is above their head. The background is a simple city street.",
+                "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\7ea5922df644646a78038d9b1f0b02ee.png"
+              }
+            ]
+          }
+        }
+      ],
+      "simple_dialogue": {
+        "hz": [
+          "我和妈妈去了一家新商场。",
+          "因为是新开的，所以东西很便宜。",
+          "我试了红色的裤子，我觉得很好看。"
+        ],
+        "vi": [
+          "Tôi và mẹ đã đến một trung tâm thương mại mới.",
+          "Vì mới khai trương nên đồ đạc rất rẻ.",
+          "Tôi đã thử chiếc quần màu đỏ, tôi thấy rất đẹp."
+        ]
+      },
+      "exercise": [
+        {
+          "type": "multiple_choice",
+          "multiple_choice": {
+            "question": "A: 这家商场的东西怎么样？ B: 因为是新开的，所以很______。",
+            "pinyin": "A: Zhè jiā shāngchǎng de dōngxi zěnmeyàng? B: Yīnwèi shì xīn kāi de, suǒyǐ hěn ______.",
+            "answer": "B",
+            "options": [
+              {
+                "label": "A",
+                "hz": "好看",
+                "py": "hǎokàn"
+              },
+              {
+                "label": "B",
+                "hz": "便宜",
+                "py": "piányi"
+              },
+              {
+                "label": "C",
+                "hz": "颜色",
+                "py": "yánsè"
+              },
+              {
+                "label": "D",
+                "hz": "红色",
+                "py": "hóngsè"
+              }
+            ]
+          }
+        },
+        {
+          "type": "true_false",
+          "true_false": {
+            "statement": "Trong câu “我觉得我穿红色的也很好看”, từ “觉得” biểu thị một ý kiến hoặc cảm nhận chủ quan.",
+            "answer": true
+          }
+        }
+      ],
+      "local_image_path": "d:\\Edmicro\\Tools\\create_hsk\\hsk_ppt\\images\\generated\\8831e34fcede556617c59e60d3cfcb07.png"
+    }
+  ]
+}
