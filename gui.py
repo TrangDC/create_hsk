@@ -1681,6 +1681,10 @@ class HSKGeneratorApp(QWidget):
             QMessageBox.warning(self, 'Lỗi đầu vào', 'Vui lòng chọn một thư mục ảnh hợp lệ.')
             return
 
+        excel_dir = os.path.dirname(os.path.abspath(excel_path))
+        excel_name = os.path.splitext(os.path.basename(excel_path))[0]
+        output_folder = os.path.join(excel_dir, f"IMAGE_MERGED_{excel_name}")
+
         # Vô hiệu hóa nút ghép ảnh và xóa log cũ
         self.merge_button.setEnabled(False)
         self.merge_button.setText('⏳ Đang ghép ảnh...')
@@ -1688,7 +1692,7 @@ class HSKGeneratorApp(QWidget):
         
         # Tạo và khởi chạy thread
         self.merge_thread = QThread()
-        self.merge_worker = ImageMergerWorker(excel_path, images_folder)
+        self.merge_worker = ImageMergerWorker(excel_path, images_folder, output_folder)
         self.merge_worker.moveToThread(self.merge_thread)
 
         self.merge_thread.started.connect(self.merge_worker.run)

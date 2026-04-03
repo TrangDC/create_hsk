@@ -15,14 +15,15 @@ class PPTGenerator:
         with open(json_path, "r", encoding="utf-8") as f:
             self.data = json.load(f)
 
-        # Template có 41 slides (index 0–40):
+        # Template có nhiều slide:
         #   [0]      → add_cover_slide()        (edit in-place)
         #   [1]      → add_table_of_content()   (edit in-place)
-        #   [2..39]  → content slides           (lấy tuần tự qua _next_slide())
-        #   [40]     → add_end_slide()          (edit in-place)
+        #   [2..N-2] → content slides           (lấy tuần tự qua _next_slide())
+        #   [N-1]    → add_end_slide()          (edit in-place)
 
         # Con trỏ slide content — bắt đầu từ index 2
         self._slide_cursor = 2
+        self._end_slide_index = len(self.prs.slides) - 1
 
         # Màu chủ đạo
         self.primary_red = RGBColor(0xB5, 0x1F, 0x09)
@@ -39,9 +40,9 @@ class PPTGenerator:
         tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
 
     def _next_slide(self):
-        """Trả về slide tiếp theo trong vùng content (index 2 → 39), tự tăng cursor."""
+        """Trả về slide tiếp theo trong vùng content, tự tăng cursor."""
         idx = self._slide_cursor
-        if idx > 39:
+        if idx >= self._end_slide_index:
             raise IndexError(
                 f"Đã dùng hết slide template content (cursor={idx}). "
                 "Tăng số slide trong template hoặc giảm dữ liệu."
@@ -1115,9 +1116,9 @@ class PPTGenerator:
             self._set_text_exact_style(right_shape, "02. BÀI KHÓA", "Anton", font_size=56, color="FCF1D4")
 
     def add_end_slide(self):
-        """Slide [40] — edit in-place."""
+        """Slide cuối cùng — edit in-place."""
         lesson = self.data.get("lesson_info", {})
-        slide  = self.prs.slides[40]
+        slide  = self.prs.slides[self._end_slide_index]
         shapes = self._get_all_shapes(slide.shapes)
 
         title_shape    = self._find_shape_by_name(shapes, "TextBox 10")
@@ -1732,17 +1733,18 @@ class PPTGenerator:
 
         self.add_end_slide()
 
-        # Xóa các slide content thừa (từ _slide_cursor đến 39)
+        # Xóa các slide content thừa
         # Lưu ý: Cần xóa ngược từ dưới lên để không làm sai lệch index của các slide còn lại
-        for i in range(39, self._slide_cursor - 1, -1):
+        for i in range(self._end_slide_index - 1, self._slide_cursor - 1, -1):
             rId = self.prs.slides._sldIdLst[i].rId
             self.prs.part.drop_rel(rId)
             del self.prs.slides._sldIdLst[i]
 
         used = self._slide_cursor - 2
-        print(f"✅ Đã dùng {used} / 38 slide content "
+        total_content = self._end_slide_index - 2
+        print(f"✅ Đã dùng {used} / {total_content} slide content "
               f"(index 2–{self._slide_cursor - 1}). "
-              f"Đã xóa {38 - used} slide thừa.")
+              f"Đã xóa {total_content - used} slide thừa.")
 
     def save(self, output_path: str):
         self.prs.save(output_path)
@@ -1756,8 +1758,8 @@ if __name__ == "__main__":
     # template_path = os.path.join(base_dir, "resources", "ppt_templates", "HSK1 Bài Khóa template.pptx")
     # json_path     = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.json")
     template_path = r"D:\Edmicro\Tools\create_hsk\dist\resources\ppt_templates\HSK Bài Khóa template.pptx"
-    json_path = r"D:\Edmicro\Tools\create_hsk\dist\output\ppt_hsk\Bài 1_她请我们吃了北京烤鸭_bk.json"
-    output_path   = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.pptx")
+    json_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\Bài 5 这样的照片才好看_bk.json"
+    output_path   = os.path.join(base_dir, "hsk_ppt", "HSK3_BK_test_output.pptx")
 
     gen = PPTGenerator(template_path, json_path)
     gen.build()
