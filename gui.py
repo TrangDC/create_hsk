@@ -4,6 +4,11 @@ import subprocess
 import traceback
 from dotenv import load_dotenv
 import json
+from hsk_ppt.test_extract_json_bk import process_full_hsk_lesson
+from hsk_ppt.test_extract_json_grammar import process_grammar_lesson
+from hsk_ppt.prepare_images import prepare_images_for_json
+from hsk_ppt.test_generate_ppt_bk import PPTGenerator
+from hsk_ppt.test_generate_ppt_grammar import GrammarPPTGenerator
 
 # ==========================================
 # SUPPRESS SUBPROCESS WINDOWS GLOBALLY
@@ -729,10 +734,8 @@ class PPTGeneratorWorker(QObject):
 
     def run(self):
         try:
-            import os
-            import sys
-            import traceback
-            base_dir = os.path.dirname(os.path.abspath(__file__))
+            # Lấy đường dẫn thư mục từ file executable để đảm bảo import đúng module trong hsk_ppt
+            base_dir = os.path.dirname(sys.executable) 
             
             # Đảm bảo import được module trong hsk_ppt
             if base_dir not in sys.path:
@@ -741,20 +744,14 @@ class PPTGeneratorWorker(QObject):
             base_name = os.path.basename(self.pdf_path).replace('.pdf', '')
             bk_json_path = os.path.join(self.output_folder, f"{base_name}_bk.json")
             gr_json_path = os.path.join(self.output_folder, f"{base_name}_grammar.json")
-            bk_ppt_path = os.path.join(self.output_folder, f"{base_name}_Bai_Khoa.pptx")
-            gr_ppt_path = os.path.join(self.output_folder, f"{base_name}_Ngu_Phap.pptx")
-            
-            index_file = os.path.join(base_dir, "hsk_ppt", "template", "hsk_index.json")
-            bk_template = os.path.join(base_dir, "hsk_ppt", "template", "HSK1 Bài Khóa template.pptx")
-            gr_template = os.path.join(base_dir, "hsk_ppt", "template", "HSK1 Ngữ pháp template.pptx")
-            bk_prompt = os.path.join(base_dir, "hsk_ppt", "prompts", "Prompt_Bai_Khoa_1_bai.txt")
-            gr_prompt = os.path.join(base_dir, "hsk_ppt", "prompts", "Prompt_Ngu_Phap_New.txt")
+            bk_ppt_path = os.path.join(self.output_folder, f"{base_name}_{self.hsk_level}_Bai_Khoa.pptx")
+            gr_ppt_path = os.path.join(self.output_folder, f"{base_name}_{self.hsk_level}_Ngu_Phap.pptx")
 
-            from hsk_ppt.test_extract_json_bk import process_full_hsk_lesson
-            from hsk_ppt.test_extract_json_grammar import process_grammar_lesson
-            from hsk_ppt.prepare_images import prepare_images_for_json
-            from hsk_ppt.test_generate_ppt_bk import PPTGenerator
-            from hsk_ppt.test_generate_ppt_grammar import GrammarPPTGenerator
+            index_file = os.path.join(base_dir, "resources", "ppt_templates", "hsk_index.json")
+            bk_template = os.path.join(base_dir, "resources", "ppt_templates", "HSK Bài Khóa template.pptx")
+            gr_template = os.path.join(base_dir, "resources", "ppt_templates", "HSK Ngữ pháp template.pptx")
+            bk_prompt = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Bai_Khoa.txt")
+            gr_prompt = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Ngu_Phap.txt")
             
             with open(bk_prompt, 'r', encoding='utf-8') as f:
                 bk_prompt_text = f.read()

@@ -317,7 +317,8 @@ class PPTGenerator:
             return
 
         slide = self._next_slide()
-        flower_icon_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\images\flower_point.png"
+        import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
 
         # 1. TIÊU ĐỀ CHÍNH
         title_width, title_height = Cm(20.14), Cm(2.67)
@@ -419,7 +420,8 @@ class PPTGenerator:
         Render layout cho cấu trúc ngữ pháp có công thức (grammar_formula).
         """
         slide = self._next_slide()
-        flower_icon_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\images\flower_point.png"
+        import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
         
         # 1. TIÊU ĐỀ CHÍNH (Hội thoại X / Đoạn văn Y)
         title_width, title_height = Cm(20.14), Cm(2.67)
@@ -572,7 +574,8 @@ class PPTGenerator:
         - Slide 2: Bảng so sánh
         - Slide 3: Lưu ý & Ví dụ
         """
-        flower_icon_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\images\flower_point.png"
+        import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
         font_size_main = 32 # 406400 EMUs
 
         # Hàm bổ trợ: In đậm phần trước dấu hai chấm (:)
@@ -810,7 +813,8 @@ class PPTGenerator:
         Render layout So sánh từ (word_comparison).
         Tích hợp Type Checking để chống lỗi AI trả về chuỗi (str) thay vì object (dict).
         """
-        flower_icon_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\images\flower_point.png"
+        import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
         font_size_main = 32 # 406400 EMUs
         
         # --- HÀM BỔ TRỢ ---
@@ -950,6 +954,7 @@ class PPTGenerator:
                     else:
                         img_box = slide2.shapes.add_textbox(l_img, img_y, img_w_h, img_w_h)
                         img_box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+                        img_box.line.color.rgb = self.hex_to_rgb_color("CCCCCC")
                         self._set_text_exact_style(img_box, img_desc, font_name="Arial", font_size=14, color="999999", align="center")
 
                     txt_box = slide2.shapes.add_textbox(l_txt, txt_y, w_txt, h_txt)
@@ -979,6 +984,7 @@ class PPTGenerator:
         # =========================================================
         # SLIDE 3 (Và 4): CHI TIẾT ĐIỂM KHÁC NHAU & MẸO NHỚ
         # =========================================================
+        # Bổ sung thêm ảnh do differences bây giờ cũng có local_image_path, image_description để tăng tính trực quan
         differences = data.get("differences",[])
         memory_tip = data.get("memory_tip", "")
         num_diffs = len(differences)
@@ -1153,7 +1159,8 @@ class PPTGenerator:
         
         if len(hz_list) == 0: return
 
-        flower_icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images", "flower_point.png")
+        import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
         section_title = sec.get("section_title", "Hội thoại")
         
         # 2. KIỂM TRA CHẾ ĐỘ: LÀ ĐOẠN VĂN HAY HỘI THOẠI?
@@ -1207,7 +1214,8 @@ class PPTGenerator:
                 
                 # Tọa độ thay đổi tùy theo slide đầu tiên hay các slide tiếp theo của đoạn văn
                 if chunk_idx == 0:
-                    img_left, img_top = Cm(9.6), Cm(6.63)
+                    # Dịch ảnh sang trái khỏi vùng chữ
+                    img_left, img_top = Inches(3.78) - Cm(7.31) - Cm(0.8), Cm(6.63)
                 else:
                     img_left, img_top = Cm(21.28), Cm(20.52)
                     
@@ -1423,8 +1431,11 @@ class PPTGenerator:
             # Màu sắc
             color_gray = "545454"
             color_red = "A40400"
-            color_black = "000000"
             color_green = "29741D" # Màu xanh lá highlight
+            color_black = "000000"
+
+            import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
 
             # ==========================================
             # C. RENDER TỪNG TỪ VỰNG TRONG CHUNK
@@ -1561,7 +1572,6 @@ class PPTGenerator:
                 data = extra.get("word_comparison", {})
                 self._render_word_comparison_layout(section_title, data)            
             
-
     def add_exercise_slide(self, sec: dict):
         """
         Sinh các slide Luyện tập dựa trên mảng exercise trong JSON.
@@ -1588,6 +1598,17 @@ class PPTGenerator:
                 color="FCF1D4", bold=False, align="center"
             )
 
+            def add_ex_para(text, is_bold=False, color="000000"):
+                p = tf.add_paragraph() if len(tf.paragraphs[0].runs) > 0 else tf.paragraphs[0]
+                p.space_after = Pt(9) # Khoảng cách giữa các dòng bài tập
+                run = p.add_run()
+                run.text = text
+                run.font.name = "Muli Bold" if is_bold else "Muli"
+                run.font.size = Pt(main_font_size)
+                run.font.bold = is_bold
+                run.font.color.rgb = self.hex_to_rgb_color(color)
+                return p
+
             # ==========================================
             # B. KHUNG NỘI DUNG CHÍNH (Textbox chung cho cả 3 dạng)
             # ==========================================
@@ -1603,20 +1624,14 @@ class PPTGenerator:
             tf.margin_top = tf.margin_bottom = tf.margin_left = tf.margin_right = 0
 
             # Giảm nhẹ font size và khoảng cách dòng để đảm bảo không bị tràn chữ
-            main_font_size = 36 
+            main_font_size = 28
             color_black = "000000"
             color_red = "A40400"
+            color_green = "29741D" # Màu xanh lá (dành cho chữ Hán ví dụ)
 
-            def add_ex_para(text, is_bold=False, color="000000"):
-                p = tf.add_paragraph() if len(tf.paragraphs[0].runs) > 0 else tf.paragraphs[0]
-                p.space_after = Pt(9) # Khoảng cách giữa các dòng bài tập
-                run = p.add_run()
-                run.text = text
-                run.font.name = "Muli Bold" if is_bold else "Muli"
-                run.font.size = Pt(main_font_size)
-                run.font.bold = is_bold
-                run.font.color.rgb = self.hex_to_rgb_color(color)
-                return p
+            import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
+
 
             # ==========================================
             # C. XỬ LÝ THEO TỪNG DẠNG BÀI TẬP
@@ -1737,9 +1752,12 @@ class PPTGenerator:
 # MAIN
 # ================================================================
 if __name__ == "__main__":
-    template_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\template\HSK1 Bài Khóa template.pptx"
-    json_path     = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\HSK2_BK_test_output.json"
-    output_path   = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\HSK2_BK_test_output.pptx"
+    import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # template_path = os.path.join(base_dir, "resources", "ppt_templates", "HSK1 Bài Khóa template.pptx")
+    # json_path     = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.json")
+    template_path = r"D:\Edmicro\Tools\create_hsk\dist\resources\ppt_templates\HSK Bài Khóa template.pptx"
+    json_path = r"D:\Edmicro\Tools\create_hsk\dist\output\ppt_hsk\Bài 1_她请我们吃了北京烤鸭_bk.json"
+    output_path   = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.pptx")
 
     gen = PPTGenerator(template_path, json_path)
     gen.build()

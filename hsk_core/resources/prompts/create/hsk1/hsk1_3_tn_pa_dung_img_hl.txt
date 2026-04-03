@@ -7,6 +7,8 @@ Hãy tạo CÂU HỎI "{matrix_name}" với các yêu cầu cực kỳ nghiêm n
 - Đáp án `correct_answer` phải là số thứ tự (từ 1 đến {number}) của ảnh khớp với đoạn hội thoại.
 - LƯU Ý QUAN TRỌNG: CÁC MÔ TẢ HÌNH ẢNH (NẾU CÓ) TUYỆT ĐỐI KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN.
 
+- LƯU Ý QUAN TRỌNG: Toàn bộ nội dung hội thoại (script hoặc dialogue) phải được viết HOÀN TOÀN BẰNG TIẾNG TRUNG GIẢN THỂ, TUYỆT ĐỐI KHÔNG chèn lẫn tiếng Việt hay tiếng Anh.
+
 Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
 {rules_text}
 

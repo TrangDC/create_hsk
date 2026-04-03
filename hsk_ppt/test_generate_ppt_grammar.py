@@ -2,6 +2,7 @@ import json
 import math
 import os
 import re
+import sys
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.util import Pt, Inches, Cm
@@ -308,8 +309,11 @@ class GrammarPPTGenerator:
         default_box_left = Cm(15.56)
         
         # Đường dẫn tới file ảnh khung (Sẽ báo lỗi nếu chưa có)
-        img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images", "title_box_image.png")
+        base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        img_path = os.path.join(base_dir, "resources", "images", "ppt", "title_box_image.png")
+        print(f"Đang kiểm tra ảnh TOC tại: {img_path}")
         has_img = os.path.exists(img_path)
+        print(f"Ảnh TOC tồn tại: {has_img}")
 
         # Cấu hình riêng cho từng trường hợp số lượng chủ điểm
         if num_items == 4:
@@ -607,7 +611,9 @@ class GrammarPPTGenerator:
         exercises = point.get("exercises", [])
 
         # Định nghĩa path ảnh hoa
-        flower_icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images", "flower_point.png")
+        # Define base directory correctly by walking up from this script
+        base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        flower_icon_path = os.path.join(base_dir, "resources", "images", "ppt", "flower_point.png")
 
         # --- 1. RENDER STRUCTURES (CẤU TRÚC/CÁCH DÙNG/VÍ DỤ) ---
         for struct in structures:
@@ -885,13 +891,12 @@ class GrammarPPTGenerator:
 # MAIN
 # ================================================================
 if __name__ == "__main__":
-    template_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\template\HSK1 Ngữ pháp template.pptx"
-    json_path     = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\HSK2_Grammar_test_output.json"
-    output_path   = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\HSK2_Grammar_generated.pptx"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    template_path = os.path.join(base_dir, "resources", "ppt_templates", "HSK1 Ngữ pháp template.pptx")
+    # json_path     = os.path.join(base_dir, "hsk_ppt", "HSK2_Grammar_test_output.json")
+    json_path = r"E:\Edmicro\create_hsk\output\ppt_hsk\Bài 1 我们去机场接你们_grammar.json"
+    output_path   = os.path.join(base_dir, "hsk_ppt", "HSK2_Grammar_generated.pptx")
 
-    if os.path.exists(json_path) and os.path.exists(template_path):
-        gen = GrammarPPTGenerator(template_path, json_path)
-        gen.build()
-        gen.save(output_path)
-    else:
-        print("Vui lòng đảm bảo file template và json tồn tại.")
+    gen = GrammarPPTGenerator(template_path, json_path)
+    gen.build()
+    gen.save(output_path)

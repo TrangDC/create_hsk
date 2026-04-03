@@ -15,3 +15,5 @@ Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON đượ
 1.  **explanations**: Tạo một danh sách gồm đúng 4 đối tượng lời giải, mỗi đối tượng tương ứng với một chỗ trống theo thứ tự.
     -   Trong mỗi đối tượng, cung cấp `analysis_paragraph` (phân tích chi tiết tại sao từ đúng lại phù hợp nhất) và `options_list` (danh sách 4 lựa chọn kèm bản dịch tiếng Việt của chúng).
 2.  **shared_translation**: Cung cấp MỘT bản dịch duy nhất cho đoạn văn ĐÃ HOÀN CHỈNH.
+
+LƯU Ý QUAN TRỌNG VỀ TỪ VỰNG: Khi dịch hoặc giải thích nội dung hội thoại giữa 男 và 女, BẮT BUỘC phải gọi là `người đàn ông` và `người phụ nữ`, TUYỆT ĐỐI KHÔNG dùng từ `người nam` hay `người nữ`.

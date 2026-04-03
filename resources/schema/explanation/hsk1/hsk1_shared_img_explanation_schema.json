@@ -4,7 +4,7 @@
   "properties": {
     "analysis_paragraph": {
       "type": "string",
-      "description": "Đoạn văn phân tích logic bằng tiếng Việt."
+      "description": "Đoạn văn phân tích logic bằng tiếng Việt. LƯU Ý: Khi nhắc đến '男' phải dịch là 'người đàn ông', '女' là 'người phụ nữ' (Tuyệt đối không dùng 'người nam', 'người nữ')."
     },
     "context_block": {
       "type": "object",
@@ -17,7 +17,7 @@
             "type": "object",
             "properties": {
               "speaker": { "type": "string", "description": "Người nói (ví dụ: '男', '女')." },
-              "chinese_text": { "type": "string", "description": "Nội dung lời thoại tiếng Trung." },
+              "chinese_text": { "type": "string", "description": "Nội dung lời thoại tiếng Trung. YÊU CẦU: Giữ nguyên y hệt câu gốc, KHÔNG chèn lẫn tiếng Việt hay tiếng Anh." },
               "pinyin": { "type": "string", "description": "Phiên âm Pinyin." }
             },
             "required": ["speaker", "chinese_text", "pinyin"]

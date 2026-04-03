@@ -10,6 +10,8 @@ Hãy tạo CÂU HỎI "{matrix_name}" với các yêu cầu cực kỳ nghiêm n
     + Hãy điền đầy đủ nội dung vào mảng `lines` theo đúng cấu trúc trên.
 - Đáp án (`correct_answer`) phải là chữ cái in hoa (A, B, C...) của từ vựng đúng.
 
+- LƯU Ý QUAN TRỌNG: Toàn bộ nội dung hội thoại (script hoặc dialogue) phải được viết HOÀN TOÀN BẰNG TIẾNG TRUNG GIẢN THỂ, TUYỆT ĐỐI KHÔNG chèn lẫn tiếng Việt hay tiếng Anh.
+
 Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
 {rules_text}
 

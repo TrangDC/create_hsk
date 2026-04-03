@@ -13,4 +13,5 @@ Bạn là một giáo viên tiếng Trung chuyên nghiệp. Nhiệm vụ của b
 2.  **Chi tiết hóa lựa chọn (`options_list`):** Điền đầy đủ thông tin vào mảng `options_list`, bao gồm cả việc **dịch nghĩa tiếng Việt** cho mỗi lựa chọn và đặt cờ `is_correct` là true cho đáp án đúng.
 3.  **Cấu trúc Phụ đề (`dialogue_block`):** Gộp toàn bộ hội thoại và câu hỏi vào mảng `full_script`. Sử dụng "男", "女" cho người nói và "问" cho dòng câu hỏi.
 4.  **Cung cấp bản dịch (`translation_block`):** Cung cấp một bản dịch hoàn chỉnh của hội thoại và câu hỏi trong trường `vietnamese_translation`. Sử dụng "Nữ:", "Nam:", và "Câu hỏi:" để phân biệt các dòng.
-5.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.
+5.  **LƯU Ý QUAN TRỌNG VỀ TỪ VỰNG: Khi dịch hoặc giải thích nội dung hội thoại giữa 男 và 女, BẮT BUỘC phải gọi là `người đàn ông` và `người phụ nữ`, TUYỆT ĐỐI KHÔNG dùng từ `người nam` hay `người nữ`.**
+4.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.

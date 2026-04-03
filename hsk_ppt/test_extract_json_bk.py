@@ -83,7 +83,7 @@ def get_section_schema():
                                 "usage": {"type": "string"},
                                 "examples": {
                                     "type": "array",
-                                    "description": "Danh sách ví dụ, tối đa 3 ví dụ",
+                                    "description": "Danh sách ví dụ, tối đa 2 ví dụ",
                                     "items": {
                                         "type": "object",
                                         "properties": {
@@ -122,7 +122,7 @@ def get_section_schema():
                                 "important_notes": {"type": "array", "items": {"type": "string"}, "description": "Lưu ý quan trọng, tối đa 3 items"},
                                 "examples": {
                                     "type": "array",
-                                    "description": "Danh sách ví dụ, tối đa 3 ví dụ",
+                                    "description": "Danh sách ví dụ, tối đa 2 ví dụ",
                                     "items": {
                                         "type": "object",
                                         "properties": {
@@ -146,7 +146,7 @@ def get_section_schema():
                                 "category_desc": {"type": "string"},
                                 "items": {
                                     "type": "array",
-                                    "description": "Danh sách các mục, tối đa 6 mục",
+                                    "description": "Danh sách các mục, tối đa 4 mục",
                                     "items": {
                                         "type": "object",
                                         "properties": {
@@ -171,7 +171,7 @@ def get_section_schema():
                                 "meaning": {"type": "string"},
                                 "derived_words": {
                                     "type": "array",
-                                    "description": "Danh sách từ phái sinh, tối đa 5 từ",
+                                    "description": "Danh sách từ phái sinh, tối đa 4 từ",
                                     "items": {
                                         "type": "object",
                                         "properties": {
@@ -256,7 +256,10 @@ def get_section_schema():
                                             "pinyin": {"type": "string"},
                                             "focus": {"type": "string"},
                                             "context": {"type": "string"},
-                                            "word_type": {"type": "string"}
+                                            "word_type": {"type": "string"},
+                                            "image_description": {"type": "string",
+                                                                  "description": "Mô tả chi tiết bằng tiếng Anh (prompt) để AI vẽ ảnh minh họa cho điểm khác biệt này."
+                                            }
                                         }
                                     }
                                 },
@@ -360,11 +363,54 @@ def extract_single_section(client: VertexClient, pdf_path: str, prompt_text: str
         print(f"Lỗi parse JSON từ AI: {resp}")
         raise ValueError(f"AI trả về JSON lỗi: {e}")
 
+def _get_grammar_blacklist(level: str, pdf_filename: str) -> list:
+    """Đọc file hsk_index.json và trả về danh sách ngữ pháp của bài học hiện tại."""
+    try:
+        base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        index_path = os.path.join(base_dir, "resources", "ppt_templates", "hsk_index.json")
+        
+        if not os.path.exists(index_path):
+            print("⚠️ Không tìm thấy hsk_index.json, bỏ qua blacklist ngữ pháp.")
+            return []
+            
+        with open(index_path, 'r', encoding='utf-8') as f:
+            index_data = json.load(f)
+            
+        # Tìm số bài (lesson number) từ tên file PDF (VD: Bài 4_...pdf -> 4)
+        match = re.search(r'Bài\s*(\d+)', pdf_filename, re.IGNORECASE)
+        if not match:
+            print(f"⚠️ Không trích xuất được số bài từ tên file PDF: {pdf_filename}. Bỏ qua blacklist ngữ pháp.")
+            return []
+            
+        lesson_num = int(match.group(1))
+        
+        level_upper = level.upper()
+        hsk_data = index_data.get("hsk_full_curriculum", {}).get(level_upper, [])
+        
+        # Tìm danh sách ngữ pháp của bài học tương ứng
+        grammar_list = []
+        for lesson in hsk_data:
+            if lesson.get("lesson") == lesson_num:
+                for grammar_item in lesson.get("grammar", []):
+                    grammar_list.append(grammar_item.get("hz", ""))
+                break                
+                
+        return grammar_list
+    except Exception as e:
+        print(f"⚠️ Lỗi khi lấy blacklist ngữ pháp: {e}")
+        return []
+
 def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_json_path: str):
     """Hàm điều phối: Gọi AI nhiều lần và gom data lại"""
     
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"Không tìm thấy file PDF tại: {pdf_path}")
+
+    # Lấy danh sách ngữ pháp cấm sinh (từ hsk_index.json)
+    pdf_filename = os.path.basename(pdf_path)
+    grammar_blacklist = _get_grammar_blacklist(level, pdf_filename)
+    grammar_blacklist_str = "\n- ".join(grammar_blacklist) if grammar_blacklist else "Không có"
+    print(f"📋 Blacklist ngữ pháp (lấy từ hsk_index): \n- {grammar_blacklist_str}")
 
     # Xác định số lần lặp dựa trên Level
     level = level.upper()
@@ -382,6 +428,8 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
         "sections":[]
     }
     
+    used_extra_knowledge = []
+    
     for i in range(1, total_iterations + 1):
         # Xác định tên section
         if i <= 3:
@@ -394,6 +442,24 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
         try:
             # Format prompt (Thay thế placeholder {level}, {number}, {section_name})
             formatted_prompt = base_prompt.format(level=level, number=i, section_name=section_name)
+            
+            # Thêm constraints chống trùng lặp vào cuối prompt
+            used_knowledge_str = "\n- ".join(used_extra_knowledge) if used_extra_knowledge else "Chưa có"
+            constraints_text = f"""
+
+--- RÀNG BUỘC ĐẶC BIỆT KHI SINH 'extra_knowledge' (KIẾN THỨC LIÊN QUAN) ---
+1. TUYỆT ĐỐI KHÔNG sinh các kiến thức liên quan chính đến chủ điểm ngữ pháp sau đây (vì chúng đã có sẵn trong sách và sẽ được học riêng):
+- {grammar_blacklist_str}
+
+2. TUYỆT ĐỐI KHÔNG sinh lại các chủ điểm kiến thức sau đây (vì chúng đã được sinh ở các hội thoại trước):
+- {used_knowledge_str}
+
+Mục tiêu của 'extra_knowledge' là:
+ + Sinh kiến thức MỚI được rút ra từ thực tiễn ứng dụng ngoài đời sống.
+ + Có nội dung liên quan tới chủ đề từ vựng, hội thoại của section hiện tại nhưng KHÔNG TRÙNG LẶP với nội dung trong sách giáo khoa.
+ + Mở rộng từ vựng hoặc nâng cao kiến thức KHÁC với nội dung chính của bài học.
+"""
+            formatted_prompt += constraints_text
         
         except Exception as e:
             print(f"❌ Lỗi khi định dạng prompt cho section {section_name}: {e}")
@@ -402,6 +468,20 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
         try:
             # Gọi AI cho 1 section
             section_data = extract_single_section(client, pdf_path, formatted_prompt)
+            
+            # Cập nhật danh sách kiến thức đã sử dụng
+            if "extra_knowledge" in section_data:
+                for knowledge_item in section_data["extra_knowledge"]:
+                    # Tìm title tuỳ theo loại kiến thức
+                    k_type = knowledge_item.get("type", "")
+                    title = ""
+                    if k_type and k_type in knowledge_item:
+                        title = knowledge_item[k_type].get("title", "")
+                    elif "root_word" in knowledge_item.get("word_derivatives", {}):
+                        title = "Phái sinh từ " + knowledge_item["word_derivatives"]["root_word"]
+                    
+                    if title:
+                        used_extra_knowledge.append(title)
             
             # Nếu là vòng lặp đầu tiên, lấy thông tin bài học (lesson_info)
             if i == 1 and "lesson_info" in section_data:
@@ -430,24 +510,21 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
     return final_json
 
 if __name__ == "__main__":
-    # Thay đổi đường dẫn tương ứng với môi trường của bạn để test
-    PDF_FILE_PATH = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\input\HSK2\Bài 4_你穿红色的很好看.pdf"
-    PROMPT_FILE_PATH = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\prompts\Prompt_Bai_Khoa_1_bai.txt"
-    OUTPUT_JSON_FILE = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\HSK2_BK_test_output.json"
-
-    # Định nghĩa cấp độ muốn chạy (HSK1, HSK2, HSK3)
-    LEVEL = 'HSK2' 
-
-    try:
-        with open(PROMPT_FILE_PATH, 'r', encoding='utf-8') as f:
-            base_prompt_text = f.read()
+    # Tham số
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    PDF_FILE_PATH = os.path.join(base_dir, "hsk_ppt", "input", "HSK2", "Bài 4_你穿红色的很好看.pdf")
+    PROMPT_FILE_PATH = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Bai_Khoa.txt")
+    OUTPUT_JSON_FILE = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.json")
+    HSK_LEVEL = "HSK2"
+    
+    with open(PROMPT_FILE_PATH, 'r', encoding='utf-8') as f:
+        base_prompt_text = f.read()
             
-        result = process_full_hsk_lesson(
-            pdf_path=PDF_FILE_PATH, 
-            base_prompt=base_prompt_text, 
-            level=LEVEL,
-            output_json_path=OUTPUT_JSON_FILE
-        )
+    result = process_full_hsk_lesson(
+        pdf_path=PDF_FILE_PATH, 
+        base_prompt=base_prompt_text, 
+        level=HSK_LEVEL,
+        output_json_path=OUTPUT_JSON_FILE
+    )
         
-    except Exception as e:
-        print(f"\n❌ LỖI CHUNG: {e}")
+    print(f"\n✅ THÀNH CÔNG! Đã xử lý xong file PDF: {PDF_FILE_PATH}")

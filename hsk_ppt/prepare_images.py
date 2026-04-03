@@ -63,9 +63,9 @@ def prepare_images_for_json(json_path, output_json_path=None):
     if not output_json_path:
         output_json_path = json_path # Ghi đè file gốc nếu không chỉ định
         
-    # Tạo thư mục chứa ảnh: hsk_ppt/images/generated/
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    output_dir = os.path.join(base_dir, "images", "generated")
+    # Tạo thư mục chứa ảnh: resources/images/ppt/generated/
+    base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    output_dir = os.path.join(base_dir, "resources", "images", "ppt", "generated")
     os.makedirs(output_dir, exist_ok=True)
     
     print(f"\n--- ĐANG TIỀN XỬ LÝ ẢNH CHO {os.path.basename(json_path)} ---")

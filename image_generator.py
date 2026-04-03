@@ -103,13 +103,14 @@ def extract_pdf_name_from_excel(excel_path: str) -> str:
         # Nếu không có dấu gạch dưới, lấy nguyên tên
         return stem
 
-def extract_image_prompts(cell_content: str) -> List[str]:
+def extract_image_prompts(cell_content) -> List[str]:
     """Trích xuất prompt từ dòng bắt đầu bằng 'Ảnh:'"""
-    if not cell_content or not isinstance(cell_content, str):
+    if cell_content is None:
         return []
     
+    cell_text = str(cell_content)
     prompts = []
-    lines = cell_content.split('\n')
+    lines = cell_text.split('\n')
     for line in lines:
         if "Ảnh:" in line or "Ảnh :" in line:
             keyword = "Ảnh:" if "Ảnh:" in line else "Ảnh :"
@@ -126,13 +127,12 @@ def extract_image_prompts(cell_content: str) -> List[str]:
 # Logic: Vẽ -> Upload Drive -> Thay thế dòng 'Ảnh:' bằng Link
 # ==========================================
 
-def update_topik_cell_inplace(excel_path: str, sheet_name: str, row_number: int, col_number: int, original_text: str, image_links: List[str]):
+def update_topik_cell_inplace(workbook, sheet_name: str, row_number: int, col_number: int, original_text, image_links: List[str]):
     """Ghi đè ô Excel: Thay thế dòng 'Ảnh: ...' bằng Link Drive"""
     try:
-        workbook = load_workbook(excel_path)
         sheet = workbook[sheet_name]
         
-        lines = original_text.split('\n')
+        lines = str(original_text).split('\n')
         new_lines = []
         link_idx = 0
         
@@ -146,14 +146,12 @@ def update_topik_cell_inplace(excel_path: str, sheet_name: str, row_number: int,
         final_text = "\n".join(new_lines)
         sheet.cell(row=row_number, column=col_number, value=final_text)
         
-        workbook.save(excel_path)
-        workbook.close()
         return True
     except Exception as e:
         print(f"❌ [TOPIK] Lỗi update Excel: {e}")
         return False
 
-def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGenerationService, 
+def process_topik_sheet(sheet_name: str, workbook, img_service: ImageGenerationService, 
                         output_dir: Path, parent_drive_id: str, pdf_name: str, sheet_number: int):
     """
     Xử lý sheet TOPIK với logic đặt tên file mới: {pdf_name}_S{sheet_number}_{question_num}{suffix}.png
@@ -176,8 +174,7 @@ def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGene
         sheet_drive_id = create_subfolder(clean_sheet_name, parent_drive_id)
         if not sheet_drive_id: sheet_drive_id = parent_drive_id
 
-        wb = load_workbook(excel_path, read_only=True)
-        sheet = wb[sheet_name]
+        sheet = workbook[sheet_name]
         jobs = []
         for i, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
             if col_idx - 1 < len(row):
@@ -185,7 +182,6 @@ def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGene
                 prompts = extract_image_prompts(val)
                 if prompts:
                     jobs.append({"row": i, "val": val, "prompts": prompts})
-        wb.close()
 
         for job in jobs:
             row_num = job['row']
@@ -231,7 +227,7 @@ def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGene
                     links.append("(Lỗi upload)")
             
             if links:
-                update_topik_cell_inplace(excel_path, sheet_name, row_num, col_idx, job['val'], links)
+                update_topik_cell_inplace(workbook, sheet_name, row_num, col_idx, job['val'], links)
                 
     except Exception as e:
         print(f"❌ [TOPIK] Lỗi xử lý sheet {sheet_name}: {e}")
@@ -243,23 +239,20 @@ def process_topik_sheet(sheet_name: str, excel_path: str, img_service: ImageGene
 # Logic: Vẽ -> Lưu Local -> Ghi tên file vào cột K
 # ==========================================
 
-def update_hsk_col_k(excel_path: str, sheet_name: str, row_number: int, image_filenames: List[str]):
+def update_hsk_col_k(workbook, sheet_name: str, row_number: int, image_filenames: List[str]):
     """Ghi tên file ảnh vào cột K (Cột 11)"""
     try:
-        workbook = load_workbook(excel_path)
         sheet = workbook[sheet_name]
         
         names_str = " - ".join([os.path.splitext(n)[0] for n in image_filenames])
         sheet.cell(row=row_number, column=11, value=names_str)
         
-        workbook.save(excel_path)
-        workbook.close()
         return True
     except Exception as e:
         print(f"❌ [HSK] Lỗi update Excel: {e}")
         return False
 
-def process_hsk_sheet(sheet_name: str, excel_path: str, img_service: ImageGenerationService, output_dir: Path):
+def process_hsk_sheet(sheet_name: str, workbook, img_service: ImageGenerationService, output_dir: Path):
     """Xử lý giữ nguyên logic cũ cho các sheet HSK"""
     print(f"🟠 [HSK] Đang xử lý sheet: {sheet_name}")
     
@@ -274,8 +267,7 @@ def process_hsk_sheet(sheet_name: str, excel_path: str, img_service: ImageGenera
         col_idx = 6
 
     try:
-        wb = load_workbook(excel_path, read_only=True)
-        sheet = wb[sheet_name]
+        sheet = workbook[sheet_name]
         
         jobs = []
         for i, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
@@ -284,7 +276,6 @@ def process_hsk_sheet(sheet_name: str, excel_path: str, img_service: ImageGenera
                 prompts = extract_image_prompts(val)
                 if prompts:
                     jobs.append({"row": i, "prompts": prompts})
-        wb.close()
 
         for job in jobs:
             row_num = job['row']
@@ -315,7 +306,7 @@ def process_hsk_sheet(sheet_name: str, excel_path: str, img_service: ImageGenera
             
             # Ghi vào cột K
             if created_files:
-                update_hsk_col_k(excel_path, sheet_name, row_num, created_files)
+                update_hsk_col_k(workbook, sheet_name, row_num, created_files)
 
     except Exception as e:
         print(f"❌ [HSK] Lỗi xử lý sheet {sheet_name}: {e}")
@@ -325,8 +316,9 @@ def process_hsk_sheet(sheet_name: str, excel_path: str, img_service: ImageGenera
 # ==========================================
 
 def process_excel_file(excel_path: str) -> str | None:
-    # Thư mục gốc chứa ảnh
-    output_dir = get_output_path("IMG_CREATE_BY_AI")
+    # Thư mục gốc chứa ảnh - tạo ở cùng thư mục với file excel
+    excel_dir = Path(excel_path).parent
+    output_dir = excel_dir / "IMG_CREATE_BY_AI"
     output_dir.mkdir(exist_ok=True)
     
     # Xóa ảnh cũ để tránh lẫn lộn
@@ -337,38 +329,47 @@ def process_excel_file(excel_path: str) -> str | None:
     if not img_service.client: return None
     
     try:
+        print("📁 Đang đọc file Excel (giữ nguyên định dạng)...")
+        # Sử dụng rich_text=True để giữ lại toàn bộ định dạng của các ô (in đậm, in nghiêng, màu...)
+        wb = load_workbook(excel_path, rich_text=True)
+        all_sheets = wb.sheetnames
+        
         # Lấy tên PDF gốc để đặt tên file ảnh
         pdf_name = extract_pdf_name_from_excel(excel_path)
         print(f"📄 Tên PDF gốc trích xuất được: {pdf_name}")
 
-        # Tạo subfolder trên Drive
-        excel_filename = Path(excel_path).stem
-        date_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-        drive_subfolder_name = f"{excel_filename}_{date_str}"
-        
-        print(f"📂 Tạo subfolder Drive: {drive_subfolder_name}")
-        subfolder_id = create_subfolder(drive_subfolder_name, DRIVE_FOLDER_ID)
-        if not subfolder_id: subfolder_id = DRIVE_FOLDER_ID # Fallback
-
-        wb = load_workbook(excel_path, read_only=True)
-        all_sheets = wb.sheetnames
-        wb.close()
-        
         topik_sheets = [s for s in all_sheets if s in TOPIK_TARGET_SHEETS]
         hsk_sheets = [s for s in all_sheets if "(img)" in s and s not in TOPIK_TARGET_SHEETS]
         
         if not topik_sheets and not hsk_sheets:
             print("⚠️ Không tìm thấy sheet nào cần xử lý.")
+            wb.close()
             return None
+
+        # Tạo subfolder trên Drive (chỉ khi có Topik sheet để tránh rác)
+        subfolder_id = None
+        if topik_sheets:
+            excel_filename = Path(excel_path).stem
+            date_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+            drive_subfolder_name = f"{excel_filename}_{date_str}"
+            
+            print(f"📂 Tạo subfolder Drive: {drive_subfolder_name}")
+            subfolder_id = create_subfolder(drive_subfolder_name, DRIVE_FOLDER_ID)
+            if not subfolder_id: subfolder_id = DRIVE_FOLDER_ID # Fallback
             
         # Xử lý TOPIK (Truyền thêm pdf_name)
         for sheet_idx, sheet in enumerate(topik_sheets, start=1):
-            process_topik_sheet(sheet, excel_path, img_service, output_dir, subfolder_id, pdf_name, sheet_idx)
+            process_topik_sheet(sheet, wb, img_service, output_dir, subfolder_id, pdf_name, sheet_idx)
             
         # Xử lý HSK (Logic cũ)
         for sheet in hsk_sheets:
-            process_hsk_sheet(sheet, excel_path, img_service, output_dir)
+            process_hsk_sheet(sheet, wb, img_service, output_dir)
             
+        # Lưu file duy nhất 1 lần ở cuối cùng để giảm thiểu rủi ro mất định dạng và tối ưu tốc độ
+        print("💾 Đang lưu thay đổi vào file Excel...")
+        wb.save(excel_path)
+        wb.close()
+        
         return str(output_dir)
 
     except Exception as e:

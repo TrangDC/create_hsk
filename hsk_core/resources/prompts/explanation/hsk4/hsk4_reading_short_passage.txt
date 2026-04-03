@@ -24,3 +24,5 @@ Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON đượ
     -   `passage_vietnamese`: Dịch TOÀN BỘ đoạn-văn sang tiếng Việt.
     -   `query_vietnamese_1`: Dịch Câu hỏi 1.
     -   `query_vietnamese_2`: Dịch Câu hỏi 2.
+
+LƯU Ý QUAN TRỌNG VỀ TỪ VỰNG: Khi dịch hoặc giải thích nội dung hội thoại giữa 男 và 女, BẮT BUỘC phải gọi là `người đàn ông` và `người phụ nữ`, TUYỆT ĐỐI KHÔNG dùng từ `người nam` hay `người nữ`.

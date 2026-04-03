@@ -16,8 +16,8 @@ class VertexAIConfig:
     """Cấu hình cho Vertex AI API"""
     def __init__(self):
         self.project_id = os.getenv("PROJECT_ID")
-        self.region = "global"  # Region mặc định
-        self.model_name = "gemini-3-flash-preview"  # Model mặc định
+        self.region = "us-central1"  # Region mặc định
+        self.model_name = "gemini-2.5-pro"  # Model mặc định
         self.credentials = None
         
         # Thiết lập credentials

@@ -244,13 +244,13 @@ def process_grammar_lesson(pdf_path: str, base_prompt: str, level: str, index_fi
     return final_json
 
 if __name__ == "__main__":
-    # ĐƯỜNG DẪN TEST
-    PDF_FILE_PATH = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\input\HSK2\Bài 4_你穿红色的很好看.pdf"
-    PROMPT_FILE_PATH = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\prompts\Prompt_Ngu_Phap_New.txt"
-    INDEX_FILE_PATH = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\template\hsk_index.json"
-    OUTPUT_JSON_FILE = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\HSK2_Grammar_test_output.json"
-
-    LEVEL = 'HSK2' 
+    # Các tham số file cần thiết
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    PDF_FILE_PATH = os.path.join(base_dir, "hsk_ppt", "input", "HSK2", "Bài 4_你穿红色的很好看.pdf")
+    PROMPT_FILE_PATH = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Ngu_Phap_New.txt")
+    INDEX_FILE_PATH = os.path.join(base_dir, "resources", "ppt_templates", "hsk_index.json")
+    OUTPUT_JSON_FILE = os.path.join(base_dir, "hsk_ppt", "HSK2_Grammar_test_output.json")
+    HSK_LEVEL = "HSK2"
 
     try:
         with open(PROMPT_FILE_PATH, 'r', encoding='utf-8') as f:
@@ -259,7 +259,7 @@ if __name__ == "__main__":
         result = process_grammar_lesson(
             pdf_path=PDF_FILE_PATH, 
             base_prompt=base_prompt_text, 
-            level=LEVEL,
+            level=HSK_LEVEL,
             index_file_path=INDEX_FILE_PATH,
             output_json_path=OUTPUT_JSON_FILE
         )
