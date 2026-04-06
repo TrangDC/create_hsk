@@ -18,7 +18,7 @@ class ImageGenerationService:
     def __init__(self):
         self.credentials = self._get_vertex_ai_credentials()
         self.project_id = PROJECT_ID
-        self.model_name = "gemini-3.1-flash-image-preview"
+        self.model_name = "gemini-3-pro-image-preview"
         self.location = "global"
         self.client = None
 
@@ -204,6 +204,72 @@ class ImageGenerationService:
                     return None
         return None
 
+    def generate_image_with_image_ref(self, prompt, image_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=3):
+        """
+        Tạo ảnh với tham chiếu từ file ảnh mẫu.
+        """
+        if not self.client:
+            return None
+
+        request_contents = []
+        
+        # Nếu có file ảnh mẫu
+        if image_path and os.path.exists(image_path):
+            try:
+                # Lấy đúng mime type
+                ext = os.path.splitext(image_path)[1].lower()
+                mime_type = "image/png" if ext == ".png" else "image/jpeg"
+                
+                with open(image_path, "rb") as f:
+                    image_bytes = f.read()
+                
+                request_contents.append(
+                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+                )
+                
+                final_prompt = (
+                    f"Follow the visual style and aesthetic of the attached reference image. "
+                    f"Action: {prompt}"
+                )
+            except Exception as e:
+                print(f"⚠️ Không thể đọc file ảnh mẫu: {e}")
+                final_prompt = prompt
+        else:
+            final_prompt = prompt
+
+        request_contents.append(types.Part.from_text(text=final_prompt))
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                if attempt > 1:
+                    print(f"   🔄 Thử lại lần {attempt}/{max_retries}...")
+                
+                # Gọi Model Image Generation
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=request_contents,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["IMAGE"],
+                        candidate_count=1,
+                        image_config=types.ImageConfig(aspect_ratio=aspect_ratio),
+                    )
+                )
+
+                if response.parts:
+                    for part in response.parts:
+                        if part.inline_data and part.inline_data.data:
+                            return part.inline_data.data
+
+                raise Exception("Empty image data from API")
+
+            except Exception as e:
+                print(f"      ❌ Lỗi sinh ảnh (Lần {attempt}): {str(e)}")
+                if attempt < max_retries:
+                    time.sleep(retry_delay)
+                else:
+                    return None
+        return None
+
     def generate_image_legacy(self, prompt, max_retries=3):
         """
         Tạo ảnh sử dụng Imagen Ultra (Cho HSK).
@@ -303,5 +369,5 @@ class ImageGenerationService:
 if __name__ == "__main__":
     service = ImageGenerationService()
     test_prompt = "Một con mèo đang ngủ."
-    img = service.generate_image(test_prompt)
+    img = service.generate_image_with_image_ref(test_prompt, aspect_ratio="2:1")
     if img: print("Thành công")

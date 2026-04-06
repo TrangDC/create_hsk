@@ -3,8 +3,10 @@ Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo c�
 Hãy tạo ra `{number}` câu hỏi sắp xếp câu bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK5.
 Cụ thể, hãy tạo ra `{number}` câu hỏi thuộc dạng "{matrix_name}":
 *   Mỗi câu hỏi gồm một danh sách các thành phần câu (`components`) bị xáo trộn.
-*   Số lượng thành phần trong mỗi câu hỏi phải từ 5 đến 7.
-*   Đáp án `correct_order` phải là một chuỗi số thể hiện thứ tự sắp xếp đúng của các thành phần (ví dụ: "24135").
+*   BẮT BUỘC một trong các thành phần (components) phải là DẤU KẾT THÚC CÂU (ví dụ: "。", "？" hoặc "！").
+*   Thành phần dấu kết thúc câu này cũng phải bị XÁO TRỘN ngẫu nhiên cùng các thành phần chữ Hán khác, KHÔNG ĐƯỢC luôn để ở vị trí cuối cùng trong mảng `components`.
+*   Số lượng thành phần trong mỗi câu hỏi phải từ 5 đến 7 (bao gồm cả thành phần dấu câu).
+*   Đáp án `correct_order` phải là một chuỗi số thể hiện thứ tự sắp xếp đúng của các thành phần (ví dụ: "24135"), với thành phần chứa dấu câu luôn nằm ở vị trí cuối cùng của chuỗi thứ tự đúng.
 
 Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
 {rules_text}
