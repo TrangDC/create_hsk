@@ -686,19 +686,18 @@ class AudioTTSWorker(QObject):
     error = pyqtSignal(str)
     progress = pyqtSignal(str)
 
-    def __init__(self, excel_path, output_folder, model_name='Chirp3-HD', male_voice='Charon', female_voice='Zephyr', exam_type=1):
+    def __init__(self, excel_path, output_folder, model_name='Chirp3-HD', male_voice='Charon', female_voice='Zephyr'):
         super().__init__()
         self.excel_path = excel_path
         self.output_folder = output_folder
         self.model_name = model_name
         self.male_voice = male_voice
         self.female_voice = female_voice
-        self.exam_type = exam_type
 
     def run(self):
         try:
             self.progress.emit("🔄 Khởi tạo Audio TTS (Vertex AI)...")
-            self.progress.emit(f"   Model: {self.model_name} | Voice Nam: {self.male_voice} | Voice Nữ: {self.female_voice} | Dạng: {self.exam_type}")
+            self.progress.emit(f"   Model: {self.model_name} | Voice Nam: {self.male_voice} | Voice Nữ: {self.female_voice}")
 
             # delegate toàn bộ logic sang helper ở services/audio_tts
             from services.audio_tts import test_file
@@ -708,8 +707,7 @@ class AudioTTSWorker(QObject):
                 model_name=self.model_name,
                 male_voice=self.male_voice,
                 female_voice=self.female_voice,
-                log_fn=self.progress.emit,
-                exam_type=self.exam_type
+                log_fn=self.progress.emit
             )
 
             self.progress.emit(f"\n🎉 HOÀN THÀNH! Audio thư mục: {os.path.abspath(audio_folder)}")
@@ -1316,24 +1314,9 @@ class HSKGeneratorApp(QWidget):
         layout.addLayout(output_layout)
 
         # 3. Cấu hình Model và Voice
-        config_group_box = QGroupBox("Cấu hình Model, Voice & Dạng đề")
+        config_group_box = QGroupBox("Cấu hình Model & Voice")
         config_layout = QVBoxLayout()
         
-        # Dòng: Exam Type Selection (Dạng Đề)
-        exam_layout = QHBoxLayout()
-        exam_label = QLabel("Loại File (Dạng Đề):")
-        self.audio_tts_exam_combo = QComboBox()
-        self.audio_tts_exam_combo.addItems([
-            '1 - Dạng gốc (Đề minitest)', 
-            '2 - Dạng bài tập từ vựng', 
-            '3 - Dạng bài tập ngữ pháp'
-        ])
-        self.audio_tts_exam_combo.setCurrentIndex(0) # Mặc định là Dạng 1
-        exam_layout.addWidget(exam_label)
-        exam_layout.addWidget(self.audio_tts_exam_combo)
-        exam_layout.addStretch()
-        config_layout.addLayout(exam_layout)
-
         # Dòng 1: Model Name Selection
         model_layout = QHBoxLayout()
         model_label = QLabel("Model TTS:")
@@ -1840,7 +1823,6 @@ class HSKGeneratorApp(QWidget):
         model_name = self.audio_tts_model_combo.currentText()
         male_voice = self.audio_tts_male_voice_combo.currentText()
         female_voice = self.audio_tts_female_voice_combo.currentText()
-        exam_type = self.audio_tts_exam_combo.currentIndex() + 1  # 0 -> 1, 1 -> 2, 2 -> 3
 
         if not excel_path or not os.path.isfile(excel_path):
             QMessageBox.warning(self, 'Lỗi', 'Vui lòng chọn file Excel hợp lệ.')
@@ -1863,8 +1845,7 @@ class HSKGeneratorApp(QWidget):
             output_folder, 
             model_name=model_name,
             male_voice=male_voice,
-            female_voice=female_voice,
-            exam_type=exam_type
+            female_voice=female_voice
         )
         self.audio_tts_worker.moveToThread(self.audio_tts_thread)
 
