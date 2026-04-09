@@ -195,7 +195,8 @@ def main():
         use_mascot = ai_data.get('use_mascot', True)
         
         # 1. Sinh ảnh AI
-        raw_img_path = os.path.join(RAW_IMG_DIR, f"{word}_ai.png")
+        row_number = item.get('excel_row', idx + 2)
+        raw_img_path = os.path.join(RAW_IMG_DIR, f"{word}_{row_number}_ai.png")
         has_ai_img = False
         
         # Kiểm tra nếu ảnh chưa tồn tại thì mới sinh

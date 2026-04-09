@@ -47,8 +47,7 @@ if os.name == 'nt':  # Windows only
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QLineEdit, QComboBox, QPlainTextEdit, QFileDialog, QMessageBox,
-    QTabWidget, QRadioButton, QButtonGroup, QGroupBox # <-- Thêm QRadioButton, QButtonGroup, QGroupBox
-
+    QTabWidget, QRadioButton, QButtonGroup, QGroupBox, QListWidget, QAbstractItemView # <-- Thêm QListWidget, QAbstractItemView
 )
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, Qt
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -149,6 +148,138 @@ class ImageMergerWorker(QObject):
         except Exception:
             error_details = traceback.format_exc()
             self.error.emit(error_details)
+
+# Lớp Worker để tạo ảnh Flashcard tiếng Anh
+class EngFlashcardWorker(QObject):
+    finished = pyqtSignal(str)
+    error = pyqtSignal(str)
+    progress = pyqtSignal(str)
+
+    def __init__(self, excel_path, sheet_name, prompt_path):
+        super().__init__()
+        self.excel_path = excel_path
+        self.sheet_name = sheet_name
+        self.prompt_path = prompt_path
+        self.output_base = "output/eng_flashcards"
+        self.template_img_dir = "resources/images/image_eng_template"
+        self._is_running = True
+
+    def stop(self):
+        self._is_running = False
+
+    def _get_random_template_image(self):
+        if not os.path.exists(self.template_img_dir):
+            return None
+        valid_ext = ('.png', '.jpg', '.jpeg', '.webp')
+        images = [f for f in os.listdir(self.template_img_dir) if f.lower().endswith(valid_ext)]
+        if not images:
+            return None
+        import random
+        return os.path.join(self.template_img_dir, random.choice(images))
+
+    def run(self):
+        try:
+            self.progress.emit("🚀 BẮT ĐẦU TẠO ẢNH FLASHCARD TIẾNG ANH...")
+            if not os.path.exists(self.template_img_dir):
+                os.makedirs(self.template_img_dir, exist_ok=True)
+            
+            if not os.path.exists(self.excel_path):
+                raise FileNotFoundError(f"Không tìm thấy file Excel tại: {self.excel_path}")
+
+            self.progress.emit("⚙️ Khởi tạo Image Generation Service...")
+            img_service = ImageGenerationService()
+            
+            self.progress.emit("📄 Đang đọc file Prompt và Excel...")
+            with open(self.prompt_path, 'r', encoding='utf-8') as f:
+                prompt_template = f.read()
+
+            xls = pd.ExcelFile(self.excel_path)
+            
+            total_generated = 0
+            sheet = self.sheet_name
+            self.progress.emit(f"\n📂 Đang xử lý sheet: {sheet}")
+            
+            # Tạo thư mục theo tên sheet
+            sheet_safe_name = "".join([c for c in sheet if c.isalnum() or c in (' ', '-', '_')]).strip()
+            sheet_out_dir = os.path.join(self.output_base, sheet_safe_name)
+            os.makedirs(sheet_out_dir, exist_ok=True)
+
+            try:
+                df = pd.read_excel(xls, sheet_name=sheet)
+            except Exception as e:
+                self.progress.emit(f"⚠️ Lỗi đọc sheet '{sheet}': {e}")
+                raise e
+            
+            if 'Từ' not in df.columns:
+                self.progress.emit(f"⚠️ Sheet '{sheet}' không có cột 'Từ'. Bỏ qua.")
+            else:
+                # Đảm bảo các cột cần thiết tồn tại để tránh lỗi
+                if 'Nghĩa' not in df.columns:
+                    df['Nghĩa'] = ''
+                if 'Câu ví dụ' not in df.columns:
+                    df['Câu ví dụ'] = ''
+
+                words = df['Từ'].astype(str).tolist()
+                meanings = df['Nghĩa'].fillna('').astype(str).tolist()
+                examples = df['Câu ví dụ'].fillna('').astype(str).tolist()
+                
+                self.progress.emit(f"📋 Tìm thấy {len(words)} từ vựng.")
+
+                for idx, word in enumerate(words):
+                    if not self._is_running:
+                        self.progress.emit("\n🛑 NGƯỜI DÙNG ĐÃ YÊU CẦU DỪNG.")
+                        break
+
+                    word = word.strip()
+                    if not word or word == 'nan': continue
+
+                    meaning = meanings[idx].strip()
+                    example = examples[idx].strip()
+
+                    safe_word = "".join([c for c in word if c.isalnum() or c in (' ', '-', '_')]).strip()
+                    final_img_path = os.path.join(sheet_out_dir, f"{safe_word}.png")
+
+                    if os.path.exists(final_img_path):
+                        self.progress.emit(f"   [{idx + 1}/{len(words)}] ⏭️ '{word}' đã có ảnh, bỏ qua.")
+                        continue
+
+                    self.progress.emit(f"   [{idx + 1}/{len(words)}] 🎨 Đang tạo ảnh cho: '{word}'...")
+                    
+                    image_prompt = prompt_template.format(
+                        word=word,
+                        meaning=meaning,
+                        example=example
+                    )
+
+                    template_img_path = self._get_random_template_image()
+                    if not template_img_path:
+                        self.progress.emit("      ⚠️ Không tìm thấy ảnh template mẫu.")
+
+                    try:
+                        img_bytes = img_service.generate_image_with_image_ref(
+                            prompt=image_prompt,
+                            image_path=template_img_path,
+                            aspect_ratio="3:2"
+                        )
+                        
+                        if img_bytes:
+                            with open(final_img_path, "wb") as f:
+                                f.write(img_bytes)
+                            total_generated += 1
+                        else:
+                            self.progress.emit(f"      ❌ Không sinh được ảnh cho '{word}'")
+                            
+                    except Exception as e:
+                        self.progress.emit(f"      ❌ Lỗi AI: {e}")
+                    
+                    import time
+                    time.sleep(1) # Tránh rate limit
+
+            self.finished.emit(f"Hoàn tất! Đã tạo thành công {total_generated} ảnh tại:\n{os.path.abspath(self.output_base)}")
+
+        except Exception as e:
+            import traceback
+            self.error.emit(traceback.format_exc())
 
 class ChineseTTSWorker(QObject):
     finished = pyqtSignal(str)
@@ -468,7 +599,7 @@ class FlashcardWorker(QObject):
             os.makedirs(os.path.dirname(self.prompt_path), exist_ok=True)
             default_prompt = """
         Bạn là chuyên gia ngôn ngữ Trung-Việt và Art Director.
-Input: Từ '{word}', Nghĩa '{meaning}', Ví dụ '{example}'.
+Input: Từ '{word}', Phiên âm '{pinyin}', Nghĩa '{meaning}', Ví dụ '{example}'.
 
 Nhiệm vụ:
 1. Xác định Pinyin chuẩn.
@@ -551,6 +682,7 @@ Trả về JSON chuẩn theo Schema.
                         
                         prompt_input = prompt_template.format(
                             word=word, 
+                            pinyin=item['pinyin'] or "",
                             meaning=item['meaning'] or "", 
                             example=item['example'] or ""
                         )
@@ -579,7 +711,8 @@ Trả về JSON chuẩn theo Schema.
                     
                     # 1. Ảnh minh họa (Thumbnail)
                     if not row_data['thumbnail']:
-                        raw_img_path = os.path.join(self.raw_img_dir, f"{word}_ai.png")
+                        row_number = item.get('excel_row', idx + 2)
+                        raw_img_path = os.path.join(self.raw_img_dir, f"{word}_{row_number}_ai.png")
                         has_img = False
                         
                         # Sinh ảnh AI nếu chưa có
@@ -655,7 +788,7 @@ Trả về JSON chuẩn theo Schema.
                 except:
                     phrace_col_idx = 5
 
-                # Duyệt toàn bộ 85 dòng trong excel_results
+                # Chọn toàn bộ 85 dòng trong excel_results
                 for row_num, row_data in enumerate(excel_results):
                     word_val = str(row_data.get('word', ''))
                     phrase_val = str(row_data.get('phrace', ''))
@@ -846,6 +979,10 @@ class HSKGeneratorApp(QWidget):
         self.flashcard_tab = self.create_flashcard_tab()
         self.tab_widget.addTab(self.flashcard_tab, "Flashcard Gen")
 
+        # --- THÊM TAB ENGLISH FLASHCARD ---
+        self.eng_flashcard_tab = self.create_eng_flashcard_tab()
+        self.tab_widget.addTab(self.eng_flashcard_tab, "English Flashcard")
+
         main_layout.addWidget(self.tab_widget)
         self.setLayout(main_layout)
 
@@ -990,7 +1127,7 @@ class HSKGeneratorApp(QWidget):
         self.path_label = QLabel('Thư mục PDF:')
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Chọn thư mục chứa các file PDF bài khóa...")
-        self.browse_button = QPushButton('Duyệt...')
+        self.browse_button = QPushButton('Chọn...')
         self.browse_button.setStyleSheet("background-color: #28a745; min-width: 100px;")
         self.browse_button.clicked.connect(self._browse_folder)
         path_layout.addWidget(self.path_label, 0)
@@ -1067,7 +1204,7 @@ class HSKGeneratorApp(QWidget):
         self.excel_label = QLabel('File Excel:')
         self.excel_input = QLineEdit()
         self.excel_input.setPlaceholderText("Chọn file Excel chứa dữ liệu...")
-        self.browse_excel_button = QPushButton('Duyệt...')
+        self.browse_excel_button = QPushButton('Chọn...')
         self.browse_excel_button.setStyleSheet("background-color: #28a745; min-width: 100px;")
         self.browse_excel_button.clicked.connect(self._browse_excel_file)
         excel_layout.addWidget(self.excel_label, 0)
@@ -1115,7 +1252,7 @@ class HSKGeneratorApp(QWidget):
         self.excel_merge_label = QLabel('File Excel:')
         self.excel_merge_input = QLineEdit()
         self.excel_merge_input.setPlaceholderText("Chọn file Excel chứa thông tin ghép...")
-        self.browse_excel_merge_button = QPushButton('Duyệt...')
+        self.browse_excel_merge_button = QPushButton('Chọn...')
         self.browse_excel_merge_button.setStyleSheet("background-color: #28a745; min-width: 100px;")
         self.browse_excel_merge_button.clicked.connect(self._browse_excel_merge_file)
         excel_merge_layout.addWidget(self.excel_merge_label, 0)
@@ -1129,7 +1266,7 @@ class HSKGeneratorApp(QWidget):
         self.images_label = QLabel('Thư mục ảnh:')
         self.images_input = QLineEdit()
         self.images_input.setPlaceholderText("Chọn thư mục chứa ảnh cần ghép...")
-        self.browse_images_button = QPushButton('Duyệt...')
+        self.browse_images_button = QPushButton('Chọn...')
         self.browse_images_button.setStyleSheet("background-color: #28a745; min-width: 100px;")
         self.browse_images_button.clicked.connect(self._browse_images_folder)
         images_layout.addWidget(self.images_label, 0)
@@ -1176,7 +1313,7 @@ class HSKGeneratorApp(QWidget):
         self.tts_excel_label = QLabel('File Excel:')
         self.tts_excel_input = QLineEdit()
         self.tts_excel_input.setPlaceholderText("Chọn file Excel chứa từ vựng/câu...")
-        self.tts_browse_excel_btn = QPushButton('Duyệt...')
+        self.tts_browse_excel_btn = QPushButton('Chọn...')
         self.tts_browse_excel_btn.setStyleSheet("background-color: #28a745;")
         self.tts_browse_excel_btn.clicked.connect(self._browse_tts_excel)
         
@@ -1190,7 +1327,7 @@ class HSKGeneratorApp(QWidget):
         self.tts_output_label = QLabel('Thư mục Output:')
         self.tts_output_input = QLineEdit()
         self.tts_output_input.setText(os.path.join(os.getcwd(), "output", "audio")) 
-        self.tts_browse_output_btn = QPushButton('Duyệt...')
+        self.tts_browse_output_btn = QPushButton('Chọn...')
         self.tts_browse_output_btn.setStyleSheet("background-color: #28a745;")
         self.tts_browse_output_btn.clicked.connect(self._browse_tts_output)
 
@@ -1289,7 +1426,7 @@ class HSKGeneratorApp(QWidget):
         self.audio_tts_excel_label = QLabel('File Excel:')
         self.audio_tts_excel_input = QLineEdit()
         self.audio_tts_excel_input.setPlaceholderText("Chọn file Excel chứa câu hỏi...")
-        self.audio_tts_browse_excel_btn = QPushButton('Duyệt...')
+        self.audio_tts_browse_excel_btn = QPushButton('Chọn...')
         self.audio_tts_browse_excel_btn.setStyleSheet("background-color: #28a745;")
         self.audio_tts_browse_excel_btn.clicked.connect(self._browse_audio_tts_excel)
         
@@ -1304,7 +1441,7 @@ class HSKGeneratorApp(QWidget):
         self.audio_tts_output_input = QLineEdit()
         # default points to root 'output' folder - audio subfolder will be created automatically
         self.audio_tts_output_input.setText(os.path.join(os.getcwd(), "output"))
-        self.audio_tts_browse_output_btn = QPushButton('Duyệt...')
+        self.audio_tts_browse_output_btn = QPushButton('Chọn...')
         self.audio_tts_browse_output_btn.setStyleSheet("background-color: #28a745;")
         self.audio_tts_browse_output_btn.clicked.connect(self._browse_audio_tts_output)
 
@@ -1397,7 +1534,7 @@ class HSKGeneratorApp(QWidget):
         self.sum_pdf_label = QLabel('File PDF:')
         self.sum_pdf_input = QLineEdit()
         self.sum_pdf_input.setPlaceholderText("Chọn file bài khóa PDF...")
-        self.sum_browse_pdf_btn = QPushButton('Duyệt...')
+        self.sum_browse_pdf_btn = QPushButton('Chọn...')
         self.sum_browse_pdf_btn.setStyleSheet("background-color: #28a745;")
         self.sum_browse_pdf_btn.clicked.connect(self._browse_sum_pdf)
         
@@ -1413,7 +1550,7 @@ class HSKGeneratorApp(QWidget):
         # đặt file prompt mặc định là prompt_summary.txt trong thư mục resources
         default_prompt_path = os.path.join(os.getcwd(), "resources", "prompts", "prompt_summary.txt")
         self.sum_prompt_input.setText(default_prompt_path)
-        self.sum_browse_prompt_btn = QPushButton('Duyệt...')
+        self.sum_browse_prompt_btn = QPushButton('Chọn...')
         self.sum_browse_prompt_btn.setStyleSheet("background-color: #17a2b8;")
         self.sum_browse_prompt_btn.clicked.connect(self._browse_sum_prompt)
 
@@ -1461,7 +1598,7 @@ class HSKGeneratorApp(QWidget):
         excel_layout = QHBoxLayout()
         self.fc_excel_label = QLabel('File Excel Đầu vào:')
         self.fc_excel_input = QLineEdit()
-        self.fc_browse_btn = QPushButton('Duyệt...')
+        self.fc_browse_btn = QPushButton('Chọn...')
         self.fc_browse_btn.setStyleSheet("background-color: #28a745;")
         self.fc_browse_btn.clicked.connect(self._browse_flashcard_excel)
         excel_layout.addWidget(self.fc_excel_label)
@@ -1487,7 +1624,7 @@ class HSKGeneratorApp(QWidget):
         self.fc_out_label = QLabel('Thư mục Output:')
         self.fc_out_input = QLineEdit()
         self.fc_out_input.setText(os.path.join(os.getcwd(), "output", "flashcards"))
-        self.fc_out_browse = QPushButton('Duyệt...')
+        self.fc_out_browse = QPushButton('Chọn...')
         self.fc_out_browse.clicked.connect(lambda: self.fc_out_input.setText(QFileDialog.getExistingDirectory(self, "Chọn Output")))
         out_layout.addWidget(self.fc_out_label)
         out_layout.addWidget(self.fc_out_input)
@@ -1512,6 +1649,122 @@ class HSKGeneratorApp(QWidget):
         self.fc_log.setReadOnly(True)
         layout.addWidget(QLabel('📋 Nhật ký xử lý:'))
         layout.addWidget(self.fc_log)
+
+        tab.setLayout(layout)
+        return tab
+
+    def create_eng_flashcard_tab(self):
+        """Tạo tab cho chức năng tạo ảnh English Flashcard."""
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(20)
+        layout.setContentsMargins(25, 25, 25, 25)
+
+        # 1. Chọn file Excel
+        excel_layout = QHBoxLayout()
+        excel_layout.setSpacing(15)
+        excel_layout.addWidget(QLabel('File Excel:'))
+        self.eng_excel_input = QLineEdit()
+        self.eng_excel_input.setPlaceholderText("Chọn file Excel flashcard tiếng Anh...")
+        excel_layout.addWidget(self.eng_excel_input, 1)
+        
+        self.browse_eng_excel_btn = QPushButton('Chọn...')
+        self.browse_eng_excel_btn.setStyleSheet("background-color: #28a745; min-width: 80px;")
+        self.browse_eng_excel_btn.clicked.connect(self._browse_eng_excel_file)
+        
+        self.eng_template_btn = QPushButton('Mở File Mẫu')
+        self.eng_template_btn.setStyleSheet("background-color: #17a2b8; min-width: 80px;")
+        self.eng_template_btn.clicked.connect(self._open_eng_template)
+        
+        excel_layout.addWidget(self.browse_eng_excel_btn, 0)
+        excel_layout.addWidget(self.eng_template_btn, 0)
+        layout.addLayout(excel_layout)
+
+        # 2. Chọn Sheet (Dropdown)
+        sheet_layout = QHBoxLayout()
+        self.eng_sheet_label = QLabel('Chọn Sheet:')
+        self.eng_sheet_combo = QComboBox()
+        self.eng_sheet_combo.setMinimumWidth(350) # Tăng độ rộng tối thiểu
+        # Cho phép combobox hiển thị tên dài hơn nếu cần, thêm tooltip
+        self.eng_sheet_combo.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+        
+        self.eng_load_sheet_btn = QPushButton('🔄 Tải danh sách Sheet')
+        self.eng_load_sheet_btn.clicked.connect(self._load_eng_sheets)
+        sheet_layout.addWidget(self.eng_sheet_label)
+        sheet_layout.addWidget(self.eng_sheet_combo, 1) # Cho phép combobox giãn ra
+        sheet_layout.addWidget(self.eng_load_sheet_btn)
+        layout.addLayout(sheet_layout)
+
+        # 3. Chọn file Prompt
+        prompt_layout = QHBoxLayout()
+        prompt_layout.setSpacing(15)
+        self.eng_prompt_label = QLabel('File Prompt:')
+        self.eng_prompt_input = QLineEdit()
+        default_prompt_path = os.path.join(os.getcwd(), "resources", "prompts", "image_eng_gen_flashcard.txt")
+        self.eng_prompt_input.setText(default_prompt_path)
+        
+        self.eng_browse_prompt_btn = QPushButton('Chọn...')
+        self.eng_browse_prompt_btn.setStyleSheet("background-color: #ffc107; color: black; min-width: 80px;")
+        self.eng_browse_prompt_btn.clicked.connect(self._browse_eng_prompt)
+        
+        self.eng_open_prompt_btn = QPushButton('Mở File')
+        self.eng_open_prompt_btn.setStyleSheet("background-color: #17a2b8; min-width: 80px;")
+        self.eng_open_prompt_btn.clicked.connect(self._open_eng_prompt)
+
+        prompt_layout.addWidget(self.eng_prompt_label)
+        prompt_layout.addWidget(self.eng_prompt_input, 1)
+        prompt_layout.addWidget(self.eng_browse_prompt_btn, 0)
+        prompt_layout.addWidget(self.eng_open_prompt_btn, 0)
+        layout.addLayout(prompt_layout)
+
+        # 4. Nút chạy và dừng
+        btn_layout = QHBoxLayout()
+        self.eng_run_button = QPushButton('🚀 Bắt đầu tạo ảnh English Flashcard')
+        self.eng_run_button.setStyleSheet("""
+            QPushButton {
+                background-color: #673AB7;
+                color: white;
+                font-size: 14pt;
+                padding: 15px 30px;
+                min-height: 35px;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #5E35B1;
+            }
+        """)
+        self.eng_run_button.clicked.connect(self._start_eng_flashcard_generation)
+        
+        self.eng_stop_button = QPushButton('🛑 Dừng')
+        self.eng_stop_button.setStyleSheet("""
+            QPushButton {
+                background-color: #dc3545;
+                color: white;
+                font-size: 14pt;
+                padding: 15px 30px;
+                min-height: 35px;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #c82333;
+            }
+            QPushButton:disabled {
+                background-color: #cccccc;
+                color: #666666;
+            }
+        """)
+        self.eng_stop_button.clicked.connect(self._stop_eng_flashcard_generation)
+        self.eng_stop_button.setEnabled(False)
+
+        btn_layout.addWidget(self.eng_run_button)
+        btn_layout.addWidget(self.eng_stop_button)
+        layout.addLayout(btn_layout)
+
+        # 5. Log
+        layout.addWidget(QLabel('📋 Nhật ký:'))
+        self.eng_log_display = QPlainTextEdit()
+        self.eng_log_display.setReadOnly(True)
+        layout.addWidget(self.eng_log_display)
 
         tab.setLayout(layout)
         return tab
@@ -2062,6 +2315,146 @@ class HSKGeneratorApp(QWidget):
         self.fc_run_btn.setText("🚀 TẠO FLASHCARD HSK")
         QMessageBox.information(self, "Hoàn tất", msg)
 
+    def _browse_eng_excel_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Chọn file Excel", "", "Excel Files (*.xlsx *.xls)")
+        if file_path:
+            self.eng_excel_input.setText(file_path)
+            self._load_eng_sheets()
+
+    def _open_eng_template(self):
+        template_path = os.path.join(os.getcwd(), "resources", "sheet", "eng_flashcard_gen_template.xlsx")
+        if os.path.exists(template_path):
+            if os.name == 'nt':
+                os.startfile(template_path)
+            elif sys.platform == 'darwin':
+                import subprocess
+                subprocess.Popen(['open', template_path])
+            else:
+                import subprocess
+                subprocess.Popen(['xdg-open', template_path])
+        else:
+            QMessageBox.warning(self, "Lỗi", "Không tìm thấy file mẫu tại resources/sheet!")
+
+    def _browse_eng_prompt(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Chọn file Prompt", "", "Text Files (*.txt)")
+        if file_path:
+            self.eng_prompt_input.setText(file_path)
+
+    def _open_eng_prompt(self):
+        prompt_path = self.eng_prompt_input.text().strip()
+        if os.path.exists(prompt_path):
+            if os.name == 'nt':
+                os.startfile(prompt_path)
+            elif sys.platform == 'darwin':
+                import subprocess
+                subprocess.Popen(['open', prompt_path])
+            else:
+                import subprocess
+                subprocess.Popen(['xdg-open', prompt_path])
+        else:
+            QMessageBox.warning(self, "Lỗi", "Không tìm thấy file prompt! Vui lòng chọn đường dẫn hợp lệ.")
+
+    def _load_eng_sheets(self):
+        path = self.eng_excel_input.text().strip()
+        if not path or not os.path.exists(path): return
+        
+        try:
+            xls = pd.ExcelFile(path)
+            sheets = [s for s in xls.sheet_names if s.strip().lower() != "yêu cầu"]
+            self.eng_sheet_combo.clear()
+            if sheets:
+                for sheet in sheets:
+                    self.eng_sheet_combo.addItem(sheet)
+                    # Gắn tooltip cho từng item trong dropdown để khi hover hiện full tên
+                    self.eng_sheet_combo.setItemData(self.eng_sheet_combo.count() - 1, sheet, Qt.ToolTipRole)
+                self.eng_log_display.appendPlainText(f">> Đã tự động tìm thấy {len(sheets)} sheet.")
+            else:
+                QMessageBox.warning(self, "Cảnh báo", "Không tìm thấy sheet hợp lệ.")
+        except Exception as e:
+            QMessageBox.critical(self, "Lỗi", f"Lỗi đọc sheet: {e}")
+
+    def _start_eng_flashcard_generation(self):
+        excel_path = self.eng_excel_input.text().strip()
+        sheet_name = self.eng_sheet_combo.currentText()
+        prompt_path = self.eng_prompt_input.text().strip()
+
+        if not excel_path or not sheet_name:
+            QMessageBox.warning(self, "Lỗi", "Vui lòng chọn file Excel và Sheet đầu vào!")
+            return
+            
+        if not prompt_path or not os.path.exists(prompt_path):
+            QMessageBox.warning(self, "Lỗi", "Vui lòng chọn file Prompt hợp lệ!")
+            return
+
+        self.eng_log_display.clear()
+        self.eng_run_button.setEnabled(False)
+        self.eng_run_button.setText('⏳ Đang tạo ảnh...')
+        self.eng_stop_button.setEnabled(True)
+
+        # Khởi tạo thread và worker
+        self.eng_thread = QThread()
+        self.eng_worker = EngFlashcardWorker(excel_path, sheet_name, prompt_path)
+        self.eng_worker.moveToThread(self.eng_thread)
+
+        # Kết nối tín hiệu
+        self.eng_thread.started.connect(self.eng_worker.run)
+        self.eng_worker.progress.connect(lambda msg: self.eng_log_display.appendPlainText(msg))
+        self.eng_worker.finished.connect(self._on_eng_flashcard_finished)
+        self.eng_worker.error.connect(self._on_eng_flashcard_error)
+        
+        # Dọn dẹp
+        self.eng_worker.error.connect(self.eng_thread.quit)
+        self.eng_worker.error.connect(self.eng_worker.deleteLater)
+        self.eng_worker.finished.connect(self.eng_thread.quit)
+        self.eng_worker.finished.connect(self.eng_worker.deleteLater)
+        self.eng_thread.finished.connect(self.eng_thread.deleteLater)
+
+        self.eng_thread.start()
+
+    def _stop_eng_flashcard_generation(self):
+        reply = QMessageBox.question(
+            self, 'Xác nhận Dừng', 
+            'Bạn có chắc chắn muốn dừng tạo ảnh?\nQuá trình sẽ dừng lại sau khi hoàn thành ảnh hiện tại.',
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            if hasattr(self, 'eng_worker') and self.eng_worker:
+                self.eng_worker.stop()
+                self.eng_log_display.appendPlainText(">> Đang gửi lệnh dừng tới hệ thống, vui lòng chờ ảnh cuối cùng...")
+                self.eng_stop_button.setEnabled(False)
+
+    def _on_eng_flashcard_finished(self, message):
+        self.eng_run_button.setEnabled(True)
+        self.eng_run_button.setText('🚀 Bắt đầu tạo ảnh English Flashcard')
+        self.eng_stop_button.setEnabled(False)
+        QMessageBox.information(self, "Thành công", message)
+
+        # Mở thư mục chứa kết quả
+        try:
+            import re
+            # Trích xuất đường dẫn từ message "Hoàn tất! Đã tạo thành công X ảnh tại:\n[Đường_dẫn]"
+            match = re.search(r"tại:\n(.*)", message)
+            if match:
+                folder_path = match.group(1).strip()
+                if os.path.exists(folder_path):
+                    if os.name == 'nt':
+                        os.startfile(folder_path)
+                    elif sys.platform == 'darwin':
+                        import subprocess
+                        subprocess.Popen(['open', folder_path])
+                    else:
+                        import subprocess
+                        subprocess.Popen(['xdg-open', folder_path])
+        except Exception as e:
+            self.eng_log_display.appendPlainText(f">> Không thể tự động mở thư mục: {e}")
+
+    def _on_eng_flashcard_error(self, error_msg):
+        self.eng_run_button.setEnabled(True)
+        self.eng_run_button.setText('🚀 Bắt đầu tạo ảnh English Flashcard')
+        self.eng_stop_button.setEnabled(False)
+        self.eng_log_display.appendPlainText(f"\n❌ LỖI HỆ THỐNG:\n{error_msg}")
+        QMessageBox.critical(self, "Lỗi", "Đã xảy ra lỗi trong quá trình thực hiện!")
+
     def create_ppt_gen_tab(self):
         tab = QWidget()
         layout = QVBoxLayout()
@@ -2072,7 +2465,7 @@ class HSKGeneratorApp(QWidget):
         pdf_layout = QHBoxLayout()
         self.ppt_pdf_label = QLabel('File PDF Bài học:')
         self.ppt_pdf_input = QLineEdit()
-        self.ppt_pdf_browse_btn = QPushButton('Duyệt...')
+        self.ppt_pdf_browse_btn = QPushButton('Chọn...')
         self.ppt_pdf_browse_btn.setStyleSheet("background-color: #28a745;")
         self.ppt_pdf_browse_btn.clicked.connect(self._browse_ppt_pdf)
         pdf_layout.addWidget(self.ppt_pdf_label)
@@ -2103,7 +2496,7 @@ class HSKGeneratorApp(QWidget):
         self.ppt_out_label = QLabel('Thư mục Output:')
         self.ppt_out_input = QLineEdit()
         self.ppt_out_input.setText(os.path.join(os.getcwd(), "output", "ppt_hsk"))
-        self.ppt_out_browse = QPushButton('Duyệt...')
+        self.ppt_out_browse = QPushButton('Chọn...')
         self.ppt_out_browse.clicked.connect(self._browse_ppt_out)
         out_layout.addWidget(self.ppt_out_label)
         out_layout.addWidget(self.ppt_out_input)
@@ -2198,7 +2591,7 @@ class HSKGeneratorApp(QWidget):
         self.ppt_worker.progress.connect(lambda text: self.ppt_log.appendPlainText(text)) 
         self.ppt_worker.finished.connect(self._finish_ppt_gen)
         self.ppt_worker.error.connect(lambda err: self.ppt_log.appendPlainText(f"❌ {err}"))
-        self.ppt_worker.error.connect(lambda err: self._finish_ppt_error())
+        self.ppt_worker.error.connect(self._finish_ppt_error())
 
         # Cleanup
         self.ppt_worker.finished.connect(self.ppt_thread.quit)

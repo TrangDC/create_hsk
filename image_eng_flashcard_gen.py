@@ -12,7 +12,6 @@ INPUT_EXCEL_PATH = r"D:\Edmicro\Tools\create_hsk\input\Bản sao của Flashcard
 
 # 2. Cấu hình Output
 OUTPUT_BASE = "output/eng_flashcards"
-IMG_FINAL_DIR = os.path.join(OUTPUT_BASE, "images")
 
 # 3. Cấu hình Templates & Resources
 TEMPLATE_IMG_DIR = "resources/images/image_eng_template"
@@ -29,7 +28,7 @@ PROMPT_TEMPLATE = """Make an image for the word/phrase "{word}" with this style 
 
 def setup_folders():
     """Tạo các thư mục cần thiết"""
-    for d in [OUTPUT_BASE, IMG_FINAL_DIR, TEMPLATE_IMG_DIR]:
+    for d in [OUTPUT_BASE, TEMPLATE_IMG_DIR]:
         if not os.path.exists(d):
             os.makedirs(d)
 
@@ -70,11 +69,26 @@ def main():
         print(f"❌ Lỗi khi đọc file Excel: {e}")
         return
 
+    # CHỌN SHEET ĐỂ CHẠY Ở ĐÂY (Có thể cấu hình thành tham số đầu vào)
+    # Ví dụ: sheets_to_run = ["Sheet1", "Sheet2"]
+    # Mặc định lấy tất cả:
+    sheets_to_run = sheet_names
+
     total_generated = 0
 
-    for sheet in sheet_names:
+    for sheet in sheets_to_run:
         print(f"\n======== ĐANG XỬ LÝ SHEET: {sheet} ========")
-        df = pd.read_excel(xls, sheet_name=sheet)
+        
+        # Tạo thư mục con dựa theo tên sheet
+        sheet_safe_name = "".join([c for c in sheet if c.isalnum() or c in (' ', '-', '_')]).strip()
+        sheet_out_dir = os.path.join(OUTPUT_BASE, sheet_safe_name)
+        os.makedirs(sheet_out_dir, exist_ok=True)
+
+        try:
+            df = pd.read_excel(xls, sheet_name=sheet)
+        except Exception as e:
+            print(f"⚠️ Lỗi đọc sheet '{sheet}': {e}")
+            continue
         
         # Kiểm tra xem cột 'Từ' có tồn tại không
         if 'Từ' not in df.columns:
@@ -102,7 +116,7 @@ def main():
             # Đặt tên file ảnh
             # Xóa các ký tự đặc biệt khỏi tên file
             safe_word = "".join([c for c in word if c.isalnum() or c in (' ', '-', '_')]).strip()
-            final_img_path = os.path.join(IMG_FINAL_DIR, f"{safe_word}.png")
+            final_img_path = os.path.join(sheet_out_dir, f"{safe_word}.png")
 
             # Bỏ qua nếu đã tồn tại
             if os.path.exists(final_img_path):
@@ -137,7 +151,7 @@ def main():
             time.sleep(3)
 
     print(f"\n🎉 HOÀN TẤT! Đã tạo thành công {total_generated} ảnh.")
-    print(f"📁 Xem ảnh tại: {os.path.abspath(IMG_FINAL_DIR)}")
+    print(f"📁 Xem ảnh tại: {os.path.abspath(OUTPUT_BASE)}")
 
 if __name__ == "__main__":
     main()

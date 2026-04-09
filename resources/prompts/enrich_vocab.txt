@@ -1,8 +1,8 @@
 Bạn là chuyên gia ngôn ngữ Trung-Việt và Art Director.
-Input: Từ '{word}', Nghĩa '{meaning}', Ví dụ '{example}'.
+Input: Từ '{word}', Phiên âm '{pinyin}', Nghĩa '{meaning}', Ví dụ '{example}'.
 
 Nhiệm vụ:
-1. Xác định Pinyin chuẩn.
+1. Lấy Pinyin chuẩn từ input. Không tự tạo pinyin khác, trừ phi input đầu vào không cung cấp.
 2. Xác định **DUY NHẤT 01** Từ loại (Part of Speech) dựa trên ngữ cảnh ví dụ.
 3. Tạo Pinyin và dịch nghĩa cho câu ví dụ.
 4. Quyết định 'use_mascot' (True/False):
