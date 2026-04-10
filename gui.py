@@ -618,6 +618,7 @@ Nhiệm vụ:
         + Nền: PHẢI LÀ NỀN TRẮNG TINH (Pure white background). 
         + Bối cảnh: KHÔNG vẽ bầu trời, KHÔNG vẽ mặt đất, KHÔNG vẽ cây cối hay nhà cửa xung quanh (trừ khi đối tượng chính là cái nhà). 
         + Hình ảnh phải được cô lập hoàn toàn (Isolated), giống như một tấm nhãn dán (Sticker style).
+        + KHÔNG KÈM CHỮ VIẾT NÀO TRÊN ẢNH, chỉ có hình vẽ.
     - Nội dung:
         + Nếu use_mascot=TRUE: Mô tả hành động của chú gấu trúc (từ tài liệu PDF tham khảo) thực hiện hành động của từ '{word}' theo câu ví dụ '{example}'.
         + Nếu use_mascot=FALSE: Mô tả đối tượng hoặc nhân vật cụ thể thực hiện hành động.
@@ -654,7 +655,13 @@ Trả về JSON chuẩn theo Schema.
             # 3. VÒNG LẶP XỬ LÝ (QUÉT QUA TOÀN BỘ CÁC DÒNG)
             for idx, item in enumerate(input_data_list):
                 word = item['word']
-                
+
+                def get_updated_filename(exist_key, final_key):
+                    val = item.get(exist_key)
+                    if val and str(val).strip() and str(val) != 'nan':
+                        return item.get(final_key)
+                    return val
+
                 # Khởi tạo row_data mặc định từ dữ liệu Excel hiện có
                 row_data = {
                     "Title": item['final_title'],
@@ -665,9 +672,9 @@ Trả về JSON chuẩn theo Schema.
                     "phrace": item['example'],
                     "pronunciation_phrace": item['ex_pinyin'],
                     "phrace_translation": item['ex_meaning'],
-                    "thumbnail": item['exist_thumb'],
-                    "audio1": item['exist_audio1'],
-                    "audio2": item['exist_audio2']
+                    "thumbnail": get_updated_filename('exist_thumb', 'filename_image'),
+                    "audio1": get_updated_filename('exist_audio1', 'filename_audio_word'),
+                    "audio2": get_updated_filename('exist_audio2', 'filename_audio_ex')
                 }
 
                 # KIỂM TRA XEM CÓ CẦN XỬ LÝ AI/MEDIA KHÔNG
@@ -790,8 +797,8 @@ Trả về JSON chuẩn theo Schema.
 
                 # Chọn toàn bộ 85 dòng trong excel_results
                 for row_num, row_data in enumerate(excel_results):
-                    word_val = str(row_data.get('word', ''))
-                    phrase_val = str(row_data.get('phrace', ''))
+                    word_val = str(row_data.get('word', '')).strip()
+                    phrase_val = str(row_data.get('phrace', '')).strip()
 
                     if word_val and phrase_val and word_val in phrase_val:
                         parts = phrase_val.split(word_val, 1)

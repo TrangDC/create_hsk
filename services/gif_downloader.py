@@ -232,56 +232,346 @@ class StrokeGifManager:
 def main():
     # --- DỮ LIỆU INPUT ---
     input_vocab = [
-  {"word": "主要","meaning": "chủ yếu, chính","example": "他的主要工作是帮助经理准备会议。" },
-  {"word": "得分","meaning": "ghi điểm, số điểm","example": "在这次比赛中，我们队的得分最高。" },
-  {"word": "体育","meaning": "thể dục, thể thao","example": "我不仅喜欢体育，也对音乐感兴趣。" },
-  {"word": "运动员","meaning": "vận động viên","example": "他是一名优秀的篮球运动员。" },
-  {"word": "奥运会","meaning": "Thế vận hội Olympic","example": "奥运会每四年举行一次。" },
-  {"word": "刘长春","meaning": "Lưu Trường Xuân (tên riêng)","example": "刘长春是中国第一位参加奥运会的运动员。" },
-  {"word": "数学","meaning": "Toán học","example": "这道数学题太难了，我还没做出来。" },
-  {"word": "认真","meaning": "nghiêm túc, chăm chỉ","example": "他做作业总是非常认真，很少出错。" },
-  {"word": "笔记","meaning": "ghi chép, vở ghi","example": "老师讲的内容，我都记在笔记里了。" },
-  {"word": "历史","meaning": "lịch sử","example": "读历史书可以让我们了解过去的事情。" },
-  {"word": "难","meaning": "khó","example": "学好外语虽然很难，但是很有用。" },
-  {"word": "外语","meaning": "ngoại ngữ","example": "他除了英语以外，还会说一点儿日语。" },
-  {"word": "句","meaning": "câu (lượng từ)","example": "请你把课文里的第一句话读一遍。" },
-  {"word": "年级","meaning": "năm học, khối lớp","example": "我弟弟现在已经是小学三年级的学生了。" },
-  {"word": "后年","meaning": "năm sau nữa","example": "他打算明年结婚，后年回国。" },
-  {"word": "努力","meaning": "nỗ lực, cố gắng","example": "只有努力学习，才能考上好的大学。" },
-  {"word": "开会","meaning": "họp, mở cuộc họp","example": "经理正在开会，请您在外面等一会儿。" },
-  {"word": "后天","meaning": "ngày mốt (ngày kia)","example": "明天我有事，我们后天再去爬山吧。" },
-  {"word": "室","meaning": "phòng (hậu tố)","example": "我们的会议室在三楼，请跟我来。" },
-  {"word": "看来","meaning": "xem ra, có vẻ như","example": "天阴了，看来一会儿就要下雨了。" },
-  {"word": "只能","meaning": "chỉ có thể","example": "电梯坏了，我们只能走楼梯上去了。" },
-  {"word": "休假","meaning": "nghỉ phép, nghỉ lễ","example": "我打算下个月请几天假去南方旅游。" },
-  {"word": "怕","meaning": "sợ, lo lắng","example": "我最怕在很多人面前说话。" },
-  {"word": "邮箱","meaning": "hòm thư (vật lý hoặc email)","example": "记得经常检查你的电子邮箱。" },
-  {"word": "老张","meaning": "Ông Trương (cách gọi thân mật)","example": "老张是我们的邻居，他为人很热情。" },
-  {"word": "或","meaning": "hoặc","example": "周末我喜欢在家里看书或听音乐。" },
-  {"word": "开花","meaning": "nở hoa","example": "春天到了，公园里的花都开花了。" },
-  {"word": "工作日","meaning": "ngày làm việc","example": "银行在工作日八点半开始上班。" },
-  {"word": "地方","meaning": "địa điểm, chỗ","example": "这个地方的环境非常安静，适合学习。" },
-  {"word": "刮","meaning": "thổi (gió)","example": "外面刮风了，你出门多穿点儿衣服。" },
-  {"word": "风","meaning": "gió","example": "今天的风很大，雨伞都没法用。" },
-  {"word": "雨衣","meaning": "áo mưa","example": "骑自行车的时候穿雨衣比打伞方便。" },
-  {"word": "冬天","meaning": "mùa đông","example": "北方的冬天非常冷，经常下雪。" },
-  {"word": "常常","meaning": "thường xuyên","example": "我常常去图书馆借书。" },
-  {"word": "关注","meaning": "quan tâm, theo dõi","example": "我们要多关注天气变化，预防感冒。" },
-  {"word": "四季","meaning": "bốn mùa","example": "这个城市的四季都不太一样。" },
-  {"word": "春天","meaning": "mùa xuân","example": "春天是爬山的好季节。" },
-  {"word": "夏天","meaning": "mùa hè","example": "夏天的时候，大家都喜欢去海边玩。" },
-  {"word": "秋天","meaning": "mùa thu","example": "秋天的天气很舒服，一点儿也不热。" },
-  {"word": "变成","meaning": "trở thành, biến thành","example": "几年不见，他已经变成了一个大人。" },
-  {"word": "请客","meaning": "mời khách, đãi tiệc","example": "今天是我生日，我请客大家去吃烤鸭。" },
-  {"word": "南方","meaning": "miền Nam","example": "南方人比北方人更喜欢吃米饭。" },
-  {"word": "北方","meaning": "miền Bắc","example": "冬天的时候，北方家里都有暖气。" },
-  {"word": "做法","meaning": "cách làm","example": "这个菜的做法很简单，你可以试一下。" },
-  {"word": "的话","meaning": "nếu (đứng sau một vế câu)","example": "如果明天下大雨的话，我们就别去了。" },
-  {"word": "酒","meaning": "rượu","example": "为了身体健康，你应该少喝点儿酒。" },
-  {"word": "客人","meaning": "khách","example": "今天家里要来客人，我去买些水果。" },
-  {"word": "晚会","meaning": "buổi tiệc tối, dạ hội","example": "元旦晚会上有好多精彩的节目。" },
-  {"word": "画家","meaning": "họa sĩ","example": "他从小就想成为一名有名的画家。" },
-  {"word": "聊天儿","meaning": "nói chuyện phiếm","example": "老人们喜欢在树下坐着聊天儿。" }
+  {
+    "word": "丢",
+    "meaning": "mất, quăng, ném",
+    "example": "我不小心把护照丢了，心里急极了。"
+  },
+  {
+    "word": "号码",
+    "meaning": "số, số điện thoại",
+    "example": "请问你的电话号码是多少？我想联系你。"
+  },
+  {
+    "word": "好像",
+    "meaning": "hình như, dường như",
+    "example": "天阴了，好像马上就要下大雨了。"
+  },
+  {
+    "word": "尝",
+    "meaning": "nếm",
+    "example": "这是我第一次做中国菜，你快来尝尝味道怎么样。"
+  },
+  {
+    "word": "咱们",
+    "meaning": "chúng ta (bao gồm cả người nghe)",
+    "example": "既然大家都到齐了，咱们就出发吧。"
+  },
+  {
+    "word": "挺",
+    "meaning": "rất, khá",
+    "example": "这家书店的环境挺安静的，适合看书。"
+  },
+  {
+    "word": "卫生间",
+    "meaning": "nhà vệ sinh",
+    "example": "请问，这层楼的卫生间在哪里？"
+  },
+  {
+    "word": "纸",
+    "meaning": "giấy",
+    "example": "请给我一张纸，我要把老师说的话记下来。"
+  },
+  {
+    "word": "主意",
+    "meaning": "ý kiến, chủ ý",
+    "example": "这是一个好主意，咱们就按你说的办吧。"
+  },
+  {
+    "word": "总之",
+    "meaning": "tóm lại",
+    "example": "总之，只有努力学习，才能取得好成绩。"
+  },
+  {
+    "word": "沙发",
+    "meaning": "ghế sô pha",
+    "example": "下班回到家，坐在沙发上听音乐最舒服了。"
+  },
+  {
+    "word": "合适",
+    "meaning": "phù hợp, thích hợp",
+    "example": "这件衣服的大小很合适，我非常喜欢。"
+  },
+  {
+    "word": "毛",
+    "meaning": "lông, hào (đơn vị tiền)",
+    "example": "在那家超市，一斤苹果只要三块五毛钱。"
+  },
+  {
+    "word": "体育馆",
+    "meaning": "nhà thi đấu thể thao",
+    "example": "学校的体育馆在那座大楼的后面。"
+  },
+  {
+    "word": "羽毛球",
+    "meaning": "cầu lông",
+    "example": "除了足球，他最喜欢的体育运动是羽毛球。"
+  },
+  {
+    "word": "低",
+    "meaning": "thấp",
+    "example": "由于感冒了，他说话的声音非常低。"
+  },
+  {
+    "word": "差不多",
+    "meaning": "xấp xỉ, gần như nhau",
+    "example": "这两双鞋的质量差不多，但是价格不同。"
+  },
+  {
+    "word": "开心",
+    "meaning": "vui vẻ",
+    "example": "听到朋友要来北京看我，我开心极了。"
+  },
+  {
+    "word": "方法",
+    "meaning": "phương pháp",
+    "example": "我们需要找到一个更好的方法来解决这个难题。"
+  },
+  {
+    "word": "校园",
+    "meaning": "khuôn viên trường",
+    "example": "春天的校园到处都是绿色的树和美丽的花。"
+  },
+  {
+    "word": "网球",
+    "meaning": "quần vợt (tennis)",
+    "example": "他网球打得很好，经常参加学校的比赛。"
+  },
+  {
+    "word": "联系",
+    "meaning": "liên hệ",
+    "example": "回国以后，记得经常跟我联系啊。"
+  },
+  {
+    "word": "紧张",
+    "meaning": "căng thẳng, hồi hộp",
+    "example": "第一次在这么多人面前说话，他感到很紧张。"
+  },
+  {
+    "word": "受到",
+    "meaning": "nhận được (tác động, tình cảm)",
+    "example": "这位画家受到了很多读者的喜爱。"
+  },
+  {
+    "word": "得到",
+    "meaning": "đạt được, có được",
+    "example": "经过努力，他终于得到了这个工作的机会。"
+  },
+  {
+    "word": "遍",
+    "meaning": "lần (lượt - từ đầu đến cuối)",
+    "example": "这个电影太有意思了，我已经看过三遍了。"
+  },
+  {
+    "word": "页",
+    "meaning": "trang (sách)",
+    "example": "请大家打开书，翻到第六十二页。"
+  },
+  {
+    "word": "对话",
+    "meaning": "đối thoại",
+    "example": "请两人一组，练习课文里的对话。"
+  },
+  {
+    "word": "地点",
+    "meaning": "địa điểm",
+    "example": "晚会的地点定在学校附近的那个大饭馆。"
+  },
+  {
+    "word": "街",
+    "meaning": "phố, đường phố",
+    "example": "周末街上到处都是出来旅游的客人。"
+  },
+  {
+    "word": "变",
+    "meaning": "thay đổi, biến đổi",
+    "example": "几年没见，这个城市的变化非常大。"
+  },
+  {
+    "word": "凉快",
+    "meaning": "mát mẻ",
+    "example": "下过雨以后，天气比昨天凉快多了。"
+  },
+  {
+    "word": "叶子",
+    "meaning": "lá cây",
+    "example": "秋天到了，树上的叶子都变黄了。"
+  },
+  {
+    "word": "不同",
+    "meaning": "khác nhau",
+    "example": "每个人对这个问题的看法都是不同的。"
+  },
+  {
+    "word": "加",
+    "meaning": "thêm vào, cộng",
+    "example": "这杯咖啡有点儿苦，我想加点儿糖。"
+  },
+  {
+    "word": "做客",
+    "meaning": "làm khách, đến chơi nhà",
+    "example": "明天我想请你去我家做客，欢迎吗？"
+  },
+  {
+    "word": "来自",
+    "meaning": "đến từ",
+    "example": "我们班的学生来自世界不同的国家。"
+  },
+  {
+    "word": "感到",
+    "meaning": "cảm thấy",
+    "example": "听到这个好消息，大家都感到非常高兴。"
+  },
+  {
+    "word": "最好",
+    "meaning": "tốt nhất, nên",
+    "example": "感冒了最好多喝点儿热开水，多休息。"
+  },
+  {
+    "word": "节",
+    "meaning": "tiết (lượng từ môn học), lễ hội",
+    "example": "今天上午我一共有四节课。"
+  },
+  {
+    "word": "表演",
+    "meaning": "biểu diễn",
+    "example": "晚会上的节目表演得精彩极了。"
+  },
+  {
+    "word": "网站",
+    "meaning": "trang web",
+    "example": "你可以上网查查，那个网站上有你需要的信息。"
+  },
+  {
+    "word": "平时",
+    "meaning": "bình thường, lúc bình thường",
+    "example": "他平时很努力，所以考试成绩总是很好。"
+  },
+  {
+    "word": "可是",
+    "meaning": "nhưng",
+    "example": "我想去爬山，可是今天的天气不太好。"
+  },
+  {
+    "word": "养",
+    "meaning": "nuôi, trồng",
+    "example": "我奶奶在家里养了很多漂亮的花。"
+  },
+  {
+    "word": "脏",
+    "meaning": "bẩn",
+    "example": "你的衣服弄脏了，快去换一件吧。"
+  },
+  {
+    "word": "好像",
+    "meaning": "giống như, dường như",
+    "example": "他长得好像他的爸爸。"
+  },
+  {
+    "word": "竹子",
+    "meaning": "tre, trúc",
+    "example": "大熊猫最喜欢吃的食物就是竹子。"
+  },
+  {
+    "word": "身边",
+    "meaning": "bên cạnh",
+    "example": "虽然父母不在身边，但我会照顾好自己。"
+  },
+  {
+    "word": "到处",
+    "meaning": "khắp nơi",
+    "example": "在北方，冬天到处都能看到白色的雪。"
+  },
+  {
+    "word": "继续",
+    "meaning": "tiếp tục",
+    "example": "休息了十分钟以后，咱们继续练习吧。"
+  },
+  {
+    "word": "有关",
+    "meaning": "có liên quan đến",
+    "example": "我想借几本有关中国历史的电子书。"
+  },
+  {
+    "word": "比如",
+    "meaning": "ví dụ như",
+    "example": "我喜欢很多体育运动，比如足球和网球。"
+  },
+  {
+    "word": "方向",
+    "meaning": "phương hướng",
+    "example": "由于没有带地图，他走错了方向。"
+  },
+  {
+    "word": "大概",
+    "meaning": "khoảng, có lẽ",
+    "example": "从这里到火车站，打车大概需要二十分钟。"
+  },
+  {
+    "word": "收",
+    "meaning": "nhận, thu dọn",
+    "example": "你要去超市吗？帮我收一下外面的衣服吧。"
+  },
+  {
+    "word": "起",
+    "meaning": "vụ, kiện (lượng từ), bắt đầu",
+    "example": "从明天起，我们要开始准备运动会了。"
+  },
+  {
+    "word": "矿泉水",
+    "meaning": "nước khoáng",
+    "example": "服务员，请给我拿一瓶矿泉水。"
+  },
+  {
+    "word": "出发",
+    "meaning": "xuất phát",
+    "example": "为了不迟到，咱们明天早上六点就出发。"
+  },
+  {
+    "word": "发生",
+    "meaning": "xảy ra",
+    "example": "马路上发生了一起交通事故，车很多。"
+  },
+  {
+    "word": "刚",
+    "meaning": "vừa, vừa mới",
+    "example": "我刚收到他的邮件，他说后天过来。"
+  },
+  {
+    "word": "只要",
+    "meaning": "chỉ cần",
+    "example": "只要你坚持努力，目标就一定能实现。"
+  },
+  {
+    "word": "学期",
+    "meaning": "học kỳ",
+    "example": "这个学期快要结束了，同学们都非常忙。"
+  },
+  {
+    "word": "毕业",
+    "meaning": "tốt nghiệp",
+    "example": "高中毕业以后，他打算去英国留学。"
+  },
+  {
+    "word": "出生",
+    "meaning": "sinh ra",
+    "example": "他出生在一个非常美丽的小城市。"
+  },
+  {
+    "word": "坚持",
+    "meaning": "kiên trì",
+    "example": "他每天都坚持跑步，所以身体很健康。"
+  },
+  {
+    "word": "目标",
+    "meaning": "mục tiêu",
+    "example": "我的目标是今年能通过HSK三级考试。"
+  },
+  {
+    "word": "发展",
+    "meaning": "phát triển",
+    "example": "随着社会的发展，人们的生活越来越方便。"
+  }
 ]
 
     # Cấu hình thư mục output theo yêu cầu
