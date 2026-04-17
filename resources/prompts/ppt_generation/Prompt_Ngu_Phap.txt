@@ -1,0 +1,55 @@
+Bạn là chuyên gia ngôn ngữ học và biên soạn giáo án tiếng Trung chuyên nghiệp.
+
+Nhiệm vụ: 
+Phân tích file PDF giáo trình (thuộc trình độ {level}) được đính kèm. 
+MỤC TIÊU DUY NHẤT CỦA BẠN LÀ: Đọc, phân tích và trích xuất dữ liệu CHỈ CHO ĐIỂM NGỮ PHÁP (CHỦ ĐIỂM): "{section_name}".
+Hãy phớt lờ các điểm ngữ pháp, hội thoại hoặc đoạn văn khác không thuộc chủ điểm "{section_name}".
+
+=====================
+I. QUY TẮC BẮT BUỘC
+=====================
+
+## KẾT QUẢ
+Chủ điểm ngữ pháp "{section_name}" phải được bóc tách và trả về thành một object JSON duy nhất chứa đầy đủ 4 phần (Tên, Các cấu trúc, Lưu ý, Bài tập).
+
+## 1. DỊCH TÊN RIÊNG VÀ LOẠI TỪ
+- Tất cả tên người phải chuyển sang Âm Hán Việt chuẩn. Tuyệt đối KHÔNG để dính phiên âm Latinh trong phần nghĩa tiếng Việt. Ví dụ: Wáng Yīfēi → Vương Nhất Phi.
+- Chỉ dùng các từ loại tiếng Việt chuẩn (Danh từ, Động từ, Tính từ...). Tuyệt đối không dùng tiếng Anh (noun, verb...).
+
+## 2. PHÂN TÍCH CÁC CẤU TRÚC (structures)
+- Một chủ điểm ngữ pháp được giải thích trong file pdf với nhiều dạng thông tin hoặc các cấu trúc nhỏ lẻ (Ví dụ: Khẳng định, Phủ định, Nghi vấn, hoặc Động từ 1 âm tiết, Động từ 2 âm tiết). 
+- Với các thông tin hoặc cấu trúc nhỏ lẻ, bạn phải tạo một object riêng biệt nằm trong mảng `structures`.
+- Bắt buộc trích xuất đầy đủ: Tên dạng (sub_title), Công thức (formula), Cách dùng (usage) và 2-3 Ví dụ minh họa (examples).
+- Nếu trong sách có phân tích chuyên sâu các thành phần câu (Ví dụ: bóc tách đâu là Chủ ngữ, Định ngữ, Trạng ngữ, Vị ngữ, Bổ ngữ, Tân ngữ), bạn phải gộp luôn phần giải thích bóc tách đó vào trường `usage` hoặc ghi trực tiếp ở dạng text (Ví dụ: "[Định ngữ]: Bổ nghĩa cho...").
+
+## 3. LƯU Ý QUAN TRỌNG (notes)
+- Trích xuất tất cả các quy tắc đặc biệt, ngoại lệ, mẹo ghi nhớ, lỗi sai thường gặp (VD: Lớn trước nhỏ sau, Mốc thời gian vs Khoảng thời gian, Những động từ không thể lặp lại...).
+- Chuyển chúng thành danh sách các gạch đầu dòng (chuỗi text thuần) và đưa vào mảng `notes`.
+
+## 4. BÀI TẬP LUYỆN TẬP (exercises)
+- Trích xuất các bài tập trong sách liên quan đến "{section_name}". Nếu sách không có, hãy tự tạo 1-2 bài tập củng cố với từ vựng không vượt quá {level}.
+- Có thể dùng 1 hoặc kết hợp các loại bài tập sau bằng cách đặt giá trị cho trường `type`:
+  + "multiple_choice": Câu hỏi trắc nghiệm 4 đáp án (A,B,C,D). Phải trả về đủ `question`, `pinyin`, `options` (đúng 4 lựa chọn), `answer`.
+  + "true_false": Câu hỏi đúng/sai. Phải trả về `statement` và `answer` (boolean).
+  + "fill_in_the_blanks": Điền từ vào chỗ trống. Phải trả về `instruction`, `given_words`, và `sentences`. Dùng ký tự *...* để bọc đáp án đúng trong `full_sentence`.
+
+## 5. DỊCH NGHĨA TIẾNG VIỆT VÀ HIGHLIGHT TỪ VỰNG
+- Dịch tự nhiên, sát ngữ cảnh {level}. Không lặp lại Pinyin vào phần tiếng Việt.
+- TẤT CẢ CÁC TRƯỜNG DỮ LIỆU YÊU CẦU ĐỀU PHẢI CÓ GIÁ TRỊ, KHÔNG TRẢ VỀ RỖNG HOẶC NULL.
+
+## 6. ẢNH MINH HỌA (image_description)
+BẮT BUỘC cung cấp mô tả chi tiết bằng tiếng Anh (prompt) để AI tạo ảnh minh họa (text-to-image) tại mỗi câu ví dụ (trong mảng `examples` của từng `structures`).
+
+Yêu cầu cho `image_description`:
+- Viết hoàn toàn bằng tiếng Anh.
+- Miêu tả rõ ngữ cảnh, bối cảnh xung quanh, nhân vật, hành động, cảm xúc và các chi tiết trực quan để thể hiện rõ ý nghĩa của câu ví dụ ngữ pháp đó.
+- Ví dụ: "A person looking confused at a complicated map, standing in a busy street."
+- KHÔNG yêu cầu có text (chữ viết) xuất hiện trong ảnh.
+
+=====================
+II. KIỂM TRA TRƯỚC KHI TRẢ KẾT QUẢ
+=====================
+Trước khi hoàn thành, hãy tự soi chiếu:
+✔ Bạn đã tập trung trích xuất ĐÚNG và ĐỦ mọi dạng thức (Khẳng định, Phủ định, Nghi vấn...) của chủ điểm "{section_name}" chưa?
+✔ Các phân tích về thành phần câu (nếu có) đã được giải thích rõ ràng chưa?
+✔ Mảng exercises đã trả về đúng cấu trúc theo loại bài tập (type) chưa?

@@ -1,14 +1,20 @@
-Make an image for the word/phrase "{word}" with this style and color code. Only gen image, no add text in image
+Generate an illustration for the word/phrase: "{word}". 
+Word Meaning: {meaning}.
 
-- Word Meaning: {meaning}
+CRITICAL REQUIREMENTS:
+1. No Text: Do NOT include any letters, words, or typography in the image.
+2. Single Composition: Generate EXACTLY ONE single, unified scene. NO grids, NO collages, NO split-screens, and NO multiple separate images in one frame. 
+3. Style Match: Match the drawing style of the reference (e.g., flat illustration, line art) but DO NOT copy its structural layout or grid format.
 
-- Bảng màu: 
-#fad9e1
-#FFB800
-#5AB0FF
-#43DF94
+COLOR PALETTE:
+- #f7d4dd (Soft Pink)
+- #FF6388 (Vibrant Pink)
+- #FFB800 (Warm Yellow)
+- #5AB0FF (Sky Blue)
+- #43DF94 (Mint Green)
 
-- Important Notes:
-  + Avoid using #fad9e1 as the main color for the background, meaning still use it but not the main color theme
-  + Generate EXACTLY ONE single, unified image. DO NOT create a grid, collage, collage-style, split-screen, or multiple separate small images in one.
-  + Do NOT copy the structural layout (like grids) from the reference image, only match the drawing style (e.g., line art, illustration style).
+COLOR MIXING RULES & BALANCE (VERY IMPORTANT):
+- Avoid "Hot" Tone: Do NOT use the pinks (#f7d4dd and #FF6388) as the dominant colors or the main solid background. 
+- Avoid "Pale/Washed-out" Tone: While Yellow, Blue, and Green will occupy more space, the image must NOT look pale, flat, or desaturated. Ensure these colors are vivid and rich.
+- Create Contrast: Use #FF6388 (Vibrant Pink) strategically as bold accent details to anchor the image and provide strong visual contrast against the brighter Yellow, Blue, and Green. 
+- Overall Goal: Achieve a perfectly harmonious color balance—neither too heavy/hot nor too pale/light.

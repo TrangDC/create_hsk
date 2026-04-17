@@ -110,41 +110,72 @@ def main():
     excel_results = []
     print(f"--- BẮT ĐẦU XỬ LÝ {len(input_data_list)} TỪ ---")
 
-    for item in input_data_list:
+    for idx, item in enumerate(input_data_list):
         word = item['word']
         print(f"\n======== ĐANG XỬ LÝ: {word} ({item['final_title']}) ========")
         
-        # Khởi tạo row_data với các thông tin cơ bản
+        # --- KIỂM TRA FILE ĐÃ TỒN TẠI TRONG THƯ MỤC CHƯA ---
+        expected_thumb_path = os.path.join(IMG_FINAL_DIR, item['filename_image'])
+        expected_audio1_path = os.path.join(AUDIO_DIR, item['filename_audio_word'])
+        expected_audio2_path = os.path.join(AUDIO_DIR, item['filename_audio_ex'])
+        
+        thumb_exists = os.path.exists(expected_thumb_path)
+        audio1_exists = os.path.exists(expected_audio1_path)
+        audio2_exists = os.path.exists(expected_audio2_path)
+        
+        # Kiểm tra xem text đã đầy đủ trong Excel chưa
+        text_completed = bool(item['pinyin'] and item['type'] and item['meaning'] and item['example'])
+        
+        # Chỉ gọi Vertex AI nếu thiếu thông tin text HOẶC thiếu ảnh (vì AI sinh prompt vẽ ảnh)
+        need_ai = not text_completed or not thumb_exists
+
+        # Khởi tạo row_data với các thông tin cơ bản và điền sẵn media nếu có
         row_data = {
             "Title": item['final_title'],
-            "word": word
+            "word": word,
+            "thumbnail": item['filename_image'] if thumb_exists else "",
+            "audio1": item['filename_audio_word'] if audio1_exists else "",
+            "audio2": item['filename_audio_ex'] if audio2_exists else ""
         }
+
+        # NẾU ĐÃ ĐỦ HẾT FILE VÀ TEXT -> BỎ QUA CHẠY SANG TỪ KHÁC LUÔN
+        if not need_ai and audio1_exists and (audio2_exists or not item['example']):
+            print(f"   ✅ BỎ QUA - Đã có đủ Text và Media cho từ: {word}")
+            row_data['pronunciation'] = item['pinyin']
+            row_data['type'] = item['type']
+            row_data['word_translation'] = item['meaning']
+            row_data['phrace'] = item['example']
+            row_data['pronunciation_phrace'] = item['ex_pinyin']
+            row_data['phrace_translation'] = item['ex_meaning']
+            excel_results.append(row_data)
+            continue
 
         # --- A. GỌI VERTEX AI (Data Enrichment) ---
         ai_data = {}
-        try:
-            with open(PROMPT_PATH, 'r', encoding='utf-8') as f: prompt_temp = f.read()
-            
-            # Truyền dữ liệu từ Excel vào Prompt để AI hiểu ngữ cảnh
-            prompt_input = prompt_temp.format(
-                word=word, 
-                meaning=item['meaning'] if item['meaning'] else "",
-                example=item['example'] if item['example'] else ""
-            )
-            
-            temp_path = f"prompts/temp_{word}.txt"
-            with open(temp_path, 'w', encoding='utf-8') as f: f.write(prompt_input)
+        if need_ai:
+            try:
+                with open(PROMPT_PATH, 'r', encoding='utf-8') as f: prompt_temp = f.read()
+                
+                # Truyền dữ liệu từ Excel vào Prompt để AI hiểu ngữ cảnh
+                prompt_input = prompt_temp.format(
+                    word=word, 
+                    meaning=item['meaning'] if item['meaning'] else "",
+                    example=item['example'] if item['example'] else ""
+                )
+                
+                temp_path = f"prompts/temp_{word}.txt"
+                with open(temp_path, 'w', encoding='utf-8') as f: f.write(prompt_input)
 
-            ai_data = generate_content(
-                prompt_file_path=temp_path,
-                schema_file_path=SCHEMA_PATH,
-                pdf_file_paths=[MASCOT_PDF_PATH], 
-                text_content=None 
-            )
-            if os.path.exists(temp_path): os.remove(temp_path)
-            
-        except Exception as e:
-            print(f"⚠️ Lỗi gọi AI: {e}. Sẽ sử dụng dữ liệu Excel tối đa.")
+                ai_data = generate_content(
+                    prompt_file_path=temp_path,
+                    schema_file_path=SCHEMA_PATH,
+                    pdf_file_paths=[MASCOT_PDF_PATH], 
+                    text_content=None 
+                )
+                if os.path.exists(temp_path): os.remove(temp_path)
+                
+            except Exception as e:
+                print(f"⚠️ Lỗi gọi AI: {e}. Sẽ sử dụng dữ liệu Excel tối đa.")
 
         # --- B. LOGIC MATCH THÔNG TIN (Excel ưu tiên -> rồi đến AI) ---
         
@@ -194,63 +225,64 @@ def main():
         
         use_mascot = ai_data.get('use_mascot', True)
         
-        # 1. Sinh ảnh AI
-        row_number = item.get('excel_row', idx + 2)
-        raw_img_path = os.path.join(RAW_IMG_DIR, f"{word}_{row_number}_ai.png")
-        has_ai_img = False
-        
-        # Kiểm tra nếu ảnh chưa tồn tại thì mới sinh
-        if not os.path.exists(raw_img_path):
-            try:
-                prompt_img = ai_data.get('image_prompt_en', f"illustration of {word}")
-                pdf_send = MASCOT_PDF_PATH if use_mascot else None
-                # Aspect ratio 3:2 cho khổ ngang
-                img_bytes = img_service.generate_image_pdfs(prompt_img, pdf_send, aspect_ratio="3:2")
-                if img_bytes:
-                    with open(raw_img_path, "wb") as f: f.write(img_bytes)
-                    has_ai_img = True
-            except Exception as e:
-                print(f"   ⚠️ Lỗi sinh ảnh AI: {e}")
-        else:
-            has_ai_img = True
-
-        # 2. Tải GIF nét viết
-        char_gif_paths = []
-        for char in word:
-            # download_char trả về (gif_path, png_path), ta chỉ lấy gif_path
-            g, _ = gif_manager.download_char(char)
-            if g and os.path.exists(g): char_gif_paths.append(g)
-
-        # 3. Gộp ảnh (Thumbnail)
-        # Sử dụng tên file đã được quy định bởi InputHandler (item['filename_image'])
-        final_gif_path = os.path.join(IMG_FINAL_DIR, item['filename_image'])
-        
-        if has_ai_img and char_gif_paths:
-            success = create_merged_gif(raw_img_path, char_gif_paths, final_gif_path)
-            if success:
-                print(f"   ✅ Ảnh gộp: {item['filename_image']}")
-                row_data['thumbnail'] = item['filename_image']
+        # 1. Sinh ảnh AI và Gộp GIF (Chỉ làm khi chưa có file thumbnail)
+        if not thumb_exists:
+            row_number = item.get('excel_row', idx + 2)
+            raw_img_path = os.path.join(RAW_IMG_DIR, f"{word}_{row_number}_ai.png")
+            has_ai_img = False
+            
+            # Kiểm tra nếu ảnh chưa tồn tại thì mới sinh
+            if not os.path.exists(raw_img_path):
+                try:
+                    prompt_img = ai_data.get('image_prompt_en', f"illustration of {word}")
+                    pdf_send = MASCOT_PDF_PATH if use_mascot else None
+                    # Aspect ratio 3:2 cho khổ ngang
+                    img_bytes = img_service.generate_image_pdfs(prompt_img, pdf_send, aspect_ratio="3:2")
+                    if img_bytes:
+                        with open(raw_img_path, "wb") as f: f.write(img_bytes)
+                        has_ai_img = True
+                except Exception as e:
+                    print(f"   ⚠️ Lỗi sinh ảnh AI: {e}")
             else:
+                has_ai_img = True
+
+            # 2. Tải GIF nét viết
+            char_gif_paths = []
+            for char in word:
+                # download_char trả về (gif_path, png_path), ta chỉ lấy gif_path
+                g, _ = gif_manager.download_char(char)
+                if g and os.path.exists(g): char_gif_paths.append(g)
+
+            # 3. Gộp ảnh (Thumbnail)
+            final_gif_path = os.path.join(IMG_FINAL_DIR, item['filename_image'])
+            
+            if has_ai_img and char_gif_paths:
+                success = create_merged_gif(raw_img_path, char_gif_paths, final_gif_path)
+                if success:
+                    print(f"   ✅ Ảnh gộp: {item['filename_image']}")
+                    row_data['thumbnail'] = item['filename_image']
+                else:
+                    row_data['thumbnail'] = ""
+            else:
+                print("   ⚠️ Thiếu ảnh AI hoặc GIF nét viết -> Không tạo được Thumbnail")
                 row_data['thumbnail'] = ""
-        else:
-            print("   ⚠️ Thiếu ảnh AI hoặc GIF nét viết -> Không tạo được Thumbnail")
-            row_data['thumbnail'] = ""
 
         # 4. Sinh Audio (TTS - Narakeet)
         # a. Audio Từ (filename_audio_word từ InputHandler)
-        final_word_audio_path = os.path.join(AUDIO_DIR, item['filename_audio_word'])
-        if generate_single_audio_narakeet(word, final_word_audio_path):
-            row_data['audio1'] = item['filename_audio_word']
-        else:
-            row_data['audio1'] = ""
+        if not audio1_exists:
+            final_word_audio_path = os.path.join(AUDIO_DIR, item['filename_audio_word'])
+            if generate_single_audio_narakeet(word, final_word_audio_path):
+                row_data['audio1'] = item['filename_audio_word']
+            else:
+                row_data['audio1'] = ""
 
         # b. Audio Câu (filename_audio_ex từ InputHandler)
-        final_ex_audio_path = os.path.join(AUDIO_DIR, item['filename_audio_ex'])
-        # Chỉ sinh audio nếu có text câu ví dụ
-        if final_phrase_cn and generate_single_audio_narakeet(final_phrase_cn, final_ex_audio_path):
-            row_data['audio2'] = item['filename_audio_ex']
-        else:
-            row_data['audio2'] = ""
+        if not audio2_exists and final_phrase_cn:
+            final_ex_audio_path = os.path.join(AUDIO_DIR, item['filename_audio_ex'])
+            if generate_single_audio_narakeet(final_phrase_cn, final_ex_audio_path):
+                row_data['audio2'] = item['filename_audio_ex']
+            else:
+                row_data['audio2'] = ""
 
         # Lưu vào list kết quả
         excel_results.append(row_data)

@@ -47,7 +47,7 @@ if os.name == 'nt':  # Windows only
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QLineEdit, QComboBox, QPlainTextEdit, QFileDialog, QMessageBox,
-    QTabWidget, QRadioButton, QButtonGroup, QGroupBox, QListWidget, QAbstractItemView # <-- Thêm QListWidget, QAbstractItemView
+    QTabWidget, QRadioButton, QButtonGroup, QGroupBox, QListWidget, QAbstractItemView, QSpinBox
 )
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, Qt
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -462,10 +462,11 @@ class SummaryWorker(QObject):
     error = pyqtSignal(str)
     progress = pyqtSignal(str)
 
-    def __init__(self, pdf_path, prompt_path):
+    def __init__(self, pdf_path, prompt_path, num_lessons):
         super().__init__()
         self.pdf_path = pdf_path
         self.prompt_path = prompt_path
+        self.num_lessons = num_lessons
         self.project_id = "onluyen-media" # Hardcode từ code cũ
         # Credentials từ code cũ
         self.creds = self._setup_credentials()
@@ -526,6 +527,9 @@ class SummaryWorker(QObject):
             self.progress.emit(f"🤖 Đang gửi yêu cầu tóm tắt tới Gemini...")
             docx_path = f"output/summary/{file_name}.docx"
             
+            # Thay thế số lượng bài khóa trong prompt nếu có
+            prompt_content = prompt_content.replace("{num_lessons}", str(self.num_lessons))
+
             # Gọi hàm response2docx
             response2docx(
                 compressed_pdf_path, 
@@ -872,8 +876,11 @@ class PPTGeneratorWorker(QObject):
 
     def run(self):
         try:
-            # Lấy đường dẫn thư mục từ file executable để đảm bảo import đúng module trong hsk_ppt
-            base_dir = os.path.dirname(sys.executable) 
+            # Lấy đường dẫn thư mục linh hoạt giữa file thực thi (exe) và python script
+            if getattr(sys, 'frozen', False):
+                base_dir = os.path.dirname(sys.executable)
+            else:
+                base_dir = os.path.dirname(os.path.abspath(__file__))
             
             # Đảm bảo import được module trong hsk_ppt
             if base_dir not in sys.path:
@@ -1566,6 +1573,19 @@ class HSKGeneratorApp(QWidget):
         prompt_layout.addWidget(self.sum_browse_prompt_btn)
         layout.addLayout(prompt_layout)
 
+        # 2.5 Nhập số lượng bài khóa
+        num_lessons_layout = QHBoxLayout()
+        self.sum_num_lessons_label = QLabel('Số lượng bài khóa:')
+        self.sum_num_lessons_input = QSpinBox()
+        self.sum_num_lessons_input.setMinimum(1)
+        self.sum_num_lessons_input.setMaximum(20)
+        self.sum_num_lessons_input.setValue(1) # Mặc định là 1
+
+        num_lessons_layout.addWidget(self.sum_num_lessons_label)
+        num_lessons_layout.addWidget(self.sum_num_lessons_input)
+        num_lessons_layout.addStretch()
+        layout.addLayout(num_lessons_layout)
+
         # 3. Nút chạy
         self.sum_run_button = QPushButton('📝 Bắt đầu Tóm tắt')
         self.sum_run_button.setStyleSheet("""
@@ -2186,6 +2206,7 @@ class HSKGeneratorApp(QWidget):
     def _start_summary(self):
         pdf_path = self.sum_pdf_input.text()
         prompt_path = self.sum_prompt_input.text()
+        num_lessons = self.sum_num_lessons_input.value()
 
         if not os.path.exists(pdf_path):
             QMessageBox.warning(self, 'Lỗi', 'File PDF không tồn tại.')
@@ -2199,7 +2220,7 @@ class HSKGeneratorApp(QWidget):
         self.sum_log_display.clear()
 
         self.sum_thread = QThread()
-        self.sum_worker = SummaryWorker(pdf_path, prompt_path)
+        self.sum_worker = SummaryWorker(pdf_path, prompt_path, num_lessons)
         self.sum_worker.moveToThread(self.sum_thread)
 
         self.sum_thread.started.connect(self.sum_worker.run)
@@ -2598,7 +2619,7 @@ class HSKGeneratorApp(QWidget):
         self.ppt_worker.progress.connect(lambda text: self.ppt_log.appendPlainText(text)) 
         self.ppt_worker.finished.connect(self._finish_ppt_gen)
         self.ppt_worker.error.connect(lambda err: self.ppt_log.appendPlainText(f"❌ {err}"))
-        self.ppt_worker.error.connect(self._finish_ppt_error())
+        self.ppt_worker.error.connect(self._finish_ppt_error)
 
         # Cleanup
         self.ppt_worker.finished.connect(self.ppt_thread.quit)

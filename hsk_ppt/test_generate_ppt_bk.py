@@ -1200,10 +1200,16 @@ class PPTGenerator:
             if has_pinyin: py_sents += [""] * (max_len - len(py_sents))
             vi_sents += [""] * (max_len - len(vi_sents))
 
-            # Giới hạn 3 câu / Slide để tránh tràn khung 5.47 inch
-            MAX_SENTS = 3
-            chunks = [ (hz_sents[i:i+MAX_SENTS], py_sents[i:i+MAX_SENTS] if has_pinyin else [], vi_sents[i:i+MAX_SENTS])
-                       for i in range(0, max_len, MAX_SENTS) ]
+            def build_passage_chunks(hz_sents, py_sents, vi_sents, max_per_slide=8):
+                num_sents = len(hz_sents)
+                if num_sents <= max_per_slide:
+                    return [(hz_sents, py_sents, vi_sents)]
+                return [
+                    (hz_sents[i:i+max_per_slide], py_sents[i:i+max_per_slide], vi_sents[i:i+max_per_slide])
+                    for i in range(0, num_sents, max_per_slide)
+                ]
+
+            chunks = build_passage_chunks(hz_sents, py_sents, vi_sents)
 
             for chunk_idx, (chunk_hz, chunk_py, chunk_vi) in enumerate(chunks):
                 slide = self._next_slide()
@@ -1242,7 +1248,9 @@ class PPTGenerator:
                 box_left = Inches(3.78)
                 box_top = Inches(2.61)
                 box_width = Inches(13.21)
-                box_height = Inches(5.47) if has_pinyin else Inches(3.95)
+                base_height = Inches(5.47) if has_pinyin else Inches(3.95)
+                extra_height = Inches(0.25) * max(0, len(chunk_hz) - 5)
+                box_height = base_height + extra_height
 
                 # Vẽ Icon hoa (Đặt ở Top-Left của đoạn văn)
                 if os.path.exists(flower_icon_path):
@@ -1292,10 +1300,24 @@ class PPTGenerator:
 
         else:
             # =========================================================
-            # CHẾ ĐỘ: HỘI THOẠI NGẮN (DIALOGUE) - (Giữ nguyên code cũ)
+            # CHẾ ĐỘ: HỘI THOẠI NGẮN (DIALOGUE)
             # =========================================================
-            num_sentences = len(hz_list)
-            chunks = [ (hz_list[i:i+6], py_list[i:i+6], vi_list[i:i+6]) for i in range(0, num_sentences, 6)]
+            def build_dialogue_chunks(hz_list, py_list, vi_list):
+                num_sentences = len(hz_list)
+                if num_sentences <= 6:
+                    return [(hz_list, py_list, vi_list)]
+                if num_sentences <= 12:
+                    first_count = math.ceil(num_sentences / 2)
+                    return [
+                        (hz_list[:first_count], py_list[:first_count], vi_list[:first_count]),
+                        (hz_list[first_count:], py_list[first_count:], vi_list[first_count:]),
+                    ]
+                return [
+                    (hz_list[i:i+6], py_list[i:i+6], vi_list[i:i+6])
+                    for i in range(0, num_sentences, 6)
+                ]
+
+            chunks = build_dialogue_chunks(hz_list, py_list, vi_list)
 
             for chunk_idx, (chunk_hz, chunk_py, chunk_vi) in enumerate(chunks):
                 slide = self._next_slide()
@@ -1755,11 +1777,11 @@ class PPTGenerator:
 # ================================================================
 if __name__ == "__main__":
     import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    # template_path = os.path.join(base_dir, "resources", "ppt_templates", "HSK1 Bài Khóa template.pptx")
-    # json_path     = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.json")
-    template_path = r"D:\Edmicro\Tools\create_hsk\dist\resources\ppt_templates\HSK Bài Khóa template.pptx"
-    json_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\Bài 5 这样的照片才好看_bk.json"
-    output_path   = os.path.join(base_dir, "hsk_ppt", "HSK3_BK_test_output.pptx")
+    template_path = os.path.join(base_dir, "resources", "ppt_templates", "HSK Bài Khóa template.pptx")
+    json_path     = os.path.join(base_dir, "hsk_ppt", "Bài 9_我去买杯奶茶_bk.json")
+    # template_path = r"D:\Edmicro\Tools\create_hsk\dist\resources\ppt_templates\HSK Bài Khóa template.pptx"
+    # json_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\Bài 5 这样的照片才好看_bk.json"
+    output_path   = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.pptx")
 
     gen = PPTGenerator(template_path, json_path)
     gen.build()
