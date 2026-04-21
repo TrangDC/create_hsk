@@ -1200,14 +1200,22 @@ class PPTGenerator:
             if has_pinyin: py_sents += [""] * (max_len - len(py_sents))
             vi_sents += [""] * (max_len - len(vi_sents))
 
-            def build_passage_chunks(hz_sents, py_sents, vi_sents, max_per_slide=8):
+            def build_passage_chunks(hz_sents, py_sents, vi_sents, max_per_slide=5):
                 num_sents = len(hz_sents)
                 if num_sents <= max_per_slide:
                     return [(hz_sents, py_sents, vi_sents)]
-                return [
-                    (hz_sents[i:i+max_per_slide], py_sents[i:i+max_per_slide], vi_sents[i:i+max_per_slide])
-                    for i in range(0, num_sents, max_per_slide)
-                ]
+                slide_count = math.ceil(num_sents / max_per_slide)
+                base = num_sents // slide_count
+                extra = num_sents % slide_count
+
+                chunks = []
+                start = 0
+                for i in range(slide_count):
+                    size = base + (1 if i < extra else 0)
+                    end = start + size
+                    chunks.append((hz_sents[start:end], py_sents[start:end], vi_sents[start:end]))
+                    start = end
+                return chunks
 
             chunks = build_passage_chunks(hz_sents, py_sents, vi_sents)
 
@@ -1264,17 +1272,16 @@ class PPTGenerator:
                 tf.vertical_anchor = MSO_ANCHOR.TOP # Đoạn văn nên căn TOP cho tự nhiên
                 tf.margin_top = tf.margin_bottom = tf.margin_left = tf.margin_right = 0
 
-                # 1. Render Hán tự (Mỗi câu 1 dòng/paragraph)
-                for hz_text in chunk_hz:
-                    if not hz_text: continue
-                    p = tf.add_paragraph() if len(tf.paragraphs[0].runs) > 0 else tf.paragraphs[0]
-                    p.space_after = Pt(4)
+                # 1. Render Hán tự (Ghép tất cả câu thành 1 đoạn văn liên tục)
+                hz_combined = "".join([text for text in chunk_hz if text])
+                if hz_combined:
+                    p = tf.paragraphs[0]
                     run = p.add_run()
-                    run.text = hz_text
-                    run.font.name, run.font.size, run.font.bold = "字由点字典楷", Pt(38.4), True # 487680 EMU
+                    run.text = hz_combined
+                    run.font.name, run.font.size, run.font.bold = "字由点字典楷", Pt(38.4), True
                     run.font.color.rgb = self.hex_to_rgb_color("000000")
 
-                # 2. Render Pinyin (Gộp chung thành 1 paragraph lớn bên dưới)
+                # 2. Render Pinyin (Gộp chung, phân cách bằng ` ``` `)
                 if has_pinyin:
                     py_text = " ".join([p for p in chunk_py if p])
                     if py_text:
@@ -1284,10 +1291,10 @@ class PPTGenerator:
                         p.line_spacing = Pt(30)
                         run = p.add_run()
                         run.text = py_text
-                        run.font.name, run.font.size = "Muli", Pt(23.8) # 302641 EMU
+                        run.font.name, run.font.size = "Muli", Pt(23.8)
                         run.font.color.rgb = self.hex_to_rgb_color("545454")
 
-                # 3. Render Tiếng Việt (Gộp chung thành 1 paragraph lớn dưới cùng)
+                # 3. Render Tiếng Việt (Gộp chung, phân cách bằng ` ``` `)
                 vi_text = " ".join([v for v in chunk_vi if v])
                 if vi_text:
                     p = tf.add_paragraph()
@@ -1295,7 +1302,7 @@ class PPTGenerator:
                     p.line_spacing = Pt(30)
                     run = p.add_run()
                     run.text = vi_text
-                    run.font.name, run.font.size = "Muli", Pt(23.8) # 302641 EMU
+                    run.font.name, run.font.size = "Muli", Pt(23.8)
                     run.font.color.rgb = self.hex_to_rgb_color("A40400")
 
         else:
@@ -1778,7 +1785,7 @@ class PPTGenerator:
 if __name__ == "__main__":
     import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     template_path = os.path.join(base_dir, "resources", "ppt_templates", "HSK Bài Khóa template.pptx")
-    json_path     = os.path.join(base_dir, "hsk_ppt", "Bài 9_我去买杯奶茶_bk.json")
+    json_path     = "D:\Edmicro\Tools\create_hsk\hsk_ppt\draft\Bài 9_我去买杯奶茶_bk.json"
     # template_path = r"D:\Edmicro\Tools\create_hsk\dist\resources\ppt_templates\HSK Bài Khóa template.pptx"
     # json_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\Bài 5 这样的照片才好看_bk.json"
     output_path   = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.pptx")
