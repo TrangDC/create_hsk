@@ -4,6 +4,7 @@ import subprocess
 import traceback
 from dotenv import load_dotenv
 import json
+import random
 from hsk_ppt.test_extract_json_bk import process_full_hsk_lesson
 from hsk_ppt.test_extract_json_grammar import process_grammar_lesson
 from hsk_ppt.prepare_images import prepare_images_for_json
@@ -155,11 +156,12 @@ class EngFlashcardWorker(QObject):
     error = pyqtSignal(str)
     progress = pyqtSignal(str)
 
-    def __init__(self, excel_path, sheet_name, prompt_path):
+    def __init__(self, excel_path, sheet_names, prompt_path, error_only=False):
         super().__init__()
         self.excel_path = excel_path
-        self.sheet_name = sheet_name
+        self.sheet_names = sheet_names if isinstance(sheet_names, list) else [sheet_names]
         self.prompt_path = prompt_path
+        self.error_only = error_only
         self.output_base = "output/eng_flashcards"
         self.template_img_dir = "resources/images/image_eng_template"
         self._is_running = True
@@ -174,7 +176,6 @@ class EngFlashcardWorker(QObject):
         images = [f for f in os.listdir(self.template_img_dir) if f.lower().endswith(valid_ext)]
         if not images:
             return None
-        import random
         return os.path.join(self.template_img_dir, random.choice(images))
 
     def run(self):
@@ -196,84 +197,96 @@ class EngFlashcardWorker(QObject):
             xls = pd.ExcelFile(self.excel_path)
             
             total_generated = 0
-            sheet = self.sheet_name
-            self.progress.emit(f"\n📂 Đang xử lý sheet: {sheet}")
             
-            # Tạo thư mục theo tên sheet
-            sheet_safe_name = "".join([c for c in sheet if c.isalnum() or c in (' ', '-', '_')]).strip()
-            sheet_out_dir = os.path.join(self.output_base, sheet_safe_name)
-            os.makedirs(sheet_out_dir, exist_ok=True)
-
-            try:
-                df = pd.read_excel(xls, sheet_name=sheet)
-            except Exception as e:
-                self.progress.emit(f"⚠️ Lỗi đọc sheet '{sheet}': {e}")
-                raise e
-            
-            if 'Từ' not in df.columns:
-                self.progress.emit(f"⚠️ Sheet '{sheet}' không có cột 'Từ'. Bỏ qua.")
-            else:
-                # Đảm bảo các cột cần thiết tồn tại để tránh lỗi
-                if 'Nghĩa' not in df.columns:
-                    df['Nghĩa'] = ''
-                if 'Câu ví dụ' not in df.columns:
-                    df['Câu ví dụ'] = ''
-
-                words = df['Từ'].astype(str).tolist()
-                meanings = df['Nghĩa'].fillna('').astype(str).tolist()
-                examples = df['Câu ví dụ'].fillna('').astype(str).tolist()
+            for sheet in self.sheet_names:
+                if not self._is_running:
+                    break
+                self.progress.emit(f"\n📂 Đang xử lý sheet: {sheet}")
                 
-                self.progress.emit(f"📋 Tìm thấy {len(words)} từ vựng.")
+                # Tạo thư mục theo tên sheet
+                sheet_safe_name = "".join([c for c in sheet if c.isalnum() or c in (' ', '-', '_')]).strip()
+                sheet_out_dir = os.path.join(self.output_base, sheet_safe_name)
+                os.makedirs(sheet_out_dir, exist_ok=True)
 
-                for idx, word in enumerate(words):
-                    if not self._is_running:
-                        self.progress.emit("\n🛑 NGƯỜI DÙNG ĐÃ YÊU CẦU DỪNG.")
-                        break
+                try:
+                    df = pd.read_excel(xls, sheet_name=sheet)
+                except Exception as e:
+                    self.progress.emit(f"⚠️ Lỗi đọc sheet '{sheet}': {e}")
+                    continue
+                
+                if 'Từ' not in df.columns:
+                    self.progress.emit(f"⚠️ Sheet '{sheet}' không có cột 'Từ'. Bỏ qua.")
+                else:
+                    # Đảm bảo các cột cần thiết tồn tại để tránh lỗi
+                    if 'Nghĩa' not in df.columns:
+                        df['Nghĩa'] = ''
+                    if 'Câu ví dụ' not in df.columns:
+                        df['Câu ví dụ'] = ''
+                    if 'Note' not in df.columns:
+                        df['Note'] = ''
 
-                    word = word.strip()
-                    if not word or word == 'nan': continue
-
-                    meaning = meanings[idx].strip()
-                    example = examples[idx].strip()
-
-                    safe_word = "".join([c for c in word if c.isalnum() or c in (' ', '-', '_')]).strip()
-                    final_img_path = os.path.join(sheet_out_dir, f"{safe_word}.png")
-
-                    if os.path.exists(final_img_path):
-                        self.progress.emit(f"   [{idx + 1}/{len(words)}] ⏭️ '{word}' đã có ảnh, bỏ qua.")
-                        continue
-
-                    self.progress.emit(f"   [{idx + 1}/{len(words)}] 🎨 Đang tạo ảnh cho: '{word}'...")
+                    words = df['Từ'].astype(str).tolist()
+                    meanings = df['Nghĩa'].fillna('').astype(str).tolist()
+                    examples = df['Câu ví dụ'].fillna('').astype(str).tolist()
+                    notes = df['Note'].fillna('').astype(str).tolist()
                     
-                    image_prompt = prompt_template.format(
-                        word=word,
-                        meaning=meaning,
-                        example=example
-                    )
+                    self.progress.emit(f"📋 Tìm thấy {len(words)} từ vựng trong sheet {sheet}.")
 
-                    template_img_path = self._get_random_template_image()
-                    if not template_img_path:
-                        self.progress.emit("      ⚠️ Không tìm thấy ảnh template mẫu.")
+                    for idx, word in enumerate(words):
+                        if not self._is_running:
+                            self.progress.emit("\n🛑 NGƯỜI DÙNG ĐÃ YÊU CẦU DỪNG.")
+                            break
 
-                    try:
-                        img_bytes = img_service.generate_image_with_image_ref(
-                            prompt=image_prompt,
-                            image_path=template_img_path,
-                            aspect_ratio="3:2"
-                        )
+                        word = word.strip()
+                        if not word or word == 'nan': continue
+
+                        note_val = notes[idx].strip()
+                        if self.error_only and not note_val:
+                            # Bỏ qua nếu người dùng tick "chỉ chạy lỗi" nhưng dòng này không có note
+                            continue
+
+                        meaning = meanings[idx].strip()
+                        example = examples[idx].strip()
+
+                        safe_word = "".join([c for c in word if c.isalnum() or c in (' ', '-', '_')]).strip()
+                        final_img_path = os.path.join(sheet_out_dir, f"{safe_word}.png")
+
+                        if os.path.exists(final_img_path):
+                            self.progress.emit(f"   [{idx + 1}/{len(words)}] ⏭️ '{word}' đã có ảnh, bỏ qua.")
+                            continue
+
+                        self.progress.emit(f"   [{idx + 1}/{len(words)}] 🎨 Đang tạo ảnh cho: '{word}'...")
                         
-                        if img_bytes:
-                            with open(final_img_path, "wb") as f:
-                                f.write(img_bytes)
-                            total_generated += 1
-                        else:
-                            self.progress.emit(f"      ❌ Không sinh được ảnh cho '{word}'")
+                        image_prompt = prompt_template.format(
+                            word=word,
+                            meaning=meaning,
+                            example=example,
+                            topic=sheet # Thêm topic từ tên sheet
+                        )
+
+                        template_img_path = self._get_random_template_image()
+                        if not template_img_path:
+                            self.progress.emit("      ⚠️ Không tìm thấy ảnh template mẫu.")
+
+                        try:
+                            img_bytes = img_service.generate_image_with_image_ref(
+                                prompt=image_prompt,
+                                image_path=template_img_path,
+                                aspect_ratio="3:2"
+                            )
                             
-                    except Exception as e:
-                        self.progress.emit(f"      ❌ Lỗi AI: {e}")
-                    
-                    import time
-                    time.sleep(1) # Tránh rate limit
+                            if img_bytes:
+                                with open(final_img_path, "wb") as f:
+                                    f.write(img_bytes)
+                                total_generated += 1
+                            else:
+                                self.progress.emit(f"      ❌ Không sinh được ảnh cho '{word}'")
+                                
+                        except Exception as e:
+                            self.progress.emit(f"      ❌ Lỗi AI: {e}")
+                        
+                        import time
+                        time.sleep(1) # Tránh rate limit
 
             self.finished.emit(f"Hoàn tất! Đã tạo thành công {total_generated} ảnh tại:\n{os.path.abspath(self.output_base)}")
 
@@ -566,6 +579,15 @@ class FlashcardWorker(QObject):
         self.schema_path = "resources/schema/flashcard_schema.json"
         self.prompt_path = "resources/prompts/enrich_vocab.txt"
         self.mascot_pdf = "resources/panda_mascot.pdf"
+        
+        # Khởi tạo Google TTS client
+        self.tts_client = None
+        try:
+            self.tts_client = init_google_tts_client()
+            print("✅ Google TTS Client đã khởi tạo thành công!")
+        except Exception as e:
+            print(f"⚠️ Lỗi khởi tạo Google TTS Client: {e}")
+            print("   Audio sẽ không được tạo nếu không khởi tạo được client.")
 
     def _setup_folders(self):
         for d in [self.output_base, self.img_final_dir, self.audio_dir, 
@@ -734,7 +756,19 @@ Trả về JSON chuẩn theo Schema.
                                 pdf = self.mascot_pdf if use_mascot else None
                                 img_bytes = img_service.generate_image_pdfs(prompt, pdf, aspect_ratio="3:2")
                                 if img_bytes:
-                                    with open(raw_img_path, "wb") as f: f.write(img_bytes)
+                                    # Nén và tối ưu hóa ảnh trước khi lưu (Giảm dung lượng từ vài MB xuống vài trăm KB)
+                                    from PIL import Image
+                                    import io
+                                    
+                                    img = Image.open(io.BytesIO(img_bytes))
+                                    if img.mode in ("RGBA", "LA"):
+                                        bg = Image.new("RGB", img.size, (255, 255, 255))
+                                        bg.paste(img, mask=img.split()[-1])
+                                        img = bg
+                                    else:
+                                        img = img.convert("RGB")
+                                        
+                                    img.save(raw_img_path, format="JPEG", quality=85, optimize=True)
                                     has_img = True
                             except Exception as e: self.progress.emit(f"⚠️ Lỗi Image Gen: {e}")
                         else: has_img = True
@@ -754,19 +788,31 @@ Trả về JSON chuẩn theo Schema.
                                 row_data['thumbnail'] = item['filename_image']
                                 self.progress.emit(f"   ✅ Đã tạo ảnh mới: {item['filename_image']}")
                         
-                    # 2. Audio Từ (audio1)
+                    # 2. Audio Từ (audio1) - Sử dụng Google TTS
                     if not row_data['audio1']:
                         w_path = os.path.join(self.audio_dir, item['filename_audio_word'])
-                        if generate_single_audio_narakeet(word, w_path):
-                            row_data['audio1'] = item['filename_audio_word']
-                            self.progress.emit(f"   🔊 Đã tạo audio từ.")
+                        if self.tts_client:
+                            try:
+                                if text_to_speech_google(self.tts_client, word, w_path):
+                                    row_data['audio1'] = item['filename_audio_word']
+                                    self.progress.emit(f"   🔊 Đã tạo audio từ (Google TTS).")
+                            except Exception as e:
+                                self.progress.emit(f"   ⚠️ Lỗi tạo audio từ: {e}")
+                        else:
+                            self.progress.emit(f"   ⚠️ Bỏ qua audio từ: Google TTS client chưa sẵn sàng")
 
-                    # 3. Audio Câu (audio2)
+                    # 3. Audio Câu (audio2) - Sử dụng Google TTS
                     if not row_data['audio2'] and row_data['phrace']:
                         ex_path = os.path.join(self.audio_dir, item['filename_audio_ex'])
-                        if generate_single_audio_narakeet(row_data['phrace'], ex_path):
-                            row_data['audio2'] = item['filename_audio_ex']
-                            self.progress.emit(f"   🔊 Đã tạo audio câu.")
+                        if self.tts_client:
+                            try:
+                                if text_to_speech_google(self.tts_client, row_data['phrace'], ex_path):
+                                    row_data['audio2'] = item['filename_audio_ex']
+                                    self.progress.emit(f"   🔊 Đã tạo audio câu (Google TTS).")
+                            except Exception as e:
+                                self.progress.emit(f"   ⚠️ Lỗi tạo audio câu: {e}")
+                        else:
+                            self.progress.emit(f"   ⚠️ Bỏ qua audio câu: Google TTS client chưa sẵn sàng")
 
                 else:
                     self.progress.emit(f"[{idx+1}/{total_items}] ✅ Bỏ qua (Đã hoàn thành): {word}")
@@ -1167,7 +1213,7 @@ class HSKGeneratorApp(QWidget):
         self.preproc_label = QLabel('Tùy chọn phân tích PDF:')
         self.preproc_combo = QComboBox()
         self.preproc_combo.addItems([
-            "Mặc định",
+            "Minitest",
             "Chỉ Từ vựng & Bài khóa",
             "Chỉ Từ vựng & Ngữ pháp"
         ])
@@ -1743,6 +1789,15 @@ class HSKGeneratorApp(QWidget):
         prompt_layout.addWidget(self.eng_browse_prompt_btn, 0)
         prompt_layout.addWidget(self.eng_open_prompt_btn, 0)
         layout.addLayout(prompt_layout)
+
+        # 3.5 Checkbox "Chỉ chạy các từ bị lỗi"
+        from PyQt5.QtWidgets import QCheckBox
+        cb_layout = QHBoxLayout()
+        self.eng_error_only_cb = QCheckBox("Chỉ chạy các từ bị lỗi (có dữ liệu ở cột 'Note')")
+        self.eng_error_only_cb.setStyleSheet("font-size: 11pt; font-weight: bold; color: #dc3545;")
+        cb_layout.addWidget(self.eng_error_only_cb)
+        cb_layout.addStretch()
+        layout.addLayout(cb_layout)
 
         # 4. Nút chạy và dừng
         btn_layout = QHBoxLayout()
@@ -2391,6 +2446,8 @@ class HSKGeneratorApp(QWidget):
             sheets = [s for s in xls.sheet_names if s.strip().lower() != "yêu cầu"]
             self.eng_sheet_combo.clear()
             if sheets:
+                self.eng_sheet_combo.addItem("Tất cả các sheet")
+                self.eng_sheet_combo.setItemData(0, "Chạy tạo ảnh cho tất cả các sheet", Qt.ToolTipRole)
                 for sheet in sheets:
                     self.eng_sheet_combo.addItem(sheet)
                     # Gắn tooltip cho từng item trong dropdown để khi hover hiện full tên
@@ -2419,9 +2476,19 @@ class HSKGeneratorApp(QWidget):
         self.eng_run_button.setText('⏳ Đang tạo ảnh...')
         self.eng_stop_button.setEnabled(True)
 
+        # Chuẩn bị danh sách sheet cần chạy
+        sheets_to_run = []
+        if sheet_name == "Tất cả các sheet":
+            for i in range(1, self.eng_sheet_combo.count()):
+                sheets_to_run.append(self.eng_sheet_combo.itemText(i))
+        else:
+            sheets_to_run = [sheet_name]
+
+        error_only = self.eng_error_only_cb.isChecked()
+
         # Khởi tạo thread và worker
         self.eng_thread = QThread()
-        self.eng_worker = EngFlashcardWorker(excel_path, sheet_name, prompt_path)
+        self.eng_worker = EngFlashcardWorker(excel_path, sheets_to_run, prompt_path, error_only)
         self.eng_worker.moveToThread(self.eng_thread)
 
         # Kết nối tín hiệu

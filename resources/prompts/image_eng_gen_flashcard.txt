@@ -1,10 +1,13 @@
 Generate an illustration for the word/phrase: "{word}". 
 Word Meaning: {meaning}.
+Topic: {topic}
+Example using the word: {example}
 
 CRITICAL REQUIREMENTS:
-1. No Text: Do NOT include any letters, words, or typography in the image.
-2. Single Composition: Generate EXACTLY ONE single, unified scene. NO grids, NO collages, NO split-screens, and NO multiple separate images in one frame. 
-3. Style Match: Match the drawing style of the reference (e.g., flat illustration, line art) but DO NOT copy its structural layout or grid format.
+1. Topic Alignment: The illustration MUST align with the given topic: "{topic}". If the word "{word}" is too abstract or difficult to visualize directly, use the provided Example ("{example}") as the main scenario for the illustration.
+2. No Text: Do NOT include any letters, words, or typography in the image.
+3. Single Composition: Generate EXACTLY ONE single, unified scene. NO grids, NO collages, NO split-screens, and NO multiple separate images in one frame. 
+4. Style Match: Match the drawing style of the reference (e.g., flat illustration, line art) but DO NOT copy its structural layout or grid format.
 
 COLOR PALETTE:
 - #f7d4dd (Soft Pink)

@@ -117,7 +117,7 @@ class HSKTextProcessor:
 # ==========================================
 class VertexAudioGenerator:
     # Danh sách các model name hỗ trợ
-    SUPPORTED_MODELS = ['gemini-2.5-pro-tts', 'gemini-2.5-flash-tts', 'Chirp3-HD']
+    SUPPORTED_MODELS = ['gemini-3.1-flash-tts-preview', 'gemini-2.5-pro-preview-tts', 'Chirp3-HD']
     
     # Danh sách voice nam và nữ
     MALE_VOICES = ['Charon', 'Orus', 'Enceladus']
@@ -174,7 +174,7 @@ class VertexAudioGenerator:
         """
         voice_name = self._get_voice_name(voice_key)
         
-        if self.model_name in ['gemini-2.5-pro-tts', 'gemini-2.5-flash-tts']:
+        if self.model_name in ['gemini-3.1-flash-tts-preview', 'gemini-2.5-pro-preview-tts']:
             # API Gemini yêu cầu model_name trong VoiceSelectionParams
             return texttospeech.VoiceSelectionParams(
                 language_code=self.language_code,
