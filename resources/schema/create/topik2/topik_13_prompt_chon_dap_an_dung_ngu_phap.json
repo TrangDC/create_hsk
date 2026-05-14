@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "topik_13_prompt_chon_dap_an_dung_ngu_phap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "options": {
+            "type": "array",    
+            "items": {
+              "type": "object",
+              "description": "Mỗi đối tượng trong mảng này đại diện cho một phương án trả lời.",
+              "properties": {
+                "display_text": { "type": "string", "description": "Nội dung hiển thị lựa chọn  (Cột G)." },
+                "explanation": { "type": "string", "description": "giải thích ngắn gọn tại sao đúng/sai (dùng cho Cột I)." },
+                "is_correct": { "type": "boolean" , "description": "Xác định phương án trả lời có đúng hay không (dùng cho Cột H)." }
+              },
+              "required": ["display_text", "explanation", "is_correct"]
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": ["question_id", "options"]
+      }
+    }
+  },
+  "required": ["topik_13_prompt_chon_dap_an_dung_ngu_phap"],
+  "additionalProperties": false
+}
