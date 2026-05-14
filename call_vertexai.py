@@ -8,7 +8,7 @@ import json
 from typing import List, Dict, Any, Optional
 import time
 import threading
-
+import base64
 # Load environment variables
 load_dotenv()
 
@@ -111,6 +111,80 @@ def load_schema_from_json(schema_file_path: str) -> dict:
     except json.JSONDecodeError as e:
         raise ValueError(f"Lỗi khi phân tích cú pháp file JSON schema '{schema_file_path}': {e}")
 
+def normalize_schema_for_openai(schema: Any) -> Any:
+    """
+    Chuan hoa JSON schema de tuong thich voi OpenAI structured outputs (strict).
+
+    Runtime normalize:
+    - Them additionalProperties=False cho moi object schema.
+    - Dam bao required chua day du tat ca key trong properties.
+    - Cac field truoc do KHONG bat buoc (optional) se duoc cho phep null de
+      giam nguy co vo logic schema cu khi bi nang cap thanh required.
+    """
+    def _make_nullable(prop_schema: Any) -> Any:
+        if not isinstance(prop_schema, dict):
+            return prop_schema
+
+        result = normalize_schema_for_openai(prop_schema)
+
+        # Da co nullable roi
+        t = result.get("type")
+        if isinstance(t, list):
+            if "null" not in t:
+                result["type"] = t + ["null"]
+            return result
+        if isinstance(t, str):
+            if t != "null":
+                result["type"] = [t, "null"]
+            return result
+
+        # Neu dung anyOf/oneOf thi chen them null schema
+        for union_key in ("anyOf", "oneOf"):
+            if union_key in result and isinstance(result[union_key], list):
+                has_null = any(
+                    isinstance(item, dict) and item.get("type") == "null"
+                    for item in result[union_key]
+                )
+                if not has_null:
+                    result[union_key].append({"type": "null"})
+                return result
+
+        # Khong xac dinh type -> fallback anyOf
+        return {"anyOf": [result, {"type": "null"}]}
+
+    if isinstance(schema, list):
+        return [normalize_schema_for_openai(item) for item in schema]
+
+    if not isinstance(schema, dict):
+        return schema
+
+    normalized = {}
+    for key, value in schema.items():
+        normalized[key] = normalize_schema_for_openai(value)
+
+    is_object_schema = normalized.get("type") == "object" or "properties" in normalized
+    if is_object_schema:
+        normalized["additionalProperties"] = False
+
+        properties = normalized.get("properties")
+        if isinstance(properties, dict):
+            original_required = normalized.get("required", [])
+            if not isinstance(original_required, list):
+                original_required = []
+
+            original_required_set = set(original_required)
+            all_prop_keys = list(properties.keys())
+
+            # Optional cu -> nullable, roi dua vao required
+            for key in all_prop_keys:
+                if key not in original_required_set:
+                    properties[key] = _make_nullable(properties[key])
+
+            normalized["required"] = all_prop_keys
+
+    return normalized
+
+
 def load_prompt_from_txt(prompt_file_path: str) -> str:
     """
     Đọc nội dung prompt từ file .txt.
@@ -175,165 +249,267 @@ def extract_structured_data_from_pdf(
 def generate_content(
     prompt_file_path: str,
     schema_file_path: str,
-    pdf_file_paths: Optional[List[str]] = None, 
+    pdf_file_paths: Optional[List[str]] = None,
     text_content: Optional[str] = None,
     max_retries: int = 5,
     retry_delay: int = 5,
     timeout_seconds: int = 150
 ) -> Dict[str, Any] | List[Any]:
     """
-    Gọi Vertex AI model với prompt, schema và nội dung (từ PDF hoặc text) để tạo câu hỏi.
-    LƯU Ý: Phải cung cấp `pdf_file_paths` HOẶC `text_content`, không phải cả hai.
+    Goi model voi prompt, schema va noi dung (tu PDF hoac text) de tao cau hoi.
+    LUU Y: Phai cung cap `pdf_file_paths` HOAC `text_content`, khong phai ca hai.
     """
-    if not is_vertex_initialized:
-        raise ConnectionError("Vertex AI chưa được khởi tạo thành công. Vui lòng kiểm tra credentials.")
-    
+    try:
+        from openai import OpenAI
+    except ImportError as e:
+        raise ImportError("Chua cai thu vien openai. Hay chay: pip install openai") from e
+
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ConnectionError("Khong tim thay OPENAI_API_KEY trong bien moi truong.")
+
     if pdf_file_paths is None and text_content is None:
-        raise ValueError("Phải cung cấp hoặc 'pdf_file_paths' hoặc 'text_content'.")
+        raise ValueError("Phai cung cap hoac 'pdf_file_paths' hoac 'text_content'.")
     if pdf_file_paths and text_content:
-        raise ValueError("Chỉ cung cấp một trong hai: 'pdf_file_paths' hoặc 'text_content'.")
+        raise ValueError("Chi cung cap mot trong hai: 'pdf_file_paths' hoac 'text_content'.")
 
-    # --- Tải cấu hình (chỉ cần làm một lần) ---
     prompt_text = load_prompt_from_txt(prompt_file_path)
-    response_schema = load_schema_from_json(schema_file_path)
+    response_schema = normalize_schema_for_openai(load_schema_from_json(schema_file_path))
 
-    request_parts = [prompt_text]
-    # Xây dựng nội dung yêu cầu dựa trên đầu vào
+    content_blocks = []
     if pdf_file_paths:
         for pdf_path in pdf_file_paths:
             try:
                 with open(pdf_path, "rb") as f:
                     pdf_bytes = f.read()
-                    request_parts.append(Part.from_data(data=pdf_bytes, mime_type="application/pdf"))
+                b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+                content_blocks.append({
+                    "type": "file",
+                    "file": {
+                        "filename": os.path.basename(pdf_path),
+                        "file_data": f"data:application/pdf;base64,{b64_pdf}",
+                    },
+                })
             except FileNotFoundError:
-                raise FileNotFoundError(f"Không tìm thấy file PDF tại: {pdf_path}")
+                raise FileNotFoundError(f"Khong tim thay file PDF tai: {pdf_path}")
     elif text_content:
-        # Nếu là nội dung text, coi nó như một tài liệu duy nhất
-        request_parts.append(Part.from_text(text_content))
+        content_blocks.append({"type": "text", "text": text_content})
 
-    generation_config = GenerationConfig(
-        temperature=0.3,
-        top_p=0.9,
-        response_mime_type="application/json",
-        response_schema=response_schema
-    )
-   
-    model = GenerativeModel(vertex_ai_config.model_name)
-    
-    # --- Bắt đầu vòng lặp Retry ---
+    content_blocks.append({"type": "text", "text": prompt_text})
+
+    openai_client = OpenAI(api_key=openai_api_key)
+    openai_model = os.getenv("OPENAI_MODEL", "gpt-4.1")
+    if openai_model.lower().startswith("gemini"):
+        openai_model = "gpt-4.1"
+
+    kwargs = {
+        "model": openai_model,
+        "messages": [{"role": "user", "content": content_blocks}],
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "structured_output",
+                "schema": response_schema,
+                "strict": True,
+            },
+        },
+    }
+
     last_exception = None
     for attempt in range(max_retries):
         try:
-            print(f"Đang gửi yêu cầu đến Vertex AI... (Lần thử {attempt + 1}/{max_retries})")
-            
-            # Set up threading event to track completion
+            print(f"Dang gui yeu cau den OpenAI... (Lan thu {attempt + 1}/{max_retries})")
+
             response_event = threading.Event()
-            response_container = [None]  # To store the response
-            exception_container = [None]  # To store any exception
+            response_container = [None]
+            exception_container = [None]
 
             def run_api_call():
                 try:
-                    response = model.generate_content(
-                        contents=request_parts,
-                        generation_config=generation_config,
-                        stream=False
-                    )
+                    response = openai_client.chat.completions.create(**kwargs)
                     response_container[0] = response
-                    response_event.set()  # Signal completion
+                    response_event.set()
                 except Exception as e:
                     exception_container[0] = e
-                    response_event.set()  # Signal completion even on error
+                    response_event.set()
 
-            # Start the API call in a separate thread
             api_thread = threading.Thread(target=run_api_call)
             api_thread.start()
 
-            # Wait for the API call to complete or timeout
             if not response_event.wait(timeout=timeout_seconds):
-                # Timeout occurred
-                print(f"   ⚠️ API call vượt quá {timeout_seconds} giây.")
+                print(f"   Warning: API call vuot qua {timeout_seconds} giay.")
                 last_exception = TimeoutError(f"API call timed out after {timeout_seconds} seconds")
                 if attempt < max_retries - 1:
-                    print(f"   -> Thử lại sau {retry_delay} giây...")
+                    print(f"   -> Thu lai sau {retry_delay} giay...")
                     time.sleep(retry_delay)
-                continue  # Retry the API call
+                continue
 
-            # Check if an exception occurred during the API call
             if exception_container[0]:
                 raise exception_container[0]
 
-            # Process the response
             response = response_container[0]
-            response_text = response.text.strip()
-            
+            response_text = response.choices[0].message.content
+            if isinstance(response_text, list):
+                response_text = "".join(
+                    block.get("text", "") for block in response_text if isinstance(block, dict)
+                )
+            response_text = (response_text or "").strip()
+
             if not response_text:
-                raise ValueError("AI không trả về nội dung.")
-            
-            # Xử lý format markdown code block nếu có
+                raise ValueError("AI khong tra ve noi dung.")
+
             if response_text.startswith('```json') and response_text.endswith('```'):
                 response_text = response_text[7:-3].strip()
-            
+            elif response_text.startswith('```') and response_text.endswith('```'):
+                response_text = response_text[3:-3].strip()
+
             try:
-                # Nếu parse JSON thành công, thoát khỏi vòng lặp và trả về kết quả
                 return json.loads(response_text)
             except json.JSONDecodeError:
-                print("--- LỖI PHÂN TÍCH JSON ---")
-                print("AI đã trả về nội dung không hợp lệ:")
+                print("--- LOI PHAN TICH JSON ---")
+                print("AI da tra ve noi dung khong hop le:")
                 print(response_text)
                 print("--------------------------")
-                raise ValueError("AI không trả về một đối tượng JSON hợp lệ.")
+                raise ValueError("AI khong tra ve mot doi tuong JSON hop le.")
 
         except Exception as e:
             last_exception = e
-            print(f"   ⚠️ Gặp lỗi ở lần thử {attempt + 1}: {e}")
+            print(f"   Warning: Gap loi o lan thu {attempt + 1}: {e}")
             if attempt < max_retries - 1:
-                print(f"   -> Thử lại sau {retry_delay} giây...")
+                print(f"   -> Thu lai sau {retry_delay} giay...")
                 time.sleep(retry_delay)
             else:
-                print(f"   -> Đã thử lại {max_retries} lần nhưng không thành công.")
-    
-    # Nếu vòng lặp kết thúc mà không thành công, raise lỗi cuối cùng gặp phải
-    raise ConnectionError(f"Không thể lấy dữ liệu từ Vertex AI sau {max_retries} lần thử.")
+                print(f"   -> Da thu lai {max_retries} lan nhung khong thanh cong.")
 
+    raise ConnectionError(f"Khong the lay du lieu tu OpenAI sau {max_retries} lan thu. Loi cuoi: {last_exception}")
+
+
+class VertexClient:
+    def __init__(self, project_id, creds, model, region="us-central1"):
+        # Giu nguyen interface cu, doi backend sang OpenAI.
+        try:
+            from openai import OpenAI
+            model= "gpt-5.4"
+        except ImportError as e:
+            raise ImportError("Chua cai thu vien openai. Hay chay: pip install openai") from e
+
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("Khong tim thay OPENAI_API_KEY trong bien moi truong.")
+
+        self.client = OpenAI(api_key=api_key)
+        self.model_name = model
+
+    def send_data_to_AI(
+        self,
+        prompt,
+        data=None,
+        mime_type=None,
+        temperature=0.5,
+        top_p=0.8,
+        response_mime_type=None,
+        response_schema=None,
+    ):
+        content_blocks = []
+
+        if data and mime_type:
+            b64_data = base64.b64encode(data).decode("utf-8")
+            if mime_type.startswith("image/"):
+                content_blocks.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:{mime_type};base64,{b64_data}"},
+                    }
+                )
+            else:
+                content_blocks.append(
+                    {
+                        "type": "file",
+                        "file": {
+                            "filename": f"input.{mime_type.split('/')[-1]}",
+                            "file_data": f"data:{mime_type};base64,{b64_data}",
+                        },
+                    }
+                )
+
+        content_blocks.append({"type": "text", "text": prompt})
+
+        kwargs = {
+            "model": self.model_name,
+            "messages": [{"role": "user", "content": content_blocks}],
+        }
+
+        kwargs["temperature"] = temperature
+        kwargs["top_p"] = top_p
+
+        if response_mime_type == "application/json":
+            if isinstance(response_schema, dict) and response_schema:
+                safe_schema = normalize_schema_for_openai(response_schema)
+                kwargs["response_format"] = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "structured_output",
+                        "schema": safe_schema,
+                        "strict": True,
+                    },
+                }
+            else:
+                kwargs["response_format"] = {"type": "json_object"}
+
+        response = self.client.chat.completions.create(**kwargs)
+        content = response.choices[0].message.content
+
+        if isinstance(content, list):
+            content = "".join(block.get("text", "") for block in content if isinstance(block, dict))
+        content = (content or "").strip()
+
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+
+        return content.strip()
 
 def get_credentials():
     """Lấy credentials và project_id từ config."""
     return vertex_ai_config.credentials, vertex_ai_config.project_id
 
 
-class VertexClient:
-    """Client wrapper để tương thích ngược với cách gọi cũ của api.callApi."""
-    def __init__(self, project_id, creds, model_name="gemini-2.5-pro", region="us-central1"):
-        # vertexai.init đã được gọi qua vertex_ai_config.initialize_vertex_ai() ở trên
-        self.model = GenerativeModel(model_name)
+# class VertexClient:
+#     """Client wrapper để tương thích ngược với cách gọi cũ của api.callApi."""
+#     def __init__(self, project_id, creds, model_name="gemini-2.5-pro", region="us-central1"):
+#         # vertexai.init đã được gọi qua vertex_ai_config.initialize_vertex_ai() ở trên
+#         self.model = GenerativeModel(model_name)
 
-    def send_data_to_AI(self, prompt, data=None, mime_type=None, temperature=0.5, top_p=0.8, file_paths=None, response_mime_type=None, response_schema=None):
-        parts =[]
-        if data and mime_type:
-            parts.append(Part.from_data(data=data, mime_type=mime_type))
-        if file_paths:
-            import mimetypes
-            for path in file_paths:
-                with open(path, "rb") as f:
-                    file_data = f.read()
-                mt = mimetypes.guess_type(path)[0] or "application/pdf"
-                parts.append(Part.from_data(data=file_data, mime_type=mt))
+#     def send_data_to_AI(self, prompt, data=None, mime_type=None, temperature=0.5, top_p=0.8, file_paths=None, response_mime_type=None, response_schema=None):
+#         parts =[]
+#         if data and mime_type:
+#             parts.append(Part.from_data(data=data, mime_type=mime_type))
+#         if file_paths:
+#             import mimetypes
+#             for path in file_paths:
+#                 with open(path, "rb") as f:
+#                     file_data = f.read()
+#                 mt = mimetypes.guess_type(path)[0] or "application/pdf"
+#                 parts.append(Part.from_data(data=file_data, mime_type=mt))
         
-        parts.append(Part.from_text(prompt))
+#         parts.append(Part.from_text(prompt))
         
-        # Khởi tạo Dictionary chứa cấu hình
-        config_args = {
-            "temperature": temperature,
-            "top_p": top_p
-        }
+#         # Khởi tạo Dictionary chứa cấu hình
+#         config_args = {
+#             "temperature": temperature,
+#             "top_p": top_p
+#         }
         
-        # Thêm cấu hình JSON nếu có truyền vào
-        if response_mime_type:
-            config_args["response_mime_type"] = response_mime_type
-        if response_schema:
-            config_args["response_schema"] = response_schema
+#         # Thêm cấu hình JSON nếu có truyền vào
+#         if response_mime_type:
+#             config_args["response_mime_type"] = response_mime_type
+#         if response_schema:
+#             config_args["response_schema"] = response_schema
             
-        generation_config = GenerationConfig(**config_args)
+#         generation_config = GenerationConfig(**config_args)
         
-        response = self.model.generate_content(parts, generation_config=generation_config)
-        return response.text
+#         response = self.model.generate_content(parts, generation_config=generation_config)
+#         return response.text
