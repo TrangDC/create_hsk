@@ -1,101 +1,21 @@
 # call_vertexai.py
+# OpenAI-based implementation (Gemini/Vertex AI removed)
 import os
-from google.oauth2 import service_account
-import vertexai
-from dotenv import load_dotenv
-from vertexai.preview.generative_models import GenerativeModel, GenerationConfig, Part
 import json
-from typing import List, Dict, Any, Optional
+import base64
 import time
 import threading
-import base64
+from typing import List, Dict, Any, Optional
+from dotenv import load_dotenv
+
 # Load environment variables
 load_dotenv()
 
 class VertexAIConfig:
-    """Cấu hình cho Vertex AI API"""
-    def __init__(self):
-        self.project_id = os.getenv("PROJECT_ID")
-        self.region = "us-central1"  # Region mặc định
-        self.model_name = "gemini-2.5-pro"  # Model mặc định
-        self.credentials = None
-        
-        # Thiết lập credentials
-        self._setup_credentials()
-    
-    def _setup_credentials(self):
-        """Thiết lập credentials từ service account"""
-        try:
-            service_account_data = {
-                "type": os.getenv("TYPE"),
-                "project_id": os.getenv("PROJECT_ID"),
-                "private_key_id": os.getenv("PRIVATE_KEY_ID"),
-                "private_key": os.getenv("PRIVATE_KEY").replace('\\n', '\n') if os.getenv("PRIVATE_KEY") else None,
-                "client_email": os.getenv("CLIENT_EMAIL"),
-                "client_id": os.getenv("CLIENT_ID", ""),
-                "auth_uri": os.getenv("AUTH_URI"),
-                "token_uri": os.getenv("TOKEN_URI"),
-                "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
-                "client_x509_cert_url": os.getenv("CLIENT_X509_CERT_URL"),
-                "universe_domain": os.getenv("UNIVERSE_DOMAIN")
-            }
-            
-            self.credentials = service_account.Credentials.from_service_account_info(
-                service_account_data,
-                scopes=["https://www.googleapis.com/auth/cloud-platform"]
-            )
-            
-        except Exception as e:
-            print(f"Lỗi khi tạo credentials từ service account: {e}")
-            self.credentials = None
-    
-    def initialize_vertex_ai(self):
-        """Khởi tạo Vertex AI với credentials"""
-        try:
-            if not self.is_configured():
-                raise ValueError("Vertex AI chưa được cấu hình đúng")
-                
-            vertexai.init(
-                project=self.project_id, 
-                location=self.region, 
-                credentials=self.credentials
-            )
-            return True
-            
-        except Exception as e:
-            print(f"Lỗi khi khởi tạo Vertex AI: {e}")
-            return False
-    
-    def is_configured(self):
-        """Kiểm tra xem API đã được cấu hình chưa"""
-        return bool(self.project_id and self.credentials)
-    
-    def get_generation_config(self, temperature=0.5, top_p=0.8, max_output_tokens=None):
-        """Trả về generation config cho model"""
-        config = {
-            "temperature": temperature,
-            "top_p": top_p
-        }
-        
-        if max_output_tokens:
-            config["max_output_tokens"] = max_output_tokens
-            
-        return config
-    
-    def get_project_info(self):
-        """Trả về thông tin project"""
-        return {
-            "project_id": self.project_id,
-            "region": self.region,
-            "model_name": self.model_name,
-            "is_configured": self.is_configured()
-        }
+    """DEPRECATED: Kept for backward compatibility only. Use OpenAI instead."""
+    pass
 
-# Tạo instance global để sử dụng trong toàn bộ ứng dụng
-vertex_ai_config = VertexAIConfig()
 
-# Khởi tạo một lần khi module được import
-is_vertex_initialized = vertex_ai_config.initialize_vertex_ai()
 
 def load_schema_from_json(schema_file_path: str) -> dict:
     """
@@ -205,21 +125,18 @@ def load_prompt_from_txt(prompt_file_path: str) -> str:
     with open(prompt_file_path, 'r', encoding='utf-8') as file:
         return file.read()
 
-def validate_vertex_ai_config() -> bool:
+
+def validate_openai_config() -> bool:
     """
-    Kiểm tra và khởi tạo cấu hình Vertex AI.
+    Kiểm tra cấu hình OpenAI.
     
     Returns:
-        bool: True nếu cấu hình hợp lệ và khởi tạo thành công, False nếu không.
+        bool: True nếu API key được cấu hình, False nếu không.
     """
-    if not vertex_ai_config.is_configured():
-        print("Lỗi: Cấu hình Vertex AI không hợp lệ.")
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        print("Lỗi: Cấu hình OpenAI không hợp lệ. Kiểm tra biến OPENAI_API_KEY.")
         return False
-
-    if not vertex_ai_config.initialize_vertex_ai():
-        print("Lỗi: Không thể khởi tạo Vertex AI.")
-        return False
-        
     return True
 
 # --- HÀM MỚI ---
@@ -472,44 +389,3 @@ class VertexClient:
 
         return content.strip()
 
-def get_credentials():
-    """Lấy credentials và project_id từ config."""
-    return vertex_ai_config.credentials, vertex_ai_config.project_id
-
-
-# class VertexClient:
-#     """Client wrapper để tương thích ngược với cách gọi cũ của api.callApi."""
-#     def __init__(self, project_id, creds, model_name="gemini-2.5-pro", region="us-central1"):
-#         # vertexai.init đã được gọi qua vertex_ai_config.initialize_vertex_ai() ở trên
-#         self.model = GenerativeModel(model_name)
-
-#     def send_data_to_AI(self, prompt, data=None, mime_type=None, temperature=0.5, top_p=0.8, file_paths=None, response_mime_type=None, response_schema=None):
-#         parts =[]
-#         if data and mime_type:
-#             parts.append(Part.from_data(data=data, mime_type=mime_type))
-#         if file_paths:
-#             import mimetypes
-#             for path in file_paths:
-#                 with open(path, "rb") as f:
-#                     file_data = f.read()
-#                 mt = mimetypes.guess_type(path)[0] or "application/pdf"
-#                 parts.append(Part.from_data(data=file_data, mime_type=mt))
-        
-#         parts.append(Part.from_text(prompt))
-        
-#         # Khởi tạo Dictionary chứa cấu hình
-#         config_args = {
-#             "temperature": temperature,
-#             "top_p": top_p
-#         }
-        
-#         # Thêm cấu hình JSON nếu có truyền vào
-#         if response_mime_type:
-#             config_args["response_mime_type"] = response_mime_type
-#         if response_schema:
-#             config_args["response_schema"] = response_schema
-            
-#         generation_config = GenerationConfig(**config_args)
-        
-#         response = self.model.generate_content(parts, generation_config=generation_config)
-#         return response.text

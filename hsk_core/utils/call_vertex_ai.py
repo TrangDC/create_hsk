@@ -2,13 +2,11 @@ import os
 import json
 import time
 import sys
+import base64
+import threading
 from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
 from dotenv import load_dotenv
-
-import vertexai
-from google.oauth2 import service_account
-from vertexai.generative_models import GenerativeModel, GenerationConfig, Part
 
 # Load biến môi trường từ file .env
 load_dotenv()
@@ -28,47 +26,110 @@ def get_resource_path(relative_path: str) -> Path:
     
     return base_path / relative_path
 
+def normalize_schema_for_openai(schema: Any) -> Any:
+    """
+    Chuẩn hóa JSON schema để tương thích với OpenAI structured outputs (strict).
+    """
+    def _make_nullable(prop_schema: Any) -> Any:
+        if not isinstance(prop_schema, dict):
+            return prop_schema
+
+        result = normalize_schema_for_openai(prop_schema)
+
+        t = result.get("type")
+        if isinstance(t, list):
+            if "null" not in t:
+                result["type"] = t + ["null"]
+            return result
+        if isinstance(t, str):
+            if t != "null":
+                result["type"] = [t, "null"]
+            return result
+
+        for union_key in ("anyOf", "oneOf"):
+            if union_key in result and isinstance(result[union_key], list):
+                has_null = any(
+                    isinstance(item, dict) and item.get("type") == "null"
+                    for item in result[union_key]
+                )
+                if not has_null:
+                    result[union_key].append({"type": "null"})
+                return result
+
+        return {"anyOf": [result, {"type": "null"}]}
+
+    if isinstance(schema, list):
+        return [normalize_schema_for_openai(item) for item in schema]
+
+    if not isinstance(schema, dict):
+        return schema
+
+    normalized = {}
+    for key, value in schema.items():
+        normalized[key] = normalize_schema_for_openai(value)
+
+    is_object_schema = normalized.get("type") == "object" or "properties" in normalized
+    if is_object_schema:
+        normalized["additionalProperties"] = False
+
+        properties = normalized.get("properties")
+        if isinstance(properties, dict):
+            original_required = normalized.get("required", [])
+            if not isinstance(original_required, list):
+                original_required = []
+
+            original_required_set = set(original_required)
+            all_prop_keys = list(properties.keys())
+
+            for key in all_prop_keys:
+                if key not in original_required_set:
+                    properties[key] = _make_nullable(properties[key])
+
+            normalized["required"] = all_prop_keys
+
+    return normalized
+
+def load_schema_from_json(schema_file_path: str) -> dict:
+    """Đọc schema từ file JSON"""
+    if not os.path.exists(schema_file_path):
+        raise FileNotFoundError(f"Không tìm thấy file schema tại '{schema_file_path}'")
+    
+    with open(schema_file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def load_prompt_from_txt(prompt_file_path: str) -> str:
+    """Đọc prompt từ file .txt"""
+    if not os.path.exists(prompt_file_path):
+        raise FileNotFoundError(f"Không tìm thấy file prompt tại '{prompt_file_path}'")
+    
+    with open(prompt_file_path, 'r', encoding='utf-8') as file:
+        return file.read()
+
 class VertexAIClient:
     def __init__(self):
-        self.project_id = os.getenv("PROJECT_ID")
-        self.location = os.getenv("REGION", "us-central1")
-        self.model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro") # Dòng model ổn định và nhanh
-        self.credentials = self._load_credentials()
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.model_name = os.getenv("OPENAI_MODEL", "gpt-4.1")
+        self.client = None
         self._initialized = False
         
-    def _load_credentials(self):
-        """Thiết lập credentials từ biến môi trường .env"""
+    def _initialize_client(self):
+        """Khởi tạo OpenAI client"""
         try:
-            service_account_info = {
-                "type": os.getenv("TYPE"),
-                "project_id": os.getenv("PROJECT_ID"),
-                "private_key_id": os.getenv("PRIVATE_KEY_ID"),
-                "private_key": os.getenv("PRIVATE_KEY", "").replace('\\n', '\n'),
-                "client_email": os.getenv("CLIENT_EMAIL"),
-                "token_uri": os.getenv("TOKEN_URI"),
-            }
-            # Kiểm tra nếu thiếu thông tin quan trọng
-            if not service_account_info["project_id"] or not service_account_info["private_key"]:
-                return None
-                
-            return service_account.Credentials.from_service_account_info(service_account_info)
-        except Exception as e:
-            print(f"❌ Lỗi cấu hình Credentials: {e}")
-            return None
+            from openai import OpenAI
+        except ImportError as e:
+            raise ImportError("Chua cai thu vien openai. Hay chay: pip install openai") from e
+
+        if not self.api_key:
+            raise ValueError("Không tìm thấy OPENAI_API_KEY trong biến môi trường")
+
+        self.client = OpenAI(api_key=self.api_key)
 
     def init_ai(self):
-        """Khởi tạo Vertex AI một lần duy nhất"""
+        """Khởi tạo OpenAI client một lần duy nhất"""
         if not self._initialized:
-            if not self.credentials:
-                raise ValueError("Cấu hình Vertex AI không hợp lệ. Kiểm tra file .env")
-            
-            vertexai.init(
-                project=self.project_id,
-                location=self.location,
-                credentials=self.credentials
-            )
+            self._initialize_client()
             self._initialized = True
-            print(f"✅ Đã khởi tạo Vertex AI (Project: {self.project_id}, Model: {self.model_name})")
+            print(f"✅ Đã khởi tạo OpenAI (Model: {self.model_name})")
 
     def generate_content(
         self,
@@ -77,64 +138,148 @@ class VertexAIClient:
         pdf_paths: Optional[List[str]] = None,
         text_context: Optional[str] = None,
         temperature: float = 0.2,
-        max_retries: int = 3
+        max_retries: int = 3,
+        timeout_seconds: int = 150,
+        retry_delay: int = 5
     ) -> Union[Dict[str, Any], List[Any]]:
         """
-        Gọi Vertex AI để sinh nội dung.
+        Gọi OpenAI để sinh nội dung có cấu trúc JSON.
         - prompt_text: String nội dung hướng dẫn.
         - response_schema: Dictionary định nghĩa cấu trúc JSON mong muốn.
         - pdf_paths: Danh sách các đường dẫn file PDF (nếu có).
+        - text_context: Nội dung text bổ sung (nếu có).
         """
         self.init_ai()
         
-        # Chuẩn bị danh sách các "Parts" gửi cho AI
-        request_parts = [prompt_text]
+        # Chuẩn hóa schema cho OpenAI
+        response_schema = normalize_schema_for_openai(response_schema)
         
-        # 1. Thêm context từ text (nếu có)
-        if text_context:
-            request_parts.append(text_context)
-            
-        # 2. Thêm context từ PDF (nếu có)
+        # Chuẩn bị content blocks
+        content_blocks = []
+        
+        # 1. Thêm context từ PDF (nếu có) - đọc text từ PDF
         if pdf_paths:
-            for path in pdf_paths:
-                if os.path.exists(path):
-                    with open(path, "rb") as f:
-                        pdf_data = f.read()
-                        request_parts.append(Part.from_data(data=pdf_data, mime_type="application/pdf"))
-                    print(f"   📎 Đã đính kèm PDF: {os.path.basename(path)}")
-                else:
-                    print(f"   ⚠️ Cảnh báo: Không tìm thấy file {path}")
-
-        # Cấu hình phản hồi dạng JSON
-        generation_config = GenerationConfig(
-            temperature=temperature,
-            response_mime_type="application/json",
-            response_schema=response_schema
-        )
-
-        model = GenerativeModel(self.model_name)
+            try:
+                import PyPDF2
+            except ImportError:
+                # Fallback: yêu cầu cài thư viện
+                print("   ⚠️ Cảnh báo: pypdf2 chưa được cài đặt. Sẽ bỏ qua xử lý PDF.")
+                print("   Để xử lý PDF, hãy chạy: pip install pypdf2")
+                pdf_paths = None
+            
+            if pdf_paths:
+                for path in pdf_paths:
+                    if os.path.exists(path):
+                        try:
+                            with open(path, "rb") as f:
+                                pdf_reader = PyPDF2.PdfReader(f)
+                                pdf_text = ""
+                                for page in pdf_reader.pages:
+                                    pdf_text += page.extract_text() + "\n"
+                            
+                            if pdf_text.strip():
+                                content_blocks.append({
+                                    "type": "text",
+                                    "text": f"=== Nội dung từ file: {os.path.basename(path)} ===\n{pdf_text}"
+                                })
+                                print(f"   📎 Đã đọc PDF: {os.path.basename(path)} ({len(pdf_text)} ký tự)")
+                            else:
+                                print(f"   ⚠️ Cảnh báo: PDF {path} không có text nào")
+                        except Exception as e:
+                            print(f"   ⚠️ Lỗi đọc PDF {path}: {e}")
+                    else:
+                        print(f"   ⚠️ Cảnh báo: Không tìm thấy file {path}")
         
-        # Vòng lặp thử lại (Retry logic)
+        # 2. Thêm context từ text (nếu có)
+        if text_context:
+            content_blocks.append({"type": "text", "text": text_context})
+        
+        # 3. Thêm prompt
+        content_blocks.append({"type": "text", "text": prompt_text})
+
+        kwargs = {
+            "model": self.model_name,
+            "messages": [{"role": "user", "content": content_blocks}],
+            "temperature": temperature,
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "structured_output",
+                    "schema": response_schema,
+                    "strict": True,
+                },
+            },
+        }
+
+        last_exception = None
         for attempt in range(max_retries):
             try:
-                response = model.generate_content(
-                    request_parts,
-                    generation_config=generation_config
-                )
+                print(f"   Đang gửi yêu cầu đến OpenAI... (Lần thử {attempt + 1}/{max_retries})")
+
+                response_event = threading.Event()
+                response_container = [None]
+                exception_container = [None]
+
+                def run_api_call():
+                    try:
+                        response = self.client.chat.completions.create(**kwargs)
+                        response_container[0] = response
+                        response_event.set()
+                    except Exception as e:
+                        exception_container[0] = e
+                        response_event.set()
+
+                api_thread = threading.Thread(target=run_api_call)
+                api_thread.start()
+
+                if not response_event.wait(timeout=timeout_seconds):
+                    print(f"   ⚠️ API call vượt quá {timeout_seconds} giây.")
+                    last_exception = TimeoutError(f"API call timed out after {timeout_seconds} seconds")
+                    if attempt < max_retries - 1:
+                        print(f"   -> Thử lại sau {retry_delay} giây...")
+                        time.sleep(retry_delay)
+                    continue
+
+                if exception_container[0]:
+                    raise exception_container[0]
+
+                response = response_container[0]
+                response_text = response.choices[0].message.content
                 
-                if not response.text:
-                    raise ValueError("AI trả về nội dung rỗng.")
-                
-                # Parse kết quả JSON
-                return json.loads(response.text)
+                if isinstance(response_text, list):
+                    response_text = "".join(
+                        block.get("text", "") for block in response_text if isinstance(block, dict)
+                    )
+                response_text = (response_text or "").strip()
+
+                if not response_text:
+                    raise ValueError("AI không trả về nội dung.")
+
+                # Loại bỏ markdown code blocks nếu có
+                if response_text.startswith('```json') and response_text.endswith('```'):
+                    response_text = response_text[7:-3].strip()
+                elif response_text.startswith('```') and response_text.endswith('```'):
+                    response_text = response_text[3:-3].strip()
+
+                try:
+                    return json.loads(response_text)
+                except json.JSONDecodeError:
+                    print("--- LỖI PHÂN TÍCH JSON ---")
+                    print("AI đã trả về nội dung không hợp lệ:")
+                    print(response_text[:500])  # In 500 ký tự đầu để debug
+                    print("-" * 30)
+                    raise ValueError("AI không trả về một đối tượng JSON hợp lệ.")
 
             except Exception as e:
-                print(f"   ⚠️ Lần thử {attempt + 1} thất bại: {e}")
+                last_exception = e
+                print(f"   ⚠️ Gặp lỗi ở lần thử {attempt + 1}: {e}")
                 if attempt < max_retries - 1:
-                    time.sleep(5)
+                    print(f"   -> Thử lại sau {retry_delay} giây...")
+                    time.sleep(retry_delay)
                 else:
-                    print(f"❌ Thất bại sau {max_retries} lần thử.")
-                    raise
+                    print(f"   -> Đã thử lại {max_retries} lần nhưng không thành công.")
+
+        raise ConnectionError(f"Không thể lấy dữ liệu từ OpenAI sau {max_retries} lần thử. Lỗi cuối: {last_exception}")
 
 # Khởi tạo client dùng chung cho toàn bộ module
 ai_client = VertexAIClient()
@@ -162,11 +307,11 @@ if __name__ == "__main__":
         }
     }
 
-    print("--- Đang chạy thử nghiệm Vertex AI Client ---")
+    print("--- Đang chạy thử nghiệm OpenAI Client ---")
     try:
         # Lưu ý: Cần có file .env đúng thông tin để chạy được
         result = ai_client.generate_content(test_prompt, test_schema)
-        print("Kết quả JSON từ AI:")
+        print("✅ Kết quả JSON từ OpenAI:")
         print(json.dumps(result, indent=2, ensure_ascii=False))
     except Exception as err:
-        print(f"Lỗi kiểm thử: {err}")
+        print(f"❌ Lỗi kiểm thử: {err}")
