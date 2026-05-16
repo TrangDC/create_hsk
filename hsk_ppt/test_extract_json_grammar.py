@@ -4,9 +4,9 @@ import json
 import time
 import re
 
-# Đảm bảo có thể import được call_vertexai từ thư mục cha
+# Đảm bảo có thể import được services từ thư mục cha
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from call_vertexai import VertexClient, get_credentials
+from services.callAPI import VertexClient
 
 def get_grammar_schema():
     """Định nghĩa JSON Schema cho điểm ngữ pháp (Linear Structure)"""
@@ -199,8 +199,7 @@ def process_grammar_lesson(pdf_path: str, base_prompt: str, level: str, index_fi
 
     print(f"Bắt đầu xử lý file PDF Ngữ Pháp cấp độ {level} - Bài {lesson_number}. Tổng số chủ điểm: {total_topics}...")
     
-    creds, project_id = get_credentials()
-    client = VertexClient(project_id, creds, "gemini-2.5-pro", "us-central1")
+    client = VertexClient(None, None, "gpt-5.5", "us-central1")  # Dùng OpenAI backend
     
     final_json = {
         "lesson_info": {},

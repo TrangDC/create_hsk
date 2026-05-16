@@ -215,9 +215,9 @@ def generate_content(
     content_blocks.append({"type": "text", "text": prompt_text})
 
     openai_client = OpenAI(api_key=openai_api_key)
-    openai_model = os.getenv("OPENAI_MODEL", "gpt-4.1")
+    openai_model = os.getenv("OPENAI_MODEL", "gpt-5.5")
     if openai_model.lower().startswith("gemini"):
-        openai_model = "gpt-4.1"
+        openai_model = "gpt-5.5"
 
     kwargs = {
         "model": openai_model,
@@ -306,7 +306,7 @@ class VertexClient:
         # Giu nguyen interface cu, doi backend sang OpenAI.
         try:
             from openai import OpenAI
-            model= "gpt-5.4"
+            model= "gpt-5.5"
         except ImportError as e:
             raise ImportError("Chua cai thu vien openai. Hay chay: pip install openai") from e
 

@@ -108,7 +108,7 @@ def load_prompt_from_txt(prompt_file_path: str) -> str:
 class VertexAIClient:
     def __init__(self):
         self.api_key = os.getenv("OPENAI_API_KEY")
-        self.model_name = os.getenv("OPENAI_MODEL", "gpt-4.1")
+        self.model_name = os.getenv("OPENAI_MODEL", "gpt-5.5")
         self.client = None
         self._initialized = False
         

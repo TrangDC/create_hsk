@@ -79,7 +79,7 @@ class VertexClient:
         }
 
         model_lower = self.model_name.lower()
-        is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-5"])
+        is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-5.5"])
         if not is_o_model:
             kwargs["temperature"] = temperature
             kwargs["top_p"] = top_p

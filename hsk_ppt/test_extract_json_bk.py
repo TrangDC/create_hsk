@@ -4,9 +4,9 @@ import json
 import re
 import time
 
-# Đảm bảo có thể import được call_vertexai từ thư mục cha
+# Đảm bảo có thể import được services từ thư mục cha
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from call_vertexai import VertexClient, get_credentials
+from services.callAPI import VertexClient
 
 def get_section_schema():
     """Định nghĩa JSON Schema dưới dạng Dict để tránh lỗi Import"""
@@ -419,8 +419,7 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
     
     print(f"Bắt đầu xử lý file PDF cho cấp độ {level}. Tổng số section cần quét: {total_iterations}...")
     
-    creds, project_id = get_credentials()
-    client = VertexClient(project_id, creds, "gemini-2.5-pro", "us-central1") # Đã sửa tên model chuẩn
+    client = VertexClient(None, None, "gpt-5.5", "us-central1")  # Dùng OpenAI backend
     
     # Khởi tạo object JSON tổng
     final_json = {
