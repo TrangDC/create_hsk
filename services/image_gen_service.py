@@ -18,14 +18,14 @@ class ImageGenerationService:
     def __init__(self):
         self.credentials = self._get_vertex_ai_credentials()
         self.project_id = PROJECT_ID
-        self.model_name = "gemini-3-pro-image-preview"
+        self.model_name = "gemini-3.1-flash-image-preview"
         self.location = "global"
         self.client = None
 
         # 2. Cấu hình cho Imagen (Cũ - HSK)
-        self.imagen_model_name = "imagen-4.0-ultra-generate-001"
-        self.imagen_location = "us-central1" # Imagen bắt buộc us-central1
-        self.imagen_model = None
+        # self.imagen_model_name = "imagen-4.0-ultra-generate-001"
+        # self.imagen_location = "us-central1" # Imagen bắt buộc us-central1
+        # self.imagen_model = None
 
         if self.credentials and self.project_id:
             try:
@@ -38,16 +38,16 @@ class ImageGenerationService:
             except Exception as e:
                 print(f"❌ Lỗi khởi tạo Client trong __init__: {e}")
 
-            # Init Imagen (Vertex AI SDK cũ)
-            try:
-                vertexai.init(
-                    project=self.project_id,
-                    location=self.imagen_location,
-                    credentials=self.credentials
-                )
-                self.imagen_model = ImageGenerationModel.from_pretrained(self.imagen_model_name)
-            except Exception as e:
-                print(f"❌ Lỗi khởi tạo Imagen Model: {e}")    
+            # # Init Imagen (Vertex AI SDK cũ)
+            # try:
+            #     vertexai.init(
+            #         project=self.project_id,
+            #         location=self.imagen_location,
+            #         credentials=self.credentials
+            #     )
+            #     self.imagen_model = ImageGenerationModel.from_pretrained(self.imagen_model_name)
+            # except Exception as e:
+            #     print(f"❌ Lỗi khởi tạo Imagen Model: {e}")    
         else:
             print("⚠️ Cảnh báo: Không thể khởi tạo Client do thiếu Credentials.")
 
@@ -207,9 +207,18 @@ class ImageGenerationService:
     def generate_image_with_image_ref(self, prompt, image_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=3):
         """
         Tạo ảnh với tham chiếu từ file ảnh mẫu.
+        Returns: tuple (image_bytes, usage_dict) hoặc (None, usage_dict) nếu thất bại.
+        usage_dict = {
+            "prompt_tokens": int,
+            "output_tokens": int,
+            "total_tokens": int,
+            "attempts": int,   # số lần thử thực tế
+        }
         """
+        usage = {"prompt_tokens": 0, "output_tokens": 0, "total_tokens": 0, "attempts": 0}
+
         if not self.client:
-            return None
+            return None, usage
 
         request_contents = []
         
@@ -240,6 +249,7 @@ class ImageGenerationService:
         request_contents.append(types.Part.from_text(text=final_prompt))
 
         for attempt in range(1, max_retries + 1):
+            usage["attempts"] = attempt
             try:
                 if attempt > 1:
                     print(f"   🔄 Thử lại lần {attempt}/{max_retries}...")
@@ -255,10 +265,17 @@ class ImageGenerationService:
                     )
                 )
 
+                # Lấy usage metadata nếu có
+                if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                    meta = response.usage_metadata
+                    usage["prompt_tokens"]  = getattr(meta, 'prompt_token_count', 0) or 0
+                    usage["output_tokens"]  = getattr(meta, 'candidates_token_count', 0) or 0
+                    usage["total_tokens"]   = getattr(meta, 'total_token_count', 0) or 0
+
                 if response.parts:
                     for part in response.parts:
                         if part.inline_data and part.inline_data.data:
-                            return part.inline_data.data
+                            return part.inline_data.data, usage
 
                 raise Exception("Empty image data from API")
 
@@ -267,8 +284,8 @@ class ImageGenerationService:
                 if attempt < max_retries:
                     time.sleep(retry_delay)
                 else:
-                    return None
-        return None
+                    return None, usage
+        return None, usage
 
     def generate_image_legacy(self, prompt, max_retries=3):
         """

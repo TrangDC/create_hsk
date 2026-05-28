@@ -69,6 +69,7 @@ from services.chinese_tts import (
 from services.media_merger import create_merged_gif
 from services.input_handler import InputDataManager
 from services.image_gen_service import ImageGenerationService
+from services.image_gen_logger import ImageGenLogger
 from services.gif_downloader import StrokeGifManager
 from call_vertexai import generate_content
 # Giả sử các module này đã có sẵn trong project của bạn
@@ -202,6 +203,9 @@ class EngFlashcardWorker(QObject):
                 if not self._is_running:
                     break
                 self.progress.emit(f"\n📂 Đang xử lý sheet: {sheet}")
+
+                # Khởi tạo logger cho từng sheet
+                logger = ImageGenLogger(session_name=f"eng_flashcard_{sheet}")
                 
                 # Tạo thư mục theo tên sheet
                 sheet_safe_name = "".join([c for c in sheet if c.isalnum() or c in (' ', '-', '_')]).strip()
@@ -243,6 +247,7 @@ class EngFlashcardWorker(QObject):
                         note_val = notes[idx].strip()
                         if self.error_only and not note_val:
                             # Bỏ qua nếu người dùng tick "chỉ chạy lỗi" nhưng dòng này không có note
+                            logger.log_request(word=word, status="skipped")
                             continue
 
                         meaning = meanings[idx].strip()
@@ -253,6 +258,7 @@ class EngFlashcardWorker(QObject):
 
                         if os.path.exists(final_img_path):
                             self.progress.emit(f"   [{idx + 1}/{len(words)}] ⏭️ '{word}' đã có ảnh, bỏ qua.")
+                            logger.log_request(word=word, status="skipped")
                             continue
 
                         self.progress.emit(f"   [{idx + 1}/{len(words)}] 🎨 Đang tạo ảnh cho: '{word}'...")
@@ -269,7 +275,7 @@ class EngFlashcardWorker(QObject):
                             self.progress.emit("      ⚠️ Không tìm thấy ảnh template mẫu.")
 
                         try:
-                            img_bytes = img_service.generate_image_with_image_ref(
+                            img_bytes, usage = img_service.generate_image_with_image_ref(
                                 prompt=image_prompt,
                                 image_path=template_img_path,
                                 aspect_ratio="3:2"
@@ -279,14 +285,36 @@ class EngFlashcardWorker(QObject):
                                 with open(final_img_path, "wb") as f:
                                     f.write(img_bytes)
                                 total_generated += 1
+                                logger.log_request(
+                                    word=word,
+                                    status="success",
+                                    tokens_in=usage.get("prompt_tokens", 0),
+                                    tokens_out=usage.get("output_tokens", 0),
+                                    total_tokens=usage.get("total_tokens", 0),
+                                    attempts=usage.get("attempts", 1),
+                                )
+                                self.progress.emit(
+                                    f"      ✅ Thành công | tokens: {usage.get('total_tokens', 'N/A')} | attempts: {usage.get('attempts', 1)}"
+                                )
                             else:
                                 self.progress.emit(f"      ❌ Không sinh được ảnh cho '{word}'")
+                                logger.log_request(
+                                    word=word,
+                                    status="failed",
+                                    attempts=usage.get("attempts", 1),
+                                    error="No image data returned",
+                                )
                                 
                         except Exception as e:
                             self.progress.emit(f"      ❌ Lỗi AI: {e}")
+                            logger.log_request(word=word, status="failed", error=str(e))
                         
                         import time
                         time.sleep(1) # Tránh rate limit
+
+                # --- Kết thúc sheet: upload log lên Drive ---
+                self.progress.emit(f"\n📤 Đang upload log sheet '{sheet}' lên Drive...")
+                logger.finish_and_upload()
 
             self.finished.emit(f"Hoàn tất! Đã tạo thành công {total_generated} ảnh tại:\n{os.path.abspath(self.output_base)}")
 
