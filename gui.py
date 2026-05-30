@@ -157,15 +157,17 @@ class EngFlashcardWorker(QObject):
     error = pyqtSignal(str)
     progress = pyqtSignal(str)
 
-    def __init__(self, excel_path, sheet_names, prompt_path, error_only=False):
+    def __init__(self, excel_path, sheet_names, prompt_path, error_only=False, gen_audio=True, audio_model="Narakeet"):
         super().__init__()
-        self.excel_path = excel_path
-        self.sheet_names = sheet_names if isinstance(sheet_names, list) else [sheet_names]
-        self.prompt_path = prompt_path
-        self.error_only = error_only
-        self.output_base = "output/eng_flashcards"
+        self.excel_path   = excel_path
+        self.sheet_names  = sheet_names if isinstance(sheet_names, list) else [sheet_names]
+        self.prompt_path  = prompt_path
+        self.error_only   = error_only
+        self.gen_audio    = gen_audio
+        self.audio_model  = audio_model
+        self.output_base  = "output/eng_flashcards"
         self.template_img_dir = "resources/images/image_eng_template"
-        self._is_running = True
+        self._is_running  = True
 
     def stop(self):
         self._is_running = False
@@ -182,6 +184,7 @@ class EngFlashcardWorker(QObject):
     def run(self):
         try:
             self.progress.emit("🚀 BẮT ĐẦU TẠO ẢNH FLASHCARD TIẾNG ANH...")
+            result_folder = os.path.abspath(self.output_base)
             if not os.path.exists(self.template_img_dir):
                 os.makedirs(self.template_img_dir, exist_ok=True)
             
@@ -190,14 +193,27 @@ class EngFlashcardWorker(QObject):
 
             self.progress.emit("⚙️ Khởi tạo Image Generation Service...")
             img_service = ImageGenerationService()
+
+            # Khởi tạo Audio Service nếu được bật
+            audio_service = None
+            if self.gen_audio:
+                from services.eng_audio_service import EngAudioService
+                self.progress.emit(f"🔊 Khởi tạo English Audio Service ({self.audio_model})...")
+                audio_service = EngAudioService(model_name=self.audio_model)
+                if not audio_service.client:
+                    self.progress.emit("⚠️ Không khởi tạo được Audio Service — bỏ qua sinh audio.")
+                    audio_service = None
+                else:
+                    self.progress.emit("✅ Audio Service sẵn sàng.")
             
-            self.progress.emit("📄 Đang đọc file Prompt và Excel...")
+            self.progress.emit("�📄 Đang đọc file Prompt và Excel...")
             with open(self.prompt_path, 'r', encoding='utf-8') as f:
                 prompt_template = f.read()
 
             xls = pd.ExcelFile(self.excel_path)
             
             total_generated = 0
+            total_audio_generated = 0
             
             for sheet in self.sheet_names:
                 if not self._is_running:
@@ -210,7 +226,12 @@ class EngFlashcardWorker(QObject):
                 # Tạo thư mục theo tên sheet
                 sheet_safe_name = "".join([c for c in sheet if c.isalnum() or c in (' ', '-', '_')]).strip()
                 sheet_out_dir = os.path.join(self.output_base, sheet_safe_name)
+                if len(self.sheet_names) == 1:
+                    result_folder = os.path.abspath(sheet_out_dir)
+                audio_out_dir = os.path.join(sheet_out_dir, "audio")
                 os.makedirs(sheet_out_dir, exist_ok=True)
+                if audio_service:
+                    os.makedirs(audio_out_dir, exist_ok=True)
 
                 try:
                     df = pd.read_excel(xls, sheet_name=sheet)
@@ -229,10 +250,10 @@ class EngFlashcardWorker(QObject):
                     if 'Note' not in df.columns:
                         df['Note'] = ''
 
-                    words = df['Từ'].astype(str).tolist()
+                    words    = df['Từ'].astype(str).tolist()
                     meanings = df['Nghĩa'].fillna('').astype(str).tolist()
                     examples = df['Câu ví dụ'].fillna('').astype(str).tolist()
-                    notes = df['Note'].fillna('').astype(str).tolist()
+                    notes    = df['Note'].fillna('').astype(str).tolist()
                     
                     self.progress.emit(f"📋 Tìm thấy {len(words)} từ vựng trong sheet {sheet}.")
 
@@ -246,9 +267,9 @@ class EngFlashcardWorker(QObject):
 
                         note_val = notes[idx].strip()
                         if self.error_only and not note_val:
-                            # Bỏ qua nếu người dùng tick "chỉ chạy lỗi" nhưng dòng này không có note
                             logger.log_request(word=word, status="skipped")
                             continue
+                        force_regenerate = self.error_only and bool(note_val)
 
                         meaning = meanings[idx].strip()
                         example = examples[idx].strip()
@@ -256,58 +277,91 @@ class EngFlashcardWorker(QObject):
                         safe_word = "".join([c for c in word if c.isalnum() or c in (' ', '-', '_')]).strip()
                         final_img_path = os.path.join(sheet_out_dir, f"{safe_word}.png")
 
-                        if os.path.exists(final_img_path):
+                        # --- SINH ẢNH ---
+                        if os.path.exists(final_img_path) and not force_regenerate:
                             self.progress.emit(f"   [{idx + 1}/{len(words)}] ⏭️ '{word}' đã có ảnh, bỏ qua.")
                             logger.log_request(word=word, status="skipped")
-                            continue
-
-                        self.progress.emit(f"   [{idx + 1}/{len(words)}] 🎨 Đang tạo ảnh cho: '{word}'...")
-                        
-                        image_prompt = prompt_template.format(
-                            word=word,
-                            meaning=meaning,
-                            example=example,
-                            topic=sheet # Thêm topic từ tên sheet
-                        )
-
-                        template_img_path = self._get_random_template_image()
-                        if not template_img_path:
-                            self.progress.emit("      ⚠️ Không tìm thấy ảnh template mẫu.")
-
-                        try:
-                            img_bytes, usage = img_service.generate_image_with_image_ref(
-                                prompt=image_prompt,
-                                image_path=template_img_path,
-                                aspect_ratio="3:2"
-                            )
+                        else:
+                            action_label = "🎨 Đang ghi đè ảnh cho" if force_regenerate and os.path.exists(final_img_path) else "🎨 Đang tạo ảnh cho"
+                            self.progress.emit(f"   [{idx + 1}/{len(words)}] {action_label}: '{word}'...")
                             
-                            if img_bytes:
-                                with open(final_img_path, "wb") as f:
-                                    f.write(img_bytes)
-                                total_generated += 1
-                                logger.log_request(
-                                    word=word,
-                                    status="success",
-                                    tokens_in=usage.get("prompt_tokens", 0),
-                                    tokens_out=usage.get("output_tokens", 0),
-                                    total_tokens=usage.get("total_tokens", 0),
-                                    attempts=usage.get("attempts", 1),
-                                )
-                                self.progress.emit(
-                                    f"      ✅ Thành công | tokens: {usage.get('total_tokens', 'N/A')} | attempts: {usage.get('attempts', 1)}"
-                                )
-                            else:
-                                self.progress.emit(f"      ❌ Không sinh được ảnh cho '{word}'")
-                                logger.log_request(
-                                    word=word,
-                                    status="failed",
-                                    attempts=usage.get("attempts", 1),
-                                    error="No image data returned",
+                            image_prompt = prompt_template.format(
+                                word=word,
+                                meaning=meaning,
+                                example=example,
+                                topic=sheet
+                            )
+
+                            template_img_path = self._get_random_template_image()
+                            if not template_img_path:
+                                self.progress.emit("      ⚠️ Không tìm thấy ảnh template mẫu.")
+
+                            try:
+                                img_bytes, usage = img_service.generate_image_with_image_ref(
+                                    prompt=image_prompt,
+                                    image_path=template_img_path,
+                                    aspect_ratio="3:2"
                                 )
                                 
-                        except Exception as e:
-                            self.progress.emit(f"      ❌ Lỗi AI: {e}")
-                            logger.log_request(word=word, status="failed", error=str(e))
+                                if img_bytes:
+                                    with open(final_img_path, "wb") as f:
+                                        f.write(img_bytes)
+                                    total_generated += 1
+                                    logger.log_request(
+                                        word=word,
+                                        status="success",
+                                        tokens_in=usage.get("prompt_tokens", 0),
+                                        tokens_out=usage.get("output_tokens", 0),
+                                        total_tokens=usage.get("total_tokens", 0),
+                                        attempts=usage.get("attempts", 1),
+                                    )
+                                    self.progress.emit(
+                                        f"      ✅ Ảnh OK | tokens: {usage.get('total_tokens', 'N/A')} | attempts: {usage.get('attempts', 1)}"
+                                    )
+                                else:
+                                    self.progress.emit(f"      ❌ Không sinh được ảnh cho '{word}'")
+                                    logger.log_request(
+                                        word=word,
+                                        status="failed",
+                                        attempts=usage.get("attempts", 1),
+                                        error="No image data returned",
+                                    )
+                                    
+                            except Exception as e:
+                                self.progress.emit(f"      ❌ Lỗi AI (ảnh): {e}")
+                                logger.log_request(word=word, status="failed", error=str(e))
+
+                        # --- SINH AUDIO (nếu được bật) ---
+                        if audio_service and self._is_running:
+                            word_audio_path    = os.path.join(audio_out_dir, f"{safe_word}.mp3")
+                            example_audio_path = os.path.join(audio_out_dir, f"{safe_word}_example.mp3")
+
+                            # Audio từ đơn
+                            if os.path.exists(word_audio_path) and not force_regenerate:
+                                self.progress.emit(f"      🔊 Audio từ đã có, bỏ qua.")
+                            else:
+                                prefix = "ghi đè" if force_regenerate and os.path.exists(word_audio_path) else "sinh"
+                                self.progress.emit(f"      🔊 Đang {prefix} audio từ: '{word}'...")
+                                ok = audio_service.generate_word(word=word, out_path=word_audio_path, overwrite=force_regenerate)
+                                if ok:
+                                    total_audio_generated += 1
+                                    self.progress.emit(f"      ✅ Audio từ OK")
+                                else:
+                                    self.progress.emit(f"      ❌ Lỗi sinh audio từ '{word}'")
+
+                            # Audio câu ví dụ
+                            if example and example != 'nan':
+                                if os.path.exists(example_audio_path) and not force_regenerate:
+                                    self.progress.emit(f"      🔊 Audio câu ví dụ đã có, bỏ qua.")
+                                else:
+                                    prefix = "ghi đè" if force_regenerate and os.path.exists(example_audio_path) else "sinh"
+                                    self.progress.emit(f"      🔊 Đang {prefix} audio câu ví dụ...")
+                                    ok = audio_service.generate_example(sentence=example, out_path=example_audio_path, overwrite=force_regenerate)
+                                    if ok:
+                                        total_audio_generated += 1
+                                        self.progress.emit(f"      ✅ Audio câu ví dụ OK")
+                                    else:
+                                        self.progress.emit(f"      ❌ Lỗi sinh audio câu ví dụ")
                         
                         import time
                         time.sleep(1) # Tránh rate limit
@@ -316,7 +370,11 @@ class EngFlashcardWorker(QObject):
                 self.progress.emit(f"\n📤 Đang upload log sheet '{sheet}' lên Drive...")
                 logger.finish_and_upload()
 
-            self.finished.emit(f"Hoàn tất! Đã tạo thành công {total_generated} ảnh tại:\n{os.path.abspath(self.output_base)}")
+            summary = f"Hoàn tất! Đã tạo thành công {total_generated} ảnh"
+            if self.gen_audio:
+                summary += f" và {total_audio_generated} file audio"
+            summary += f" tại:\n{result_folder}"
+            self.finished.emit(summary)
 
         except Exception as e:
             import traceback
@@ -1028,7 +1086,7 @@ class HSKGeneratorApp(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Tool sinh câu hỏi và ảnh AI cho HSK/TOPIK')
-        self.setGeometry(200, 200, 900, 700)
+        self.setGeometry(200, 200, 1600, 900)
 
         # Layout chính
         main_layout = QVBoxLayout()
@@ -1818,12 +1876,26 @@ class HSKGeneratorApp(QWidget):
         prompt_layout.addWidget(self.eng_open_prompt_btn, 0)
         layout.addLayout(prompt_layout)
 
-        # 3.5 Checkbox "Chỉ chạy các từ bị lỗi"
+        # 3.5 Checkbox options + chọn model audio
         from PyQt5.QtWidgets import QCheckBox
         cb_layout = QHBoxLayout()
         self.eng_error_only_cb = QCheckBox("Chỉ chạy các từ bị lỗi (có dữ liệu ở cột 'Note')")
         self.eng_error_only_cb.setStyleSheet("font-size: 11pt; font-weight: bold; color: #dc3545;")
         cb_layout.addWidget(self.eng_error_only_cb)
+
+        # Combo chọn model TTS
+        cb_layout.addWidget(QLabel("Model sinh audio:"))
+        self.eng_audio_model_combo = QComboBox()
+        self.eng_audio_model_combo.addItems(["Narakeet", "Chirp3-HD", "gemini-3.1-flash-tts-preview"])
+        self.eng_audio_model_combo.setCurrentText("Narakeet")
+        self.eng_audio_model_combo.setMinimumWidth(220)
+        self.eng_audio_model_combo.setToolTip(
+            "Chirp3-HD: ổn định, nhanh\n"
+            "gemini-3.1-flash-tts-preview: tự nhiên hơn, hỗ trợ ngữ điệu tốt hơn\n"
+            "Narakeet: dùng voice cố định Nữ Lisa, Nam Jeff"
+        )
+        cb_layout.addWidget(self.eng_audio_model_combo)
+
         cb_layout.addStretch()
         layout.addLayout(cb_layout)
 
@@ -2432,19 +2504,38 @@ class HSKGeneratorApp(QWidget):
             self.eng_excel_input.setText(file_path)
             self._load_eng_sheets()
 
+    def _open_local_path(self, target_path, missing_message, open_error_title="Không thể mở file"):
+        if not os.path.exists(target_path):
+            QMessageBox.warning(self, "Lỗi", missing_message)
+            return
+
+        try:
+            if os.name == 'nt':
+                os.startfile(target_path)
+                return
+
+            import shutil
+            import subprocess
+
+            opener = 'open' if sys.platform == 'darwin' else 'xdg-open'
+            if not shutil.which(opener):
+                raise FileNotFoundError(f"Không tìm thấy công cụ '{opener}' để mở file.")
+
+            subprocess.Popen([opener, target_path])
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                open_error_title,
+                f"Không thể mở file:\n{target_path}\n\nChi tiết: {e}"
+            )
+
     def _open_eng_template(self):
         template_path = os.path.join(os.getcwd(), "resources", "sheet", "eng_flashcard_gen_template.xlsx")
-        if os.path.exists(template_path):
-            if os.name == 'nt':
-                os.startfile(template_path)
-            elif sys.platform == 'darwin':
-                import subprocess
-                subprocess.Popen(['open', template_path])
-            else:
-                import subprocess
-                subprocess.Popen(['xdg-open', template_path])
-        else:
-            QMessageBox.warning(self, "Lỗi", "Không tìm thấy file mẫu tại resources/sheet!")
+        self._open_local_path(
+            template_path,
+            "Không tìm thấy file mẫu tại resources/sheet!",
+            "Không thể mở file mẫu Excel"
+        )
 
     def _browse_eng_prompt(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Chọn file Prompt", "", "Text Files (*.txt)")
@@ -2453,17 +2544,11 @@ class HSKGeneratorApp(QWidget):
 
     def _open_eng_prompt(self):
         prompt_path = self.eng_prompt_input.text().strip()
-        if os.path.exists(prompt_path):
-            if os.name == 'nt':
-                os.startfile(prompt_path)
-            elif sys.platform == 'darwin':
-                import subprocess
-                subprocess.Popen(['open', prompt_path])
-            else:
-                import subprocess
-                subprocess.Popen(['xdg-open', prompt_path])
-        else:
-            QMessageBox.warning(self, "Lỗi", "Không tìm thấy file prompt! Vui lòng chọn đường dẫn hợp lệ.")
+        self._open_local_path(
+            prompt_path,
+            "Không tìm thấy file prompt! Vui lòng chọn đường dẫn hợp lệ.",
+            "Không thể mở file prompt"
+        )
 
     def _load_eng_sheets(self):
         path = self.eng_excel_input.text().strip()
@@ -2501,7 +2586,6 @@ class HSKGeneratorApp(QWidget):
 
         self.eng_log_display.clear()
         self.eng_run_button.setEnabled(False)
-        self.eng_run_button.setText('⏳ Đang tạo ảnh...')
         self.eng_stop_button.setEnabled(True)
 
         # Chuẩn bị danh sách sheet cần chạy
@@ -2513,10 +2597,15 @@ class HSKGeneratorApp(QWidget):
             sheets_to_run = [sheet_name]
 
         error_only = self.eng_error_only_cb.isChecked()
+        gen_audio = True
+        audio_model = self.eng_audio_model_combo.currentText()
+
+        # Cập nhật label nút chạy
+        self.eng_run_button.setText('⏳ Đang tạo ảnh & audio...')
 
         # Khởi tạo thread và worker
         self.eng_thread = QThread()
-        self.eng_worker = EngFlashcardWorker(excel_path, sheets_to_run, prompt_path, error_only)
+        self.eng_worker = EngFlashcardWorker(excel_path, sheets_to_run, prompt_path, error_only, gen_audio, audio_model)
         self.eng_worker.moveToThread(self.eng_thread)
 
         # Kết nối tín hiệu
