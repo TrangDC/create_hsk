@@ -27,15 +27,24 @@ def populate_individual_image_matching(worksheet, data: list):
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
 
 # Sheet ĐS (img) HSK1 và ĐS Ko phụ đề (img) HSK1
-def populate_true_false_from_array(worksheet, data: list):
+def populate_true_false_from_array(worksheet, data):
     """
     Điền dữ liệu cho sheet Đúng/Sai từ một mảng JSON.
     Hàm này được dùng chung cho cả 'ĐS (img) HSK1' và 'ĐS Ko phụ đề (img) HSK1'.
     """
     print(f"   -> Đang điền dữ liệu Đúng/Sai vào sheet: {worksheet.title}")
     
+    # Xử lý cả 2 format: {"questions": [...]} và [...]
+    if isinstance(data, dict) and "questions" in data:
+        questions_list = data["questions"]
+    elif isinstance(data, list):
+        questions_list = data
+    else:
+        print(f"   ❌ Lỗi: Format dữ liệu không hợp lệ. Bỏ qua.")
+        return
+    
     start_row = 2
-    for i, item in enumerate(data, start=start_row):
+    for i, item in enumerate(questions_list, start=start_row):
         kind = item.get("kind")
         
         # Xử lý chuỗi hiển thị và lời giải dựa trên 'kind'
@@ -56,7 +65,7 @@ def populate_true_false_from_array(worksheet, data: list):
         worksheet.cell(row=i, column=8).value = f"đúng sai: {item.get('correct_answer')}"
         worksheet.cell(row=i, column=9).value = explanation
         
-    print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
+    print(f"   ✅ Hoàn thành điền {len(questions_list)} câu hỏi.")
 
 # Sheet TN PA đúng (img) (HL) (HSK1)
 def populate_shared_image_comprehension(worksheet, data: dict):

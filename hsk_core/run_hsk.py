@@ -53,7 +53,7 @@ class HSKPipeline:
         prompt = self._load_resource("resources/prompts/preprocessing/extract_lesson_structure.txt")
         schema = self._load_resource("resources/schemas/preprocessing/extract_lesson_structure.json")
         
-        result = ai_client.generate_content(prompt, schema, pdf_paths=pdf_files)
+        result = ai_client.generate_content(prompt, schema, pdf_paths=pdf_files, service_tier="flex")
         context_str = json.dumps(result, ensure_ascii=False)
         
         # Lưu lại để xem bối cảnh bài học
@@ -95,7 +95,7 @@ class HSKPipeline:
             p_schema = self._load_resource(f"resources/schemas/create/{self.hsk_level}/{prompt_id}.json")
             
             # 4. Gọi AI
-            data = ai_client.generate_content(final_prompt, p_schema)
+            data = ai_client.generate_content(final_prompt, p_schema, service_tier="flex")
             all_generated_data[prompt_id] = data
             
             # 5. Ghi dữ liệu vào Excel (Duyệt qua các processors trong config)
@@ -165,7 +165,7 @@ class HSKPipeline:
                     schema = self._load_resource(f"resources/schemas/explanation/{schema_folder}/{schema_filename}")
                     
                     # 3. Gọi AI lấy lời giải
-                    explanation_result = ai_client.generate_content(final_prompt, schema)
+                    explanation_result = ai_client.generate_content(final_prompt, schema, service_tier="flex")
                     
                     # 4. Dùng Renderer ghi vào Excel
                     sheet_name = config['sheet_name']

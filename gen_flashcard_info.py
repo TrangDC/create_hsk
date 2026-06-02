@@ -170,7 +170,8 @@ def main():
                     prompt_file_path=temp_path,
                     schema_file_path=SCHEMA_PATH,
                     pdf_file_paths=[MASCOT_PDF_PATH], 
-                    text_content=None 
+                    text_content=None,
+                    service_tier="flex"
                 )
                 if os.path.exists(temp_path): os.remove(temp_path)
                 

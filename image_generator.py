@@ -293,7 +293,7 @@ def process_hsk_sheet(sheet_name: str, workbook, img_service: ImageGenerationSer
                 
                 # Vẽ ảnh và lưu local (Không upload Drive)
                 if not local_path.exists():
-                    img_bytes = img_service.generate_image_legacy(prompt)
+                    img_bytes = img_service.generate_image(prompt)
                     if img_bytes:
                         with open(local_path, "wb") as f: f.write(img_bytes)
                         created_files.append(filename)

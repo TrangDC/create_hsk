@@ -2,10 +2,59 @@ import base64
 import os
 
 
+def get_openai_timeout_seconds():
+    raw_timeout = os.getenv("OPENAI_TIMEOUT_SECONDS", "900")
+    try:
+        return float(raw_timeout)
+    except ValueError:
+        return 900.0
+
+
+def get_openai_service_tier(default=None):
+    raw_tier = default if default is not None else os.getenv("OPENAI_SERVICE_TIER", "auto")
+    if raw_tier is None:
+        return None
+
+    normalized_tier = raw_tier.strip().lower()
+    if normalized_tier in {"", "default"}:
+        return None
+    if normalized_tier in {"auto", "flex"}:
+        return normalized_tier
+    return None
+
+
+def should_fallback_from_flex():
+    fallback_mode = os.getenv("OPENAI_FLEX_FALLBACK", "auto").strip().lower()
+    return fallback_mode == "auto"
+
+
+def is_flex_resource_unavailable_error(error):
+    status_code = getattr(error, "status_code", None)
+    if status_code != 429:
+        return False
+
+    error_message = str(error).lower()
+    return "resource unavailable" in error_message or "insufficient resources" in error_message
+
+
+def create_chat_completion_with_fallback(client, kwargs):
+    try:
+        return client.chat.completions.create(**kwargs)
+    except Exception as error:
+        if kwargs.get("service_tier") == "flex" and should_fallback_from_flex() and is_flex_resource_unavailable_error(error):
+            fallback_kwargs = dict(kwargs)
+            fallback_kwargs["service_tier"] = "auto"
+            print("Warning: Flex tam thoi thieu tai nguyen, chuyen sang service_tier=auto.")
+            return client.chat.completions.create(**fallback_kwargs)
+        raise
+
+
 def normalize_schema_for_openai(schema):
     """
     Chuan hoa JSON schema de tuong thich OpenAI structured outputs.
-    Tu dong them additionalProperties=False cho moi object schema neu chua co.
+    Tu dong:
+    - Chuyen type tu OBJECT/STRING/ARRAY (viet hoa) sang object/string/array (viet thuong)
+    - Them additionalProperties=False cho moi object schema neu chua co
     """
     if isinstance(schema, list):
         return [normalize_schema_for_openai(item) for item in schema]
@@ -15,7 +64,11 @@ def normalize_schema_for_openai(schema):
 
     normalized = {}
     for key, value in schema.items():
-        normalized[key] = normalize_schema_for_openai(value)
+        if key == "type" and isinstance(value, str):
+            # Chuyển type sang chữ thường (ví dụ: OBJECT -> object, STRING -> string)
+            normalized[key] = value.lower()
+        else:
+            normalized[key] = normalize_schema_for_openai(value)
 
     is_object_schema = normalized.get("type") == "object" or "properties" in normalized
     if is_object_schema and "additionalProperties" not in normalized:
@@ -36,7 +89,7 @@ class VertexClient:
         if not api_key:
             raise ValueError("Khong tim thay OPENAI_API_KEY trong bien moi truong.")
 
-        self.client = OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key=api_key, timeout=get_openai_timeout_seconds())
         self.model_name = model
 
     def send_data_to_AI(
@@ -48,6 +101,7 @@ class VertexClient:
         top_p=0.8,
         response_mime_type=None,
         response_schema=None,
+        service_tier=None,
     ):
         content_blocks = []
 
@@ -77,9 +131,12 @@ class VertexClient:
             "model": self.model_name,
             "messages": [{"role": "user", "content": content_blocks}],
         }
+        resolved_service_tier = get_openai_service_tier(service_tier)
+        if resolved_service_tier:
+            kwargs["service_tier"] = resolved_service_tier
 
         model_lower = self.model_name.lower()
-        is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-5.5"])
+        is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-5.4"])
         if not is_o_model:
             kwargs["temperature"] = temperature
             kwargs["top_p"] = top_p
@@ -98,7 +155,7 @@ class VertexClient:
             else:
                 kwargs["response_format"] = {"type": "json_object"}
 
-        response = self.client.chat.completions.create(**kwargs)
+        response = create_chat_completion_with_fallback(self.client, kwargs)
         content = response.choices[0].message.content
 
         if isinstance(content, list):

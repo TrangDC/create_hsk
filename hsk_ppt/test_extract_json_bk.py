@@ -419,7 +419,7 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
     
     print(f"Bắt đầu xử lý file PDF cho cấp độ {level}. Tổng số section cần quét: {total_iterations}...")
     
-    client = VertexClient(None, None, "gpt-5.5", "us-central1")  # Dùng OpenAI backend
+    client = VertexClient(None, None, "gpt-5.4", "us-central1")  # Dùng OpenAI backend
     
     # Khởi tạo object JSON tổng
     final_json = {

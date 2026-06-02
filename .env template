@@ -2,7 +2,7 @@ MATHPIX_APP_KEY=
 MATHPIX_APP_ID=
 # OpenAI Configuration
 OPENAI_API_KEY=""
-OPENAI_MODEL="gpt-5.5"
+OPENAI_MODEL="gpt-5.4"
 # (Legacy) Vertex AI Configuration - kept for backward compatibility
 GEMINI_API_KEY=""
 TYPE="service_account"

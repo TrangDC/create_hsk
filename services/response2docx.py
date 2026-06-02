@@ -31,7 +31,8 @@ def response2docx(file_path, prompt, file_name, project_id, creds, model_name):
         data=pdf_data, 
         mime_type=mime_type,
         response_mime_type="application/json",
-        response_schema=response_schema
+        response_schema=response_schema,
+        service_tier="auto"
     )
     print("Đã nhận phản hồi từ AI (JSON).")
     

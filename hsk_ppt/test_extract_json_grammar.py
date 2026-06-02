@@ -199,7 +199,7 @@ def process_grammar_lesson(pdf_path: str, base_prompt: str, level: str, index_fi
 
     print(f"Bắt đầu xử lý file PDF Ngữ Pháp cấp độ {level} - Bài {lesson_number}. Tổng số chủ điểm: {total_topics}...")
     
-    client = VertexClient(None, None, "gpt-5.5", "us-central1")  # Dùng OpenAI backend
+    client = VertexClient(None, None, "gpt-5.4", "us-central1")  # Dùng OpenAI backend
     
     final_json = {
         "lesson_info": {},

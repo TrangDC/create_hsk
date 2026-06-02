@@ -291,7 +291,7 @@ class EngFlashcardWorker(QObject):
                                 example=example,
                                 topic=sheet
                             )
-
+                            
                             template_img_path = self._get_random_template_image()
                             if not template_img_path:
                                 self.progress.emit("      ⚠️ Không tìm thấy ảnh template mẫu.")
@@ -623,7 +623,7 @@ class SummaryWorker(QObject):
                 raise Exception("Nén PDF thất bại.")
 
             # Bước 2: Gọi AI tạo DOCX
-            self.progress.emit(f"🤖 Đang gửi yêu cầu tóm tắt tới Gemini...")
+            self.progress.emit(f"🤖 Đang gửi yêu cầu tóm tắt tới OpenAI...")
             docx_path = f"output/summary/{file_name}.docx"
             
             # Thay thế số lượng bài khóa trong prompt nếu có
@@ -636,7 +636,7 @@ class SummaryWorker(QObject):
                 file_name, 
                 self.project_id, 
                 self.creds, 
-                "gemini-2.5-pro"
+                os.getenv("OPENAI_MODEL", "gpt-5.4")
             )
             
             self.finished.emit(f"Hoàn tất! File lưu tại:\n{os.path.abspath(docx_path)}")
@@ -809,7 +809,7 @@ Trả về JSON chuẩn theo Schema.
                         temp_path = f"resources/prompts/temp_{idx}.txt"
                         with open(temp_path, 'w', encoding='utf-8') as f: f.write(prompt_input)
 
-                        ai_data = generate_content(temp_path, self.schema_path, [self.mascot_pdf], None)
+                        ai_data = generate_content(temp_path, self.schema_path, [self.mascot_pdf], None, service_tier="flex")
                         if os.path.exists(temp_path): os.remove(temp_path)
                     except Exception as e:
                         self.progress.emit(f"⚠️ Lỗi AI tại từ '{word}': {e}")

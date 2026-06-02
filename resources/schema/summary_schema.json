@@ -1,38 +1,38 @@
 {
-  "type": "OBJECT",
+  "type": "object",
   "properties": {
     "document_title_cn": {
-      "type": "STRING",
+      "type": "string",
       "description": "Tên bài học bằng tiếng Trung (Ví dụ: 我叫李文)"
     },
     "document_title_vn": {
-      "type": "STRING",
+      "type": "string",
       "description": "Tên bài học bằng tiếng Việt (Ví dụ: Bài 2: Tôi tên là Lý Văn)"
     },
     "lesson_summary": {
-      "type": "STRING",
+      "type": "string",
       "description": "Đoạn văn ngắn 3-5 câu tóm tắt nội dung, hoàn cảnh, ý nghĩa của bài học bằng tiếng Việt."
     },
     "vocabulary_list": {
-      "type": "ARRAY",
+      "type": "array",
       "description": "Danh sách TẤT CẢ từ mới xuất hiện trong bài học.",
       "items": {
-        "type": "OBJECT",
+        "type": "object",
         "properties": {
           "hanzi": {
-            "type": "STRING",
+            "type": "string",
             "description": "Chữ Hán"
           },
           "pinyin": {
-            "type": "STRING",
+            "type": "string",
             "description": "Phiên âm Pinyin"
           },
           "type": {
-            "type": "STRING",
+            "type": "string",
             "description": "Từ loại (VD: đt., dt., tt., đại từ.)"
           },
           "meaning": {
-            "type": "STRING",
+            "type": "string",
             "description": "Nghĩa tiếng Việt"
           }
         },
@@ -45,35 +45,35 @@
       }
     },
     "lessons": {
-      "type": "ARRAY",
+      "type": "array",
       "description": "Danh sách các bài khóa. Số lượng phần tử trong mảng này phải BẰNG đúng số lượng bài khóa ({num_lessons}) được yêu cầu.",
       "items": {
-        "type": "OBJECT",
+        "type": "object",
         "properties": {
           "lesson_title": {
-            "type": "STRING",
+            "type": "string",
             "description": "Tên hoặc số thứ tự bài khóa (VD: Bài khóa 1)"
           },
           "content_cn": {
-            "type": "STRING",
+            "type": "string",
             "description": "Trích lại toàn bộ nội dung bài khóa bằng tiếng Trung. Giữ nguyên dấu xuống dòng."
           },
           "content_vn": {
-            "type": "STRING",
+            "type": "string",
             "description": "Bản dịch tiếng Việt của bài khóa. Giữ nguyên dấu xuống dòng."
           },
           "important_notes": {
-            "type": "ARRAY",
+            "type": "array",
             "description": "Danh sách các lưu ý quan trọng, kiến thức liên quan lấy từ slide đứng ngay sau phần từ vựng của bài khóa này.",
             "items": {
-              "type": "OBJECT",
+              "type": "object",
               "properties": {
                 "hanzi_pinyin": {
-                  "type": "STRING",
+                  "type": "string",
                   "description": "Từ/Cụm từ tiếng Trung và Pinyin cần lưu ý (VD: 请 (qǐng) hoặc 你叫什么名字? (nǐ jiào shénme míngzi?))"
                 },
                 "explanation": {
-                  "type": "STRING",
+                  "type": "string",
                   "description": "Phân tích chi tiết, giải nghĩa bằng tiếng Việt."
                 }
               },

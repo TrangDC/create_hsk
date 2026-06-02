@@ -11,6 +11,63 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+
+def get_openai_timeout_seconds() -> float:
+    """Doc timeout cho OpenAI SDK, mac dinh 15 phut de phu hop voi Flex."""
+    raw_timeout = os.getenv("OPENAI_TIMEOUT_SECONDS", "900")
+    try:
+        return float(raw_timeout)
+    except ValueError:
+        return 900.0
+
+
+def get_openai_service_tier(default: Optional[str] = None) -> Optional[str]:
+    """Lay service tier hop le cho request OpenAI."""
+    raw_tier = (default if default is not None else os.getenv("OPENAI_SERVICE_TIER", "auto"))
+    if raw_tier is None:
+        return None
+
+    normalized_tier = raw_tier.strip().lower()
+    if normalized_tier in {"", "default"}:
+        return None
+    if normalized_tier in {"auto", "flex"}:
+        return normalized_tier
+    return None
+
+
+def should_fallback_from_flex() -> bool:
+    """Cho phep fallback tu flex sang auto khi thieu tai nguyen."""
+    fallback_mode = os.getenv("OPENAI_FLEX_FALLBACK", "auto").strip().lower()
+    return fallback_mode == "auto"
+
+
+def is_flex_resource_unavailable_error(error: Exception) -> bool:
+    """Nhan dien loi thieu tai nguyen dac trung cua Flex."""
+    status_code = getattr(error, "status_code", None)
+    if status_code != 429:
+        return False
+
+    error_message = str(error).lower()
+    return "resource unavailable" in error_message or "insufficient resources" in error_message
+
+
+def create_openai_client(api_key: str):
+    from openai import OpenAI
+
+    return OpenAI(api_key=api_key, timeout=get_openai_timeout_seconds())
+
+
+def create_chat_completion_with_fallback(client, kwargs: Dict[str, Any]):
+    try:
+        return client.chat.completions.create(**kwargs)
+    except Exception as error:
+        if kwargs.get("service_tier") == "flex" and should_fallback_from_flex() and is_flex_resource_unavailable_error(error):
+            fallback_kwargs = dict(kwargs)
+            fallback_kwargs["service_tier"] = "auto"
+            print("   Warning: Flex tam thoi thieu tai nguyen, chuyen sang service_tier=auto.")
+            return client.chat.completions.create(**fallback_kwargs)
+        raise
+
 class VertexAIConfig:
     """DEPRECATED: Kept for backward compatibility only. Use OpenAI instead."""
     pass
@@ -49,7 +106,11 @@ def normalize_schema_for_openai(schema: Any) -> Any:
 
         # Da co nullable roi
         t = result.get("type")
+        if isinstance(t, str):
+            t = t.lower()  # Normalize type case
+        
         if isinstance(t, list):
+            t = [x.lower() if isinstance(x, str) else x for x in t]
             if "null" not in t:
                 result["type"] = t + ["null"]
             return result
@@ -80,9 +141,13 @@ def normalize_schema_for_openai(schema: Any) -> Any:
 
     normalized = {}
     for key, value in schema.items():
-        normalized[key] = normalize_schema_for_openai(value)
+        if key == "type" and isinstance(value, str):
+            # Chuyển type sang chữ thường (ví dụ: OBJECT -> object, STRING -> string)
+            normalized[key] = value.lower()
+        else:
+            normalized[key] = normalize_schema_for_openai(value)
 
-    is_object_schema = normalized.get("type") == "object" or "properties" in normalized
+    is_object_schema = (normalized.get("type") == "object" or "properties" in normalized)
     if is_object_schema:
         normalized["additionalProperties"] = False
 
@@ -144,6 +209,7 @@ def extract_structured_data_from_pdf(
     pdf_path: str,
     prompt_file_path: str,
     schema_file_path: str,
+    service_tier: Optional[str] = None,
     max_retries: int = 3,
     retry_delay: int = 5,
     timeout_seconds: int = 180
@@ -158,6 +224,7 @@ def extract_structured_data_from_pdf(
         text_content=None,
         prompt_file_path=prompt_file_path,
         schema_file_path=schema_file_path,
+        service_tier=service_tier,
         max_retries=max_retries,
         retry_delay=retry_delay,
         timeout_seconds=timeout_seconds
@@ -168,6 +235,7 @@ def generate_content(
     schema_file_path: str,
     pdf_file_paths: Optional[List[str]] = None,
     text_content: Optional[str] = None,
+    service_tier: Optional[str] = None,
     max_retries: int = 5,
     retry_delay: int = 5,
     timeout_seconds: int = 150
@@ -214,10 +282,11 @@ def generate_content(
 
     content_blocks.append({"type": "text", "text": prompt_text})
 
-    openai_client = OpenAI(api_key=openai_api_key)
-    openai_model = os.getenv("OPENAI_MODEL", "gpt-5.5")
+    openai_client = create_openai_client(openai_api_key)
+    openai_model = os.getenv("OPENAI_MODEL", "gpt-5.4")
     if openai_model.lower().startswith("gemini"):
-        openai_model = "gpt-5.5"
+        openai_model = "gpt-5.4"
+    service_tier = get_openai_service_tier(service_tier)
 
     kwargs = {
         "model": openai_model,
@@ -231,11 +300,14 @@ def generate_content(
             },
         },
     }
+    if service_tier:
+        kwargs["service_tier"] = service_tier
 
     last_exception = None
     for attempt in range(max_retries):
         try:
-            print(f"Dang gui yeu cau den OpenAI... (Lan thu {attempt + 1}/{max_retries})")
+            tier_label = kwargs.get("service_tier", "default")
+            print(f"Dang gui yeu cau den OpenAI... (Lan thu {attempt + 1}/{max_retries}, tier={tier_label})")
 
             response_event = threading.Event()
             response_container = [None]
@@ -243,7 +315,7 @@ def generate_content(
 
             def run_api_call():
                 try:
-                    response = openai_client.chat.completions.create(**kwargs)
+                    response = create_chat_completion_with_fallback(openai_client, kwargs)
                     response_container[0] = response
                     response_event.set()
                 except Exception as e:
@@ -306,7 +378,7 @@ class VertexClient:
         # Giu nguyen interface cu, doi backend sang OpenAI.
         try:
             from openai import OpenAI
-            model= "gpt-5.5"
+            model= "gpt-5.4"
         except ImportError as e:
             raise ImportError("Chua cai thu vien openai. Hay chay: pip install openai") from e
 
@@ -314,7 +386,7 @@ class VertexClient:
         if not api_key:
             raise ValueError("Khong tim thay OPENAI_API_KEY trong bien moi truong.")
 
-        self.client = OpenAI(api_key=api_key)
+        self.client = create_openai_client(api_key)
         self.model_name = model
 
     def send_data_to_AI(
@@ -326,6 +398,7 @@ class VertexClient:
         top_p=0.8,
         response_mime_type=None,
         response_schema=None,
+        service_tier: Optional[str] = None,
     ):
         content_blocks = []
 
@@ -355,6 +428,9 @@ class VertexClient:
             "model": self.model_name,
             "messages": [{"role": "user", "content": content_blocks}],
         }
+        service_tier = get_openai_service_tier(service_tier)
+        if service_tier:
+            kwargs["service_tier"] = service_tier
 
         kwargs["temperature"] = temperature
         kwargs["top_p"] = top_p
@@ -373,7 +449,7 @@ class VertexClient:
             else:
                 kwargs["response_format"] = {"type": "json_object"}
 
-        response = self.client.chat.completions.create(**kwargs)
+        response = create_chat_completion_with_fallback(self.client, kwargs)
         content = response.choices[0].message.content
 
         if isinstance(content, list):

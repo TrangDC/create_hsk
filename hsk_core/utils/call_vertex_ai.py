@@ -105,10 +105,57 @@ def load_prompt_from_txt(prompt_file_path: str) -> str:
     with open(prompt_file_path, 'r', encoding='utf-8') as file:
         return file.read()
 
+
+def get_openai_timeout_seconds() -> float:
+    raw_timeout = os.getenv("OPENAI_TIMEOUT_SECONDS", "900")
+    try:
+        return float(raw_timeout)
+    except ValueError:
+        return 900.0
+
+
+def get_openai_service_tier(default: Optional[str] = None) -> Optional[str]:
+    raw_tier = default if default is not None else os.getenv("OPENAI_SERVICE_TIER", "auto")
+    if raw_tier is None:
+        return None
+
+    normalized_tier = raw_tier.strip().lower()
+    if normalized_tier in {"", "default"}:
+        return None
+    if normalized_tier in {"auto", "flex"}:
+        return normalized_tier
+    return None
+
+
+def should_fallback_from_flex() -> bool:
+    fallback_mode = os.getenv("OPENAI_FLEX_FALLBACK", "auto").strip().lower()
+    return fallback_mode == "auto"
+
+
+def is_flex_resource_unavailable_error(error: Exception) -> bool:
+    status_code = getattr(error, "status_code", None)
+    if status_code != 429:
+        return False
+
+    error_message = str(error).lower()
+    return "resource unavailable" in error_message or "insufficient resources" in error_message
+
+
+def create_chat_completion_with_fallback(client, kwargs: Dict[str, Any]):
+    try:
+        return client.chat.completions.create(**kwargs)
+    except Exception as error:
+        if kwargs.get("service_tier") == "flex" and should_fallback_from_flex() and is_flex_resource_unavailable_error(error):
+            fallback_kwargs = dict(kwargs)
+            fallback_kwargs["service_tier"] = "auto"
+            print("   ⚠️ Flex tạm thời thiếu tài nguyên, chuyển sang service_tier=auto.")
+            return client.chat.completions.create(**fallback_kwargs)
+        raise
+
 class VertexAIClient:
     def __init__(self):
         self.api_key = os.getenv("OPENAI_API_KEY")
-        self.model_name = os.getenv("OPENAI_MODEL", "gpt-5.5")
+        self.model_name = os.getenv("OPENAI_MODEL", "gpt-5.4")
         self.client = None
         self._initialized = False
         
@@ -122,7 +169,7 @@ class VertexAIClient:
         if not self.api_key:
             raise ValueError("Không tìm thấy OPENAI_API_KEY trong biến môi trường")
 
-        self.client = OpenAI(api_key=self.api_key)
+        self.client = OpenAI(api_key=self.api_key, timeout=get_openai_timeout_seconds())
 
     def init_ai(self):
         """Khởi tạo OpenAI client một lần duy nhất"""
@@ -137,6 +184,7 @@ class VertexAIClient:
         response_schema: Dict[str, Any],
         pdf_paths: Optional[List[str]] = None,
         text_context: Optional[str] = None,
+        service_tier: Optional[str] = None,
         temperature: float = 0.2,
         max_retries: int = 3,
         timeout_seconds: int = 150,
@@ -210,11 +258,15 @@ class VertexAIClient:
                 },
             },
         }
+        resolved_service_tier = get_openai_service_tier(service_tier)
+        if resolved_service_tier:
+            kwargs["service_tier"] = resolved_service_tier
 
         last_exception = None
         for attempt in range(max_retries):
             try:
-                print(f"   Đang gửi yêu cầu đến OpenAI... (Lần thử {attempt + 1}/{max_retries})")
+                tier_label = kwargs.get("service_tier", "default")
+                print(f"   Đang gửi yêu cầu đến OpenAI... (Lần thử {attempt + 1}/{max_retries}, tier={tier_label})")
 
                 response_event = threading.Event()
                 response_container = [None]
@@ -222,7 +274,7 @@ class VertexAIClient:
 
                 def run_api_call():
                     try:
-                        response = self.client.chat.completions.create(**kwargs)
+                        response = create_chat_completion_with_fallback(self.client, kwargs)
                         response_container[0] = response
                         response_event.set()
                     except Exception as e:
