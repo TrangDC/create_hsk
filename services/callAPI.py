@@ -54,8 +54,45 @@ def normalize_schema_for_openai(schema):
     Chuan hoa JSON schema de tuong thich OpenAI structured outputs.
     Tu dong:
     - Chuyen type tu OBJECT/STRING/ARRAY (viet hoa) sang object/string/array (viet thuong)
-    - Them additionalProperties=False cho moi object schema neu chua co
+    - Them additionalProperties=False cho moi object schema.
+    - Dam bao required chua day du tat ca key trong properties.
+    - Cac field optional cu se duoc cho phep null de van tuong thich voi strict mode.
     """
+    def _make_nullable(prop_schema):
+        if not isinstance(prop_schema, dict):
+            return prop_schema
+
+        result = normalize_schema_for_openai(prop_schema)
+
+        schema_type = result.get("type")
+        if isinstance(schema_type, str):
+            schema_type = schema_type.lower()
+
+        if isinstance(schema_type, list):
+            normalized_types = [item.lower() if isinstance(item, str) else item for item in schema_type]
+            if "null" not in normalized_types:
+                result["type"] = normalized_types + ["null"]
+            else:
+                result["type"] = normalized_types
+            return result
+
+        if isinstance(schema_type, str):
+            if schema_type != "null":
+                result["type"] = [schema_type, "null"]
+            return result
+
+        for union_key in ("anyOf", "oneOf"):
+            if union_key in result and isinstance(result[union_key], list):
+                has_null = any(
+                    isinstance(item, dict) and item.get("type") == "null"
+                    for item in result[union_key]
+                )
+                if not has_null:
+                    result[union_key].append({"type": "null"})
+                return result
+
+        return {"anyOf": [result, {"type": "null"}]}
+
     if isinstance(schema, list):
         return [normalize_schema_for_openai(item) for item in schema]
 
@@ -71,8 +108,23 @@ def normalize_schema_for_openai(schema):
             normalized[key] = normalize_schema_for_openai(value)
 
     is_object_schema = normalized.get("type") == "object" or "properties" in normalized
-    if is_object_schema and "additionalProperties" not in normalized:
+    if is_object_schema:
         normalized["additionalProperties"] = False
+
+        properties = normalized.get("properties")
+        if isinstance(properties, dict):
+            original_required = normalized.get("required", [])
+            if not isinstance(original_required, list):
+                original_required = []
+
+            original_required_set = set(original_required)
+            all_prop_keys = list(properties.keys())
+
+            for prop_key in all_prop_keys:
+                if prop_key not in original_required_set:
+                    properties[prop_key] = _make_nullable(properties[prop_key])
+
+            normalized["required"] = all_prop_keys
 
     return normalized
 

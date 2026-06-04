@@ -346,10 +346,15 @@ def extract_single_section(client: VertexClient, pdf_path: str, prompt_text: str
     # Lấy schema đã định nghĩa
     schema = get_section_schema()
     
-    # Gọi VertexClient với các tham số mới thêm
+    # Đọc file PDF
+    with open(pdf_path, "rb") as f:
+        pdf_data = f.read()
+    
+    # Gọi VertexClient với các tham số đúng
     resp = client.send_data_to_AI(
         prompt=prompt_text, 
-        file_paths=[pdf_path], 
+        data=pdf_data,
+        mime_type="application/pdf",
         temperature=0.6,
         response_mime_type="application/json",
         response_schema=schema

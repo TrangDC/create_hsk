@@ -26,7 +26,7 @@ def generate_and_save_image(image_service, description, output_dir):
         return filepath
         
     print(f"   [API] Đang gọi AI vẽ ảnh cho: {description[:50]}...")
-    image_bytes = image_service.generate_image_legacy(prompt=description)
+    image_bytes = image_service.generate_image(prompt=description, aspect_ratio="1:1")
     
     if image_bytes:
         with open(filepath, "wb") as f:

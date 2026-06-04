@@ -4,8 +4,6 @@ import time
 from google import genai
 from google.genai import types
 from google.oauth2 import service_account
-import vertexai
-from vertexai.preview.vision_models import ImageGenerationModel
 from dotenv import load_dotenv
 
 # Load biến môi trường
@@ -270,53 +268,6 @@ class ImageGenerationService:
                 else:
                     return None, usage
         return None, usage
-
-    def generate_image_legacy(self, prompt, max_retries=3):
-        """
-        Tạo ảnh sử dụng Imagen Ultra (Cho HSK).
-        Code logic lấy từ yêu cầu cũ.
-        """
-
-        if not self.imagen_model:
-            print("❌ Lỗi: Imagen Model chưa được khởi tạo")
-            return None
-        
-        prompt_gen_image= f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác theo mô tả sau: {prompt}."
-        prompt_gen_image += f"**Lưu ý**: Không vẽ theo phong cách hoạt hình hay tranh vẽ tay."
-        prompt_gen_image += f"Với hình ảnh có chữ, ưu tiên sử dụng từ Tiếng Anh để đảm bảo chữ chính xác không lỗi."
-        prompt_gen_image += f"Chỉ sinh ra ảnh có chữ Tiếng Việt trong trường hợp mô tả ảnh yêu cầu có chữ Tiếng Việt."
-
-        for attempt in range(1, max_retries + 1):
-            try:
-                if attempt > 1: print(f"   🔄 Imagen retry ({attempt}/{max_retries})...")
-                else: print(f"   🎨 [Imagen] Đang sinh ảnh: {prompt[:30]}...")
-
-                # Gọi API Imagen cũ
-                response = self.imagen_model.generate_images(
-                    number_of_images=1, # Chỉ lấy 1 ảnh để tiết kiệm
-                    prompt=prompt_gen_image,
-                    aspect_ratio="1:1",
-                    negative_prompt="",
-                    person_generation="allow_all",
-                    safety_filter_level="block_few",
-                    add_watermark=False,
-                )
-
-                if response.images and len(response.images) > 0:
-                    # Imagen SDK trả về object GeneratedImage
-                    # Ta lấy bytes trực tiếp từ thuộc tính _image_bytes (hoặc save vào buffer)
-                    # Cách chuẩn nhất với SDK này là truy cập ._image_bytes
-                    return response.images[0]._image_bytes
-                
-                print(f"      ⚠️ Imagen không trả về ảnh (Lần {attempt}).")
-                raise Exception("Empty response")
-
-            except Exception as e:
-                print(f"      ❌ Lỗi Imagen (Lần {attempt}): {str(e)}")
-                if attempt < max_retries: time.sleep(3)
-                else: return None
-        return None
-
 
 # --- KHỐI TEST ---
 if __name__ == "__main__":

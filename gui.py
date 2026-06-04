@@ -48,7 +48,8 @@ if os.name == 'nt':  # Windows only
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QLineEdit, QComboBox, QPlainTextEdit, QFileDialog, QMessageBox,
-    QTabWidget, QRadioButton, QButtonGroup, QGroupBox, QListWidget, QAbstractItemView, QSpinBox
+    QTabWidget, QRadioButton, QButtonGroup, QGroupBox, QListWidget, QAbstractItemView, QSpinBox,
+    QStackedWidget
 )
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, Qt
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -1102,28 +1103,28 @@ class HSKGeneratorApp(QWidget):
         
         # Tab 2: Tạo ảnh
         self.image_tab = self.create_image_tab()
-        self.tab_widget.addTab(self.image_tab, "Tạo ảnh AI")
+        self.tab_widget.addTab(self.image_tab, "Tạo ảnh AI HSK")
 
         # Tab 3: Ghép ảnh
         self.merge_tab = self.create_merge_tab()
-        self.tab_widget.addTab(self.merge_tab, "Ghép ảnh AI")
-
-        # --- THÊM TAB TTS MỚI Ở ĐÂY ---
-        self.tts_tab = self.create_tts_tab()
-        self.tab_widget.addTab(self.tts_tab, "TTS")
+        self.tab_widget.addTab(self.merge_tab, "Ghép ảnh AI HSK")
 
         # --- TAB AUDIO TTS (VERTEX AI) ---
         self.audio_tts_tab = self.create_audio_tts_tab()
-        self.tab_widget.addTab(self.audio_tts_tab, "🎙️ Audio TTS")
+        self.tab_widget.addTab(self.audio_tts_tab, "🎙️ Audio HSK")
 
         self.ppt_tab = self.create_ppt_gen_tab()
-        self.tab_widget.addTab(self.ppt_tab, "Tạo PPT HSK")
+        self.tab_widget.addTab(self.ppt_tab, "Tạo slide HSK")
 
         self.summary_tab = self.create_summary_tab()
         self.tab_widget.addTab(self.summary_tab, "Tóm tắt HSK")
 
         self.flashcard_tab = self.create_flashcard_tab()
-        self.tab_widget.addTab(self.flashcard_tab, "Flashcard Gen")
+        self.tab_widget.addTab(self.flashcard_tab, "Flashcard Gen HSK")
+
+        # --- THÊM TAB TTS MỚI Ở ĐÂY ---
+        self.tts_tab = self.create_tts_tab()
+        self.tab_widget.addTab(self.tts_tab, "TTS")
 
         # --- THÊM TAB ENGLISH FLASHCARD ---
         self.eng_flashcard_tab = self.create_eng_flashcard_tab()
@@ -1604,7 +1605,7 @@ class HSKGeneratorApp(QWidget):
         model_layout = QHBoxLayout()
         model_label = QLabel("Model TTS:")
         self.audio_tts_model_combo = QComboBox()
-        self.audio_tts_model_combo.addItems(['Chirp3-HD', 'gemini-2.5-pro-tts', 'gemini-2.5-flash-tts'])
+        self.audio_tts_model_combo.addItems(['Chirp3-HD', 'gemini-3.1-flash-tts-preview'])
         self.audio_tts_model_combo.setCurrentText('Chirp3-HD')
         model_layout.addWidget(model_label)
         model_layout.addWidget(self.audio_tts_model_combo)
@@ -1672,53 +1673,86 @@ class HSKGeneratorApp(QWidget):
         """Tạo tab cho chức năng Tóm tắt Tiếng Trung."""
         tab = QWidget()
         layout = QVBoxLayout()
-        layout.setSpacing(20)
+        layout.setSpacing(15)
         layout.setContentsMargins(25, 25, 25, 25)
+
+        # ── Phần chọn loại tóm tắt ──────────────────────────────────────
+        mode_group = QGroupBox("Loại tóm tắt")
+        mode_layout = QHBoxLayout()
+        mode_layout.setContentsMargins(10, 10, 10, 10)
+
+        self.sum_radio_lesson = QRadioButton("📖 Tóm tắt bài khóa")
+        self.sum_radio_grammar = QRadioButton("📐 Tóm tắt ngữ pháp")
+        self.sum_radio_lesson.setChecked(True)
+
+        mode_layout.addWidget(self.sum_radio_lesson)
+        mode_layout.addWidget(self.sum_radio_grammar)
+        mode_layout.addStretch()
+        mode_group.setLayout(mode_layout)
+        layout.addWidget(mode_group)
+
+        # ── QStackedWidget chứa 2 giao diện ─────────────────────────────
+        self.sum_stacked = QStackedWidget()
+        self.sum_stacked.addWidget(self._create_sum_lesson_panel())   # index 0
+        self.sum_stacked.addWidget(self._create_sum_grammar_panel())  # index 1
+
+        layout.addWidget(self.sum_stacked)
+
+        # Kết nối radio → switch panel
+        self.sum_radio_lesson.toggled.connect(
+            lambda checked: self.sum_stacked.setCurrentIndex(0) if checked else None
+        )
+        self.sum_radio_grammar.toggled.connect(
+            lambda checked: self.sum_stacked.setCurrentIndex(1) if checked else None
+        )
+
+        tab.setLayout(layout)
+        return tab
+
+    # ── Panel: Tóm tắt bài khóa ─────────────────────────────────────────
+    def _create_sum_lesson_panel(self):
+        panel = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(15)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         # 1. Chọn PDF
         pdf_layout = QHBoxLayout()
-        self.sum_pdf_label = QLabel('File PDF:')
         self.sum_pdf_input = QLineEdit()
         self.sum_pdf_input.setPlaceholderText("Chọn file bài khóa PDF...")
         self.sum_browse_pdf_btn = QPushButton('Chọn...')
         self.sum_browse_pdf_btn.setStyleSheet("background-color: #28a745;")
         self.sum_browse_pdf_btn.clicked.connect(self._browse_sum_pdf)
-        
-        pdf_layout.addWidget(self.sum_pdf_label)
+        pdf_layout.addWidget(QLabel('File PDF:'))
         pdf_layout.addWidget(self.sum_pdf_input)
         pdf_layout.addWidget(self.sum_browse_pdf_btn)
         layout.addLayout(pdf_layout)
 
         # 2. Chọn Prompt
         prompt_layout = QHBoxLayout()
-        self.sum_prompt_label = QLabel('File Prompt:')
         self.sum_prompt_input = QLineEdit()
-        # đặt file prompt mặc định là prompt_summary.txt trong thư mục resources
         default_prompt_path = os.path.join(os.getcwd(), "resources", "prompts", "prompt_summary.txt")
         self.sum_prompt_input.setText(default_prompt_path)
         self.sum_browse_prompt_btn = QPushButton('Chọn...')
         self.sum_browse_prompt_btn.setStyleSheet("background-color: #17a2b8;")
         self.sum_browse_prompt_btn.clicked.connect(self._browse_sum_prompt)
-
-        prompt_layout.addWidget(self.sum_prompt_label)
+        prompt_layout.addWidget(QLabel('File Prompt:'))
         prompt_layout.addWidget(self.sum_prompt_input)
         prompt_layout.addWidget(self.sum_browse_prompt_btn)
         layout.addLayout(prompt_layout)
 
-        # 2.5 Nhập số lượng bài khóa
+        # 3. Số lượng bài khóa
         num_lessons_layout = QHBoxLayout()
-        self.sum_num_lessons_label = QLabel('Số lượng bài khóa:')
         self.sum_num_lessons_input = QSpinBox()
         self.sum_num_lessons_input.setMinimum(1)
         self.sum_num_lessons_input.setMaximum(20)
-        self.sum_num_lessons_input.setValue(1) # Mặc định là 1
-
-        num_lessons_layout.addWidget(self.sum_num_lessons_label)
+        self.sum_num_lessons_input.setValue(1)
+        num_lessons_layout.addWidget(QLabel('Số lượng bài khóa:'))
         num_lessons_layout.addWidget(self.sum_num_lessons_input)
         num_lessons_layout.addStretch()
         layout.addLayout(num_lessons_layout)
 
-        # 3. Nút chạy
+        # 4. Nút chạy
         self.sum_run_button = QPushButton('📝 Bắt đầu Tóm tắt')
         self.sum_run_button.setStyleSheet("""
             QPushButton {
@@ -1735,16 +1769,31 @@ class HSKGeneratorApp(QWidget):
         self.sum_run_button.clicked.connect(self._start_summary)
         layout.addWidget(self.sum_run_button)
 
-        # 4. Log area
-        log_label = QLabel('📋 Nhật ký Tóm tắt:')
-        layout.addWidget(log_label)
-        
+        # 5. Log
+        layout.addWidget(QLabel('📋 Nhật ký Tóm tắt bài khóa:'))
         self.sum_log_display = QPlainTextEdit()
         self.sum_log_display.setReadOnly(True)
         layout.addWidget(self.sum_log_display)
 
-        tab.setLayout(layout)
-        return tab
+        panel.setLayout(layout)
+        return panel
+
+    # ── Panel: Tóm tắt ngữ pháp ─────────────────────────────────────────
+    def _create_sum_grammar_panel(self):
+        panel = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(15)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        # (Giao diện sẽ được bổ sung theo yêu cầu tiếp theo)
+        placeholder = QLabel("🚧 Giao diện tóm tắt ngữ pháp đang được xây dựng...")
+        placeholder.setAlignment(Qt.AlignCenter)
+        placeholder.setStyleSheet("color: #888; font-size: 13pt; padding: 40px;")
+        layout.addWidget(placeholder)
+        layout.addStretch()
+
+        panel.setLayout(layout)
+        return panel
 
     def create_flashcard_tab(self):
         """Tạo tab Flashcard Generator (Tính năng mới)."""
@@ -2186,7 +2235,7 @@ class HSKGeneratorApp(QWidget):
         self.tts_run_button.setEnabled(False)
         self.tts_run_button.setText('⏳ Đang xử lý...')
         self.tts_log_display.clear()
-
+        
         # Tạo Thread
         self.tts_thread = QThread()
         

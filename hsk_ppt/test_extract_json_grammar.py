@@ -146,9 +146,14 @@ def extract_single_grammar_point(client: VertexClient, pdf_path: str, prompt_tex
     
     schema = get_grammar_schema()
     
+    # Đọc file PDF
+    with open(pdf_path, "rb") as f:
+        pdf_data = f.read()
+    
     resp = client.send_data_to_AI(
         prompt=prompt_text, 
-        file_paths=[pdf_path], 
+        data=pdf_data,
+        mime_type="application/pdf",
         temperature=0.6,
         response_mime_type="application/json",
         response_schema=schema
