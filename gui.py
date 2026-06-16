@@ -72,10 +72,12 @@ from services.input_handler import InputDataManager
 from services.image_gen_service import ImageGenerationService
 from services.image_gen_logger import ImageGenLogger
 from services.gif_downloader import StrokeGifManager
+from services.vocab_extractor import build_lesson_map, get_vocab_sheet_names
 from call_vertexai import generate_content
 # Giả sử các module này đã có sẵn trong project của bạn
 from services.CompressPDF import compress_pdf_ghostscript 
 from services.response2docx import response2docx
+from services.response2docx_grammar import response2docx_grammar
 from services.process import ProcessingThread
 from google.oauth2 import service_account
 
@@ -644,6 +646,116 @@ class SummaryWorker(QObject):
 
         except Exception as e:
             self.error.emit(str(e))        
+
+
+class GrammarSummaryWorker(QObject):
+    finished = pyqtSignal(str)
+    error = pyqtSignal(str)
+    progress = pyqtSignal(str)
+
+    def __init__(self, pdf_path, excel_path, sheet_name, lesson_value, topic_value, prompt_path):
+        super().__init__()
+        self.pdf_path = pdf_path
+        self.excel_path = excel_path
+        self.sheet_name = sheet_name
+        self.lesson_value = lesson_value
+        self.topic_value = topic_value
+        self.prompt_path = prompt_path
+        self.project_id = "onluyen-media"
+        self.creds = self._setup_credentials()
+
+    def _setup_credentials(self):
+        try:
+            service_account_data = {
+                "type": os.getenv("TYPE"),
+                "project_id": os.getenv("PROJECT_ID"),
+                "private_key_id": os.getenv("PRIVATE_KEY_ID"),
+                "private_key": os.getenv("PRIVATE_KEY").replace('\\n', '\n') if os.getenv("PRIVATE_KEY") else None,
+                "client_email": os.getenv("CLIENT_EMAIL"),
+                "client_id": os.getenv("CLIENT_ID", ""),
+                "auth_uri": os.getenv("AUTH_URI"),
+                "token_uri": os.getenv("TOKEN_URI"),
+                "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
+                "client_x509_cert_url": os.getenv("CLIENT_X509_CERT_URL"),
+                "universe_domain": os.getenv("UNIVERSE_DOMAIN")
+            }
+
+            self.credentials = service_account.Credentials.from_service_account_info(
+                service_account_data,
+                scopes=["https://www.googleapis.com/auth/cloud-platform"]
+            )
+            return self.credentials
+        except Exception as e:
+            print(f"Lỗi khi tạo credentials từ service account: {e}")
+            return None
+
+    def _build_prompt(self, prompt_template, vocab_records):
+        vocab_lines = []
+        for idx, record in enumerate(vocab_records, 1):
+            vocab_lines.append(
+                f"{idx}. {record.get('word', '')} | {record.get('pinyin', '')} | {record.get('part_of_speech', '')} | {record.get('meaning', '')}"
+            )
+
+        vocab_block = "\n".join(vocab_lines) if vocab_lines else "Không có từ vựng."
+        lesson_label = f"Bài {self.lesson_value}"
+        return (
+            f"{prompt_template.strip()}\n\n"
+            f"Thông tin bài học:\n"
+            f"- Sheet: {self.sheet_name}\n"
+            f"- Bài: {lesson_label}\n"
+            f"- Chủ đề: {self.topic_value}\n\n"
+            f"Danh sách từ vựng lấy từ Excel:\n{vocab_block}\n"
+        )
+
+    def run(self):
+        try:
+            from openpyxl import load_workbook
+            from services.vocab_extractor import build_lesson_map, extract_vocabulary_records
+
+            if not os.path.exists(self.prompt_path):
+                raise FileNotFoundError("Không tìm thấy file prompt ngữ pháp.")
+
+            with open(self.prompt_path, 'r', encoding='utf-8') as f:
+                prompt_content = f.read()
+
+            self.progress.emit("📘 Đang đọc danh sách từ vựng từ Excel...")
+            wb = load_workbook(self.excel_path, read_only=True, data_only=True)
+            try:
+                ws = wb[self.sheet_name]
+                lesson_map = build_lesson_map(ws)
+                vocab_records = extract_vocabulary_records(ws, lesson_map, self.lesson_value, self.topic_value)
+            finally:
+                wb.close()
+
+            if not vocab_records:
+                raise ValueError("Không tìm thấy từ vựng phù hợp theo sheet/bài/chủ đề đã chọn.")
+
+            file_name = os.path.splitext(os.path.basename(self.pdf_path))[0]
+            os.makedirs("output/summary", exist_ok=True)
+            compressed_pdf_path = f"output/summary/{file_name}_grammar_compressed.pdf"
+
+            self.progress.emit(f"🔄 Đang nén PDF ngữ pháp: {file_name}...")
+            compress_pdf_ghostscript(self.pdf_path, compressed_pdf_path, 'ebook')
+
+            if not os.path.exists(compressed_pdf_path):
+                raise Exception("Nén PDF ngữ pháp thất bại.")
+
+            final_prompt = self._build_prompt(prompt_content, vocab_records)
+
+            self.progress.emit("🤖 Đang gửi yêu cầu tóm tắt ngữ pháp tới OpenAI...")
+            docx_path = response2docx_grammar(
+                compressed_pdf_path,
+                final_prompt,
+                file_name,
+                self.project_id,
+                self.creds,
+                os.getenv("OPENAI_MODEL", "gpt-5.4"),
+                vocab_records
+            )
+
+            self.finished.emit(f"Hoàn tất! File lưu tại:\n{os.path.abspath(docx_path)}")
+        except Exception as e:
+            self.error.emit(str(e))
 
 class FlashcardWorker(QObject):
     finished = pyqtSignal(str)
@@ -1785,12 +1897,95 @@ class HSKGeneratorApp(QWidget):
         layout.setSpacing(15)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        # (Giao diện sẽ được bổ sung theo yêu cầu tiếp theo)
-        placeholder = QLabel("🚧 Giao diện tóm tắt ngữ pháp đang được xây dựng...")
-        placeholder.setAlignment(Qt.AlignCenter)
-        placeholder.setStyleSheet("color: #888; font-size: 13pt; padding: 40px;")
-        layout.addWidget(placeholder)
-        layout.addStretch()
+        default_vocab_path = os.path.join(os.getcwd(), "resources", "sheet", "hsk_vocabs.xlsx")
+        default_prompt_path = os.path.join(os.getcwd(), "resources", "prompts", "prompt_summary_grammar.txt")
+
+        pdf_layout = QHBoxLayout()
+        self.sum_grammar_pdf_input = QLineEdit()
+        self.sum_grammar_pdf_input.setPlaceholderText("Chọn file PDF slide ngữ pháp...")
+        self.sum_grammar_browse_pdf_btn = QPushButton('Chọn...')
+        self.sum_grammar_browse_pdf_btn.setStyleSheet("background-color: #28a745;")
+        self.sum_grammar_browse_pdf_btn.clicked.connect(self._browse_sum_grammar_pdf)
+        pdf_layout.addWidget(QLabel('File PDF:'))
+        pdf_layout.addWidget(self.sum_grammar_pdf_input)
+        pdf_layout.addWidget(self.sum_grammar_browse_pdf_btn)
+        layout.addLayout(pdf_layout)
+
+        excel_layout = QHBoxLayout()
+        self.sum_grammar_excel_input = QLineEdit()
+        self.sum_grammar_excel_input.setText(default_vocab_path)
+        self.sum_grammar_browse_excel_btn = QPushButton('Chọn...')
+        self.sum_grammar_browse_excel_btn.setStyleSheet("background-color: #28a745;")
+        self.sum_grammar_browse_excel_btn.clicked.connect(self._browse_sum_grammar_excel)
+        excel_layout.addWidget(QLabel('File Excel từ vựng:'))
+        excel_layout.addWidget(self.sum_grammar_excel_input)
+        excel_layout.addWidget(self.sum_grammar_browse_excel_btn)
+        layout.addLayout(excel_layout)
+
+        sheet_layout = QHBoxLayout()
+        self.sum_grammar_sheet_combo = QComboBox()
+        self.sum_grammar_sheet_combo.setMinimumWidth(220)
+        self.sum_grammar_sheet_combo.currentTextChanged.connect(self._on_sum_grammar_sheet_changed)
+        self.sum_grammar_reload_btn = QPushButton('🔄 Tải sheet')
+        self.sum_grammar_reload_btn.clicked.connect(self._load_sum_grammar_sheets)
+        sheet_layout.addWidget(QLabel('Sheet:'))
+        sheet_layout.addWidget(self.sum_grammar_sheet_combo)
+        sheet_layout.addWidget(self.sum_grammar_reload_btn)
+        sheet_layout.addStretch()
+        layout.addLayout(sheet_layout)
+
+        lesson_layout = QHBoxLayout()
+        self.sum_grammar_bai_combo = QComboBox()
+        self.sum_grammar_bai_combo.setMinimumWidth(220)
+        self.sum_grammar_bai_combo.currentTextChanged.connect(self._on_sum_grammar_bai_changed)
+        lesson_layout.addWidget(QLabel('Bài:'))
+        lesson_layout.addWidget(self.sum_grammar_bai_combo)
+        lesson_layout.addStretch()
+        layout.addLayout(lesson_layout)
+
+        topic_layout = QHBoxLayout()
+        self.sum_grammar_topic_combo = QComboBox()
+        self.sum_grammar_topic_combo.setMinimumWidth(320)
+        topic_layout.addWidget(QLabel('Chủ đề:'))
+        topic_layout.addWidget(self.sum_grammar_topic_combo)
+        topic_layout.addStretch()
+        layout.addLayout(topic_layout)
+
+        prompt_layout = QHBoxLayout()
+        self.sum_grammar_prompt_input = QLineEdit()
+        self.sum_grammar_prompt_input.setText(default_prompt_path)
+        self.sum_grammar_browse_prompt_btn = QPushButton('Chọn...')
+        self.sum_grammar_browse_prompt_btn.setStyleSheet("background-color: #17a2b8;")
+        self.sum_grammar_browse_prompt_btn.clicked.connect(self._browse_sum_grammar_prompt)
+        prompt_layout.addWidget(QLabel('File Prompt:'))
+        prompt_layout.addWidget(self.sum_grammar_prompt_input)
+        prompt_layout.addWidget(self.sum_grammar_browse_prompt_btn)
+        layout.addLayout(prompt_layout)
+
+        self.sum_grammar_run_button = QPushButton('📐 Bắt đầu Tóm tắt ngữ pháp')
+        self.sum_grammar_run_button.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                font-size: 14pt;
+                padding: 15px 30px;
+                min-height: 35px;
+            }
+            QPushButton:hover {
+                background-color: #7B1FA2;
+            }
+        """)
+        self.sum_grammar_run_button.clicked.connect(self._start_summary_grammar)
+        layout.addWidget(self.sum_grammar_run_button)
+
+        layout.addWidget(QLabel('📋 Nhật ký Tóm tắt ngữ pháp:'))
+        self.sum_grammar_log_display = QPlainTextEdit()
+        self.sum_grammar_log_display.setReadOnly(True)
+        layout.addWidget(self.sum_grammar_log_display)
+
+        self.sum_grammar_lesson_map = {}
+        if os.path.exists(default_vocab_path):
+            self._load_sum_grammar_sheets()
 
         panel.setLayout(layout)
         return panel
@@ -2407,6 +2602,140 @@ class HSKGeneratorApp(QWidget):
         if file_path:
             self.sum_prompt_input.setText(file_path)
 
+    def _browse_sum_grammar_pdf(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Chọn file PDF ngữ pháp', '', 'PDF Files (*.pdf)')
+        if file_path:
+            self.sum_grammar_pdf_input.setText(file_path)
+
+    def _browse_sum_grammar_excel(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Chọn file Excel từ vựng', '', 'Excel Files (*.xlsx *.xls)')
+        if file_path:
+            self.sum_grammar_excel_input.setText(file_path)
+            self._load_sum_grammar_sheets()
+
+    def _browse_sum_grammar_prompt(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Chọn file Prompt ngữ pháp', '', 'Text Files (*.txt)')
+        if file_path:
+            self.sum_grammar_prompt_input.setText(file_path)
+
+    def _load_sum_grammar_sheets(self):
+        excel_path = self.sum_grammar_excel_input.text().strip()
+        if not excel_path or not os.path.exists(excel_path):
+            self.sum_grammar_sheet_combo.clear()
+            self.sum_grammar_bai_combo.clear()
+            self.sum_grammar_topic_combo.clear()
+            return
+
+        try:
+            sheet_names = get_vocab_sheet_names(excel_path)
+            self.sum_grammar_sheet_combo.blockSignals(True)
+            self.sum_grammar_sheet_combo.clear()
+            self.sum_grammar_sheet_combo.addItems(sheet_names)
+            self.sum_grammar_sheet_combo.blockSignals(False)
+            self.sum_grammar_log_display.appendPlainText(f">> Tải {len(sheet_names)} sheet vocab hợp lệ.")
+            if sheet_names:
+                self._on_sum_grammar_sheet_changed(sheet_names[0])
+        except Exception as e:
+            self.sum_grammar_log_display.appendPlainText(f"❌ Lỗi tải sheet vocab: {e}")
+            QMessageBox.critical(self, 'Lỗi', f"Không thể đọc file vocab:\n{e}")
+
+    def _on_sum_grammar_sheet_changed(self, sheet_name):
+        excel_path = self.sum_grammar_excel_input.text().strip()
+        self.sum_grammar_bai_combo.blockSignals(True)
+        self.sum_grammar_bai_combo.clear()
+        self.sum_grammar_topic_combo.clear()
+        self.sum_grammar_bai_combo.blockSignals(False)
+        self.sum_grammar_lesson_map = {}
+
+        if not excel_path or not sheet_name or not os.path.exists(excel_path):
+            return
+
+        try:
+            from openpyxl import load_workbook
+
+            wb = load_workbook(excel_path, read_only=True, data_only=True)
+            try:
+                ws = wb[sheet_name]
+                self.sum_grammar_lesson_map = build_lesson_map(ws)
+            finally:
+                wb.close()
+
+            lessons = sorted(self.sum_grammar_lesson_map.keys(), key=lambda value: int(value))
+            self.sum_grammar_bai_combo.blockSignals(True)
+            self.sum_grammar_bai_combo.addItems([f"Bài {lesson}" for lesson in lessons])
+            self.sum_grammar_bai_combo.blockSignals(False)
+            self.sum_grammar_log_display.appendPlainText(f">> Sheet '{sheet_name}' có {len(lessons)} bài.")
+            if lessons:
+                self._on_sum_grammar_bai_changed(f"Bài {lessons[0]}")
+        except Exception as e:
+            self.sum_grammar_log_display.appendPlainText(f"❌ Lỗi tải bài/chủ đề: {e}")
+            QMessageBox.critical(self, 'Lỗi', f"Không thể đọc bài/chủ đề từ sheet '{sheet_name}':\n{e}")
+
+    def _on_sum_grammar_bai_changed(self, selected_bai_text):
+        self.sum_grammar_topic_combo.clear()
+        if not selected_bai_text:
+            return
+
+        bai_key = selected_bai_text.replace('Bài ', '').strip()
+        lesson_data = self.sum_grammar_lesson_map.get(bai_key)
+        if not lesson_data:
+            return
+
+        topics = lesson_data.get('topics', [])
+        self.sum_grammar_topic_combo.addItems(topics)
+        self.sum_grammar_log_display.appendPlainText(f">> Bài {bai_key} có {len(topics)} chủ đề.")
+
+    def _start_summary_grammar(self):
+        pdf_path = self.sum_grammar_pdf_input.text().strip()
+        excel_path = self.sum_grammar_excel_input.text().strip()
+        sheet_name = self.sum_grammar_sheet_combo.currentText().strip()
+        lesson_text = self.sum_grammar_bai_combo.currentText().strip()
+        topic_value = self.sum_grammar_topic_combo.currentText().strip()
+        prompt_path = self.sum_grammar_prompt_input.text().strip()
+
+        if not pdf_path or not os.path.exists(pdf_path):
+            QMessageBox.warning(self, 'Lỗi', 'File PDF ngữ pháp không tồn tại.')
+            return
+        if not excel_path or not os.path.exists(excel_path):
+            QMessageBox.warning(self, 'Lỗi', 'File Excel từ vựng không tồn tại.')
+            return
+        if not prompt_path or not os.path.exists(prompt_path):
+            QMessageBox.warning(self, 'Lỗi', 'File prompt ngữ pháp không tồn tại.')
+            return
+        if not sheet_name or not lesson_text or not topic_value:
+            QMessageBox.warning(self, 'Lỗi', 'Vui lòng chọn đủ sheet, bài và chủ đề.')
+            return
+
+        lesson_value = lesson_text.replace('Bài ', '').strip()
+
+        self.sum_grammar_run_button.setEnabled(False)
+        self.sum_grammar_run_button.setText('⏳ Đang xử lý...')
+        self.sum_grammar_log_display.clear()
+
+        self.sum_grammar_thread = QThread()
+        self.sum_grammar_worker = GrammarSummaryWorker(
+            pdf_path,
+            excel_path,
+            sheet_name,
+            lesson_value,
+            topic_value,
+            prompt_path
+        )
+        self.sum_grammar_worker.moveToThread(self.sum_grammar_thread)
+
+        self.sum_grammar_thread.started.connect(self.sum_grammar_worker.run)
+        self.sum_grammar_worker.progress.connect(self._sum_grammar_progress)
+        self.sum_grammar_worker.finished.connect(self._sum_grammar_finished)
+        self.sum_grammar_worker.error.connect(self._sum_grammar_error)
+
+        self.sum_grammar_worker.error.connect(self.sum_grammar_thread.quit)
+        self.sum_grammar_worker.error.connect(self.sum_grammar_worker.deleteLater)
+        self.sum_grammar_worker.finished.connect(self.sum_grammar_thread.quit)
+        self.sum_grammar_worker.finished.connect(self.sum_grammar_worker.deleteLater)
+        self.sum_grammar_thread.finished.connect(self.sum_grammar_thread.deleteLater)
+
+        self.sum_grammar_thread.start()
+
     def _start_summary(self):
         pdf_path = self.sum_pdf_input.text()
         prompt_path = self.sum_prompt_input.text()
@@ -2452,6 +2781,20 @@ class HSKGeneratorApp(QWidget):
     def _sum_error(self, err):
         self.sum_run_button.setEnabled(True)
         self.sum_run_button.setText('📝 Bắt đầu Tóm tắt')
+        QMessageBox.critical(self, 'Lỗi', f"Lỗi: {err}")
+
+    def _sum_grammar_progress(self, msg):
+        self.sum_grammar_log_display.appendPlainText(msg)
+        self.sum_grammar_log_display.verticalScrollBar().setValue(self.sum_grammar_log_display.verticalScrollBar().maximum())
+
+    def _sum_grammar_finished(self, result):
+        self.sum_grammar_run_button.setEnabled(True)
+        self.sum_grammar_run_button.setText('📐 Bắt đầu Tóm tắt ngữ pháp')
+        QMessageBox.information(self, 'Hoàn thành', result)
+
+    def _sum_grammar_error(self, err):
+        self.sum_grammar_run_button.setEnabled(True)
+        self.sum_grammar_run_button.setText('📐 Bắt đầu Tóm tắt ngữ pháp')
         QMessageBox.critical(self, 'Lỗi', f"Lỗi: {err}")
 
     def _pipeline_finished(self, result_path):

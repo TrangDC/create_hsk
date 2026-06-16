@@ -18,6 +18,7 @@ class HSKTextProcessor:
         self.chinese_char_pattern = re.compile(r'[\u4e00-\u9fff]')
         # Tăng range lên 100 để an toàn cho đề có số câu dài hơn
         self.question_numbers = {i: f"第{self._to_chinese_num(i)}题" for i in range(1, 101)}
+        self.sentence_split_pattern = re.compile(r'(?<=[。！？!?；;])\s*')
 
     def _to_chinese_num(self, n):
         nums = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
@@ -53,6 +54,43 @@ class HSKTextProcessor:
         lines = str(text_block).split('\n')
         return [l.strip() for l in lines if self.is_contains_chinese(l) and "http" not in l.lower() and not self.is_option_line(l)]
 
+    def split_tts_segments(self, text, max_chars=90):
+        if not text:
+            return []
+
+        normalized = re.sub(r'\s+', ' ', str(text)).strip()
+        if not normalized:
+            return []
+
+        parts = [part.strip() for part in self.sentence_split_pattern.split(normalized) if part.strip()]
+        if not parts:
+            parts = [normalized]
+
+        segments = []
+        for part in parts:
+            if len(part) <= max_chars:
+                segments.append(part)
+                continue
+
+            start = 0
+            while start < len(part):
+                segments.append(part[start:start + max_chars].strip())
+                start += max_chars
+
+        return [segment for segment in segments if segment]
+
+    def expand_narration_lines(self, lines):
+        expanded = []
+        for line in lines:
+            cleaned = self.clean_tags(line, remove_all=True)
+            segments = self.split_tts_segments(cleaned)
+            if segments:
+                expanded.append(segments)
+        return expanded
+
+    def is_dialogue_line(self, text):
+        return bool(re.search(r'(男|女)[：:]', text or ''))
+
     def build_script(self, row_data, is_first_in_group=False, is_merged_group=False, is_last_in_group=False):
         """
         Xây dựng kịch bản cho một câu hỏi.
@@ -62,12 +100,12 @@ class HSKTextProcessor:
         q_idx = row_data['q_idx']
         text_i = row_data['text_i']
         text_f = row_data['text_f']
+        is_dialogue = any(self.is_dialogue_line(line) for line in text_i)
 
         # 1. Xử lý Intro/Ví dụ nếu là câu đầu tiên của nhóm
         if is_first_in_group:
             if is_merged_group:
                 # Dạng gộp nhóm (như 9-12 cũ)
-                is_dialogue = any(re.search(r'(男|女)[：:]', line) for line in text_i)
                 intro_text = "一段对话" if is_dialogue else "一段话"
                 # Sẽ replace "...题" bằng end_q ở lớp ngoài
                 script.append({'v': 'Leda', 't': f"第{self._to_chinese_num(q_idx)}题到第...题是根据下面{intro_text}。", 'delay_after': 5000})
@@ -83,15 +121,8 @@ class HSKTextProcessor:
         script.append({'v': 'Leda', 't': self.question_numbers.get(q_idx, f"第{q_idx}题"), 'delay_after': 1500})
 
         # 3. Đọc nội dung chính
-        if len(text_i) == 1:
-            # Dạng câu đơn
-            content = self.clean_tags(text_i[0], remove_all=True)
-            script.extend([
-                {'v': 'Charon', 't': content, 'delay_after': 5000},
-                {'v': 'Zephyr', 't': content, 'delay_after': 0}
-            ])
-        elif len(text_i) >= 2:
-            # Dạng đối thoại / đoạn văn
+        if is_dialogue and len(text_i) >= 1:
+            # Dạng đối thoại
             # Lượt 1
             for i, line in enumerate(text_i):
                 if "女：" in line or "女:" in line: v = 'Zephyr'
@@ -109,6 +140,28 @@ class HSKTextProcessor:
                 end_delay = 15000 if (is_merged_group and not is_last_in_group) else 0
                 delay = 1200 if i < len(text_i) - 1 else end_delay
                 script.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
+        elif len(text_i) >= 1:
+            # Dạng câu đơn / đoạn văn: tách thành các nhịp đọc ngắn hơn nhưng giữ cùng voice
+            narration_line_groups = self.expand_narration_lines(text_i)
+            if not narration_line_groups:
+                return script
+
+            def append_narration_pass(voice, final_delay):
+                for line_idx, line_segments in enumerate(narration_line_groups):
+                    is_last_line = line_idx == len(narration_line_groups) - 1
+                    for seg_idx, segment in enumerate(line_segments):
+                        is_last_segment = seg_idx == len(line_segments) - 1
+                        if is_last_line and is_last_segment:
+                            delay = final_delay
+                        elif is_last_segment:
+                            delay = 1200
+                        else:
+                            delay = 0
+                        script.append({'v': voice, 't': segment, 'delay_after': delay})
+
+            append_narration_pass('Charon', 5000)
+            end_delay = 15000 if (is_merged_group and not is_last_in_group) else 0
+            append_narration_pass('Zephyr', end_delay)
         
         return script
 
@@ -284,19 +337,67 @@ def get_range_from_filename(filename):
         return int(match.group(1)), int(match.group(2))
     return None
 
-def get_merged_ranges_b(excel_path):
+def extract_subtitle_block(cell_value):
+    """
+    Lấy phần text nằm sau marker 'Phụ đề' và trước 'Tạm dịch'.
+    Chấp nhận cả ':' và '：', đồng thời chịu được khoảng trắng / xuống dòng khác nhau.
+    """
+    if pd.isna(cell_value) or not str(cell_value).strip():
+        return None
+
+    text = str(cell_value)
+    match = re.search(
+        r'Phụ đề\s*[:：]\s*(.*?)(?:\n*\s*Tạm dịch\s*[:：]|$)',
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+    if not match:
+        return None
+
+    subtitle_block = match.group(1).strip()
+    return subtitle_block or None
+
+def has_url_reference(cell_value):
+    if pd.isna(cell_value) or not str(cell_value).strip():
+        return False
+
+    text = str(cell_value)
+    return bool(re.search(r'(^|\n)\s*URL\s*[:：]\s*\S+', text, flags=re.IGNORECASE))
+
+def has_audio_material(cell_value):
+    if pd.isna(cell_value) or not str(cell_value).strip():
+        return False
+
+    text = str(cell_value)
+    return bool(
+        re.search(
+            r'(^|\n)\s*(Audio\s*,\s*image|Audio\s*,\s*hình\s*ảnh|Audio)\s*[:：]',
+            text,
+            flags=re.IGNORECASE
+        )
+    )
+
+def get_merged_ranges_b(excel_path, sheet_name=None):
     """
     Lấy danh sách các khoảng merge ở cột B (cột 2).
-    Trả về list các tuple (start_row, end_row). Lưu ý: row của openpyxl bắt đầu từ 1.
+    Trả về list dict gồm start/end/value để các dòng nằm trong merge có thể
+    dùng lại giá trị ở ô đầu tiên của vùng merge.
     """
     try:
-        wb = openpyxl.load_workbook(excel_path, read_only=True)
-        ws = wb.active # pd.read_excel mặc định đọc sheet đầu tiên
+        wb = openpyxl.load_workbook(excel_path, read_only=False, data_only=True)
+        if sheet_name and sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+        else:
+            ws = wb[wb.sheetnames[0]]
         ranges = []
         if hasattr(ws, 'merged_cells'):
             for m_range in ws.merged_cells.ranges:
                 if m_range.min_col <= 2 <= m_range.max_col:
-                    ranges.append((m_range.min_row, m_range.max_row))
+                    ranges.append({
+                        'start_row': m_range.min_row,
+                        'end_row': m_range.max_row,
+                        'value': ws.cell(row=m_range.min_row, column=2).value,
+                    })
         wb.close()
         return ranges
     except Exception as e:
@@ -313,43 +414,66 @@ def test_file(excel_path, output_dir, model_name='Chirp3-HD', male_voice='Charon
         os.makedirs(audio_folder, exist_ok=True)
 
     # Đọc dữ liệu
-    df = pd.read_excel(excel_path)
+    excel_file = pd.ExcelFile(excel_path)
+    sheet_name = excel_file.sheet_names[0]
+    df = pd.read_excel(excel_file, sheet_name=sheet_name)
     # Lấy thông tin merge thực tế từ Excel
-    merged_ranges = get_merged_ranges_b(excel_path)
+    merged_ranges = get_merged_ranges_b(excel_path, sheet_name=sheet_name)
+    merged_b_value_by_row = {}
+    for merged_range in merged_ranges:
+        for row_num in range(merged_range['start_row'], merged_range['end_row'] + 1):
+            merged_b_value_by_row[row_num] = merged_range['value']
+
+    log_fn(f"Đang xử lý sheet: {sheet_name}")
     
     processor = HSKTextProcessor()
     generator = VertexAudioGenerator(model_name=model_name, male_voice=male_voice, female_voice=female_voice)
 
     # BƯỚC 1: Parse data và map với thông tin merge + thông tin từ tên file
     parsed_rows = []
+    skipped_rows = []
     for idx, row in df.iterrows():
         excel_row_idx = idx + 2 # pd.read_excel header=0 -> dòng data đầu là 2
         col_b, col_f, col_i = row.iloc[1], row.iloc[5], row.iloc[8]
-        if "Phụ đề:" not in str(col_i):
+        effective_col_b = col_b if not pd.isna(col_b) and str(col_b).strip() else merged_b_value_by_row.get(excel_row_idx)
+        subtitle_block = extract_subtitle_block(col_i)
+        if not subtitle_block:
+            continue
+
+        has_col_f_url = has_url_reference(col_f)
+        has_col_b_audio = has_audio_material(effective_col_b)
+        if not (has_col_f_url or has_col_b_audio):
+            skipped_rows.append((idx + 1, excel_row_idx))
             continue
         
         # 1. Tìm merge range từ Excel
         my_range = None
-        for r_start, r_end in merged_ranges:
+        for merged_range in merged_ranges:
+            r_start = merged_range['start_row']
+            r_end = merged_range['end_row']
             if r_start <= excel_row_idx <= r_end:
                 my_range = (r_start, r_end)
                 break
         
         # 2. Tìm merge range từ tên file (Cột B)
-        filename_b = clean_filename(col_b)
+        filename_b = clean_filename(effective_col_b)
         file_range = get_range_from_filename(filename_b)
-        
-        text_i_raw = str(col_i).split("Phụ đề:")[1].split("Tạm dịch:")[0]
+
         parsed_rows.append({
             'q_idx': idx + 1,
             'excel_row': excel_row_idx,
             'merge_range': my_range,
             'file_range': file_range,
-            'col_b': col_b,
+            'col_b': effective_col_b,
             'col_f': col_f,
-            'text_i': processor.extract_clean_chinese(text_i_raw),
+            'text_i': processor.extract_clean_chinese(subtitle_block),
             'text_f': processor.extract_clean_chinese(col_f)
         })
+
+    if skipped_rows:
+        skipped_desc = ", ".join([f"Câu {q_idx} (row {excel_row})" for q_idx, excel_row in skipped_rows[:10]])
+        suffix = "..." if len(skipped_rows) > 10 else ""
+        log_fn(f"⚠️ Bỏ qua {len(skipped_rows)} dòng có phụ đề nhưng không có URL ở cột F hoặc học liệu Audio ở cột B: {skipped_desc}{suffix}")
 
     if not parsed_rows:
         log_fn("❌ Không tìm thấy dữ liệu hợp lệ trong file Excel.")

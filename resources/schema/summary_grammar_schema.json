@@ -1,0 +1,142 @@
+{
+  "type": "object",
+  "properties": {
+    "lesson_number": {
+      "type": "string",
+      "description": "Số thứ tự bài, ví dụ: Bài 13"
+    },
+    "lesson_title_vi": {
+      "type": "string",
+      "description": "Tên bài bằng tiếng Việt"
+    },
+    "grammar_sections": {
+      "type": "array",
+      "description": "Danh sách các phần ngữ pháp xuất hiện theo đúng thứ tự trong slide PDF",
+      "items": {
+        "type": "object",
+        "properties": {
+          "section_number": {
+            "type": "integer",
+            "description": "Số thứ tự phần ngữ pháp, ví dụ: 1, 2, 3"
+          },
+          "section_title": {
+            "type": "string",
+            "description": "Tiêu đề ngữ pháp chính"
+          },
+          "items": {
+            "type": "array",
+            "description": "Các mục nhỏ hoặc cụm công thức thuộc phần ngữ pháp này",
+            "items": {
+              "type": "object",
+              "properties": {
+                "highlight_text": {
+                  "type": "string",
+                  "description": "Chỉ là nhãn ngắn hoặc cụm công thức cốt lõi cần tô đỏ trong DOCX; không chứa cả đoạn giải thích dài"
+                },
+                "detail_text": {
+                  "type": "string",
+                  "description": "Phần diễn giải, ghi chú hoặc quy tắc đi kèm mục ngữ pháp. Nếu không có thì trả về chuỗi rỗng. Phần này không tô đỏ trong DOCX"
+                },
+                "examples": {
+                  "type": "array",
+                  "description": "Danh sách ví dụ cho mục này",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "example_cn": {
+                        "type": "string",
+                        "description": "Câu ví dụ tiếng Trung"
+                      },
+                      "example_pinyin": {
+                        "type": "string",
+                        "description": "Phiên âm pinyin"
+                      },
+                      "example_vi": {
+                        "type": "string",
+                        "description": "Dịch tiếng Việt"
+                      }
+                    },
+                    "required": [
+                      "example_cn",
+                      "example_pinyin",
+                      "example_vi"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "highlight_text",
+                "detail_text",
+                "examples"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "practice": {
+            "type": "object",
+            "description": "Chỉ chọn một trong hai dạng luyện tập tùy theo nội dung phù hợp nhất của phần ngữ pháp",
+            "properties": {
+              "practice_type": {
+                "type": "string",
+                "enum": [
+                  "multiple_choice",
+                  "fill_in_blank"
+                ],
+                "description": "Loại bài luyện tập được chọn cho phần ngữ pháp này"
+              },
+              "questions": {
+                "type": "array",
+                "description": "Danh sách câu hỏi theo đúng practice_type",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "question_text": {
+                      "type": "string",
+                      "description": "Nội dung câu hỏi hoặc đề bài"
+                    },
+                    "options": {
+                      "type": "array",
+                      "description": "Danh sách đáp án lựa chọn. Nếu bài là điền từ hoặc không có lựa chọn, trả về mảng rỗng []",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "answer": {
+                      "type": "string",
+                      "description": "Đáp án đúng"
+                    }
+                  },
+                  "required": [
+                    "question_text",
+                    "options",
+                    "answer"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "practice_type",
+              "questions"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "section_number",
+          "section_title",
+          "items",
+          "practice"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "lesson_number",
+    "lesson_title_vi",
+    "grammar_sections"
+  ],
+  "additionalProperties": false
+}

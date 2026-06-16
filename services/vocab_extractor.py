@@ -41,6 +41,51 @@ def normalize_stt_bai(value) -> str:
 
 SPECIAL_TOPICS = {"no hsk topic", "tất cả chủ đề", "all topics"}
 
+VOCAB_COLUMN_ALIASES = {
+    "vocab": ["từ vựng"],
+    "pinyin": ["phiên âm", "pinyin"],
+    "part_of_speech": ["loại từ", "từ loại"],
+    "meaning": ["nghĩa", "nghĩa tiếng việt"]
+}
+
+
+def resolve_column_indexes(header: list, required_keys: list[str]) -> dict:
+    """Tìm vị trí các cột theo danh sách tên alias đã chuẩn hoá."""
+    resolved = {}
+
+    for key in required_keys:
+        aliases = VOCAB_COLUMN_ALIASES.get(key, [key])
+        found_idx = None
+        for alias in aliases:
+            try:
+                found_idx = header.index(normalize_string(alias))
+                break
+            except ValueError:
+                continue
+
+        if found_idx is None:
+            raise ValueError(f"Không tìm thấy cột bắt buộc cho '{key}'.")
+        resolved[key] = found_idx
+
+    return resolved
+
+
+def get_vocab_sheet_names(file_path: str) -> list[str]:
+    """Lấy danh sách sheet có dữ liệu bài/chủ đề hợp lệ từ file vocab."""
+    wb = load_workbook(file_path, read_only=True, data_only=True)
+    try:
+        valid_sheets = []
+        for sheet_name in wb.sheetnames:
+            try:
+                lesson_map = build_lesson_map(wb[sheet_name])
+            except Exception:
+                continue
+            if lesson_map:
+                valid_sheets.append(sheet_name)
+        return valid_sheets
+    finally:
+        wb.close()
+
 
 def build_lesson_map(ws) -> dict:
     """
@@ -152,8 +197,9 @@ def extract_vocabulary(ws, lesson_map: dict, selected_bai: str, selected_chu_de:
     header = [normalize_string(h) for h in rows[0]]
 
     try:
-        topic_col  = header.index("tên chủ đề")
-        vocab_col  = header.index(normalize_string("Từ vựng"))
+        topic_col = header.index("tên chủ đề")
+        column_indexes = resolve_column_indexes(header, ["vocab"])
+        vocab_col = column_indexes["vocab"]
     except ValueError as e:
         raise ValueError(f"Không tìm thấy cột bắt buộc: {e}") from e
 
@@ -175,6 +221,70 @@ def extract_vocabulary(ws, lesson_map: dict, selected_bai: str, selected_chu_de:
                 vocabulary.append(str(vocab_val).strip())
 
     return vocabulary
+
+
+def extract_vocabulary_records(ws, lesson_map: dict, selected_bai: str, selected_chu_de: str) -> list[dict]:
+    """
+    Trả về danh sách record từ vựng theo bài và chủ đề đã chọn.
+
+    Mỗi record gồm:
+      - word
+      - pinyin
+      - part_of_speech
+      - meaning
+    """
+    bai_key = normalize_stt_bai(selected_bai)
+
+    if bai_key not in lesson_map:
+        raise ValueError(f"Không tìm thấy bài '{selected_bai}' trong sheet.")
+
+    lesson_data = lesson_map[bai_key]
+    start_row = lesson_data["start_row"]
+    end_row = lesson_data["end_row"]
+
+    if not start_row or not end_row:
+        raise ValueError(f"Bài '{bai_key}' thiếu thông tin start_row / end_row.")
+
+    parts = selected_chu_de.split(" - ", 1)
+    topic_normalized = normalize_string(parts[1] if len(parts) > 1 else selected_chu_de)
+    is_special = topic_normalized in SPECIAL_TOPICS
+
+    rows = list(ws.iter_rows(values_only=True))
+    header = [normalize_string(h) for h in rows[0]]
+
+    try:
+        topic_col = header.index("tên chủ đề")
+        column_indexes = resolve_column_indexes(
+            header,
+            ["vocab", "pinyin", "part_of_speech", "meaning"]
+        )
+    except ValueError as e:
+        raise ValueError(f"Không tìm thấy cột bắt buộc: {e}") from e
+
+    records = []
+    for excel_row in range(start_row, end_row + 1):
+        arr_idx = excel_row - 1
+        if arr_idx < 0 or arr_idx >= len(rows):
+            continue
+
+        row = rows[arr_idx]
+        sheet_topic_normalized = normalize_string(row[topic_col])
+
+        if not (is_special or sheet_topic_normalized == topic_normalized):
+            continue
+
+        vocab_val = row[column_indexes["vocab"]]
+        if not vocab_val or not str(vocab_val).strip():
+            continue
+
+        records.append({
+            "word": str(vocab_val).strip(),
+            "pinyin": str(row[column_indexes["pinyin"]]).strip() if row[column_indexes["pinyin"]] else "",
+            "part_of_speech": str(row[column_indexes["part_of_speech"]]).strip() if row[column_indexes["part_of_speech"]] else "",
+            "meaning": str(row[column_indexes["meaning"]]).strip() if row[column_indexes["meaning"]] else ""
+        })
+
+    return records
 
 
 # ---------------------------------------------------------------------------
