@@ -10,6 +10,70 @@ import os
 import json
 
 
+def _append_note_examples(doc, examples):
+    examples = examples or []
+    if not examples:
+        return
+
+    p_examples_title = doc.add_paragraph()
+    p_examples_title.add_run("Ví dụ:")
+
+    for example in examples:
+        example_cn = example.get('example_cn', '').strip()
+        example_pinyin = example.get('example_pinyin', '').strip()
+        example_vi = example.get('example_vi', '').strip()
+        example_layout = example.get('example_layout', 'multiline').strip() or 'multiline'
+
+        if example_layout == 'inline':
+            inline_parts = []
+            if example_cn:
+                inline_parts.append(example_cn)
+            if example_pinyin:
+                inline_parts.append(f"/{example_pinyin}/")
+            inline_text = "".join(inline_parts)
+            if inline_text and example_vi:
+                inline_text = f"{inline_text}: {example_vi}"
+            elif example_vi:
+                inline_text = example_vi
+
+            if inline_text:
+                p_example_inline = doc.add_paragraph()
+                run_inline = p_example_inline.add_run(f"  - {inline_text}")
+                if not example_cn and not example_pinyin:
+                    run_inline.italic = True
+            continue
+
+        if example_cn:
+            p_example_cn = doc.add_paragraph()
+            p_example_cn.add_run(f"  - {example_cn}")
+
+        if example_pinyin:
+            p_example_py = doc.add_paragraph()
+            p_example_py.add_run(f"    {example_pinyin}")
+
+        if example_vi:
+            p_example_vi = doc.add_paragraph()
+            run_example_vi = p_example_vi.add_run(f"    {example_vi}")
+            run_example_vi.italic = True
+
+
+def _append_practice_block(doc, practice):
+    practice = practice or {}
+    title = practice.get('title', '').strip()
+    content_lines = practice.get('content_lines', []) or []
+    content_lines = [line.strip() for line in content_lines if str(line).strip()]
+
+    if not title and not content_lines:
+        return
+
+    p_practice_title = doc.add_paragraph()
+    run_practice_title = p_practice_title.add_run(title or "Luyện tập")
+    run_practice_title.bold = True
+
+    for line in content_lines:
+        doc.add_paragraph(line)
+
+
 def response2docx(file_path, prompt, file_name, project_id, creds, model_name):
     client = VertexClient(project_id, creds, model_name)
 
@@ -89,6 +153,18 @@ def response2docx(file_path, prompt, file_name, project_id, creds, model_name):
                 for line in lesson['content_cn'].split('\n'):
                     if line.strip():
                         doc.add_paragraph(line.strip())
+
+                doc.add_paragraph()
+
+            # Pinyin
+            if lesson.get('content_pinyin'):
+                for line in lesson['content_pinyin'].split('\n'):
+                    if line.strip():
+                        p_py = doc.add_paragraph()
+                        run_py = p_py.add_run(line.strip())
+                        run_py.italic = True
+
+                doc.add_paragraph()
             
             # Tiếng Việt (In nghiêng)
             if lesson.get('content_vn'):
@@ -109,11 +185,24 @@ def response2docx(file_path, prompt, file_name, project_id, creds, model_name):
                 for note in notes:
                     p_note = doc.add_paragraph()
                     p_note.add_run("-   ")
-                    
-                    run_note_cn = p_note.add_run(note.get('hanzi_pinyin', ''))
+
+                    term_cn = note.get('term_cn', '').strip()
+                    term_pinyin = note.get('term_pinyin', '').strip()
+                    legacy_hanzi_pinyin = note.get('hanzi_pinyin', '').strip()
+                    label_text = term_cn
+                    if term_pinyin:
+                        label_text = f"{term_cn} ({term_pinyin})"
+                    elif not label_text:
+                        label_text = legacy_hanzi_pinyin
+
+                    run_note_cn = p_note.add_run(label_text)
                     run_note_cn.bold = True
-                    
+
                     p_note.add_run(f": {note.get('explanation', '')}")
+
+                    _append_note_examples(doc, note.get('examples', []))
+
+            _append_practice_block(doc, lesson.get('practice', {}))
                     
             doc.add_paragraph() # Dòng trống giữa các bài khóa
 

@@ -17,7 +17,26 @@ Nhiệm vụ của bạn là trích xuất dữ liệu và điền vào JSON Sch
    - Lặp lại {num_lessons} lần cho mỗi bài khóa.
    - lesson_title: Tên bài khóa (Ví dụ: Bài khóa 1)
    - content_cn: Trích xuất đầy đủ bài khóa bằng tiếng Trung.
+   - content_pinyin: Viết đầy đủ pinyin tương ứng với toàn bộ nội dung `content_cn`, giữ nguyên số dòng và thứ tự dòng để mỗi dòng pinyin khớp với dòng tiếng Trung tương ứng.
    - content_vn: Trích xuất y nguyên bản dịch tiếng Việt của bài khóa đã được cung cấp sẵn trong slide (không tự dịch lại).
-   - important_notes: Trích xuất từ "slide kiến thức liên quan" (nằm ngay sau slide từ vựng của bài khóa này). Bóc tách phần chữ/cụm từ tiếng Trung và giải thích chi tiết của nó. Tuyệt đối không tự ý lấy thêm ví dụ không có trong PDF.
+   - important_notes: Trích xuất từ "slide kiến thức liên quan" (nằm ngay sau slide từ vựng của bài khóa này).
+     - `term_cn`: chỉ ghi chữ Hán hoặc cấu trúc tiếng Trung cần lưu ý.
+     - `term_pinyin`: chỉ ghi pinyin của `term_cn`.
+     - `explanation`: chỉ ghi nội dung giải thích/nghĩa/cách dùng ngắn gọn bằng tiếng Việt, bỏ toàn bộ câu dẫn kiểu "Theo slide...", "Theo hội thoại...", "ở phần tiếp theo...".
+     - `examples`: chỉ lấy ví dụ nếu ví dụ đó thực sự có trong PDF.
+     - Mỗi ví dụ phải tách riêng thành `example_cn`, `example_pinyin`, `example_vi`.
+     - `example_layout`: nếu ví dụ trên slide đang nằm trên một dòng theo kiểu `Câu Trung/Pinyin: Câu dịch` thì đặt là `inline`; nếu slide đang tách ví dụ thành nhiều dòng thì đặt là `multiline`.
+     - Nếu trong PDF không có ví dụ thì trả về `examples: []`.
+   - `practice`: trích xuất phần Luyện tập của bài khóa nếu có trên slide bài khóa hoặc slide bài tập tương ứng với bài đó.
+     - `title`: tiêu đề phần luyện tập đúng như trên slide, ví dụ `Luyện tập`.
+     - `content_lines`: danh sách từng dòng nội dung nhìn thấy trên slide, giữ nguyên thứ tự xuất hiện. Không tự thêm đáp án hay lời giải nếu slide không có.
+     - Nếu không có phần luyện tập thì trả về `title: ""` và `content_lines: []`.
+
+4. **Quy định bắt buộc để tránh bịa thêm nội dung:**
+   - Chỉ được lấy nội dung thực sự xuất hiện trong PDF. Không suy diễn, không bổ sung kiến thức bên ngoài, không tự tạo ví dụ mới.
+   - Không được trả về các câu dẫn, câu nối, hoặc nhãn giải thích do AI tự thêm như: "Theo slide...", "Theo slide kiến thức liên quan tiếp theo...", "Ví dụ trong PDF gồm...", "Bài này cho biết...".
+   - Không được trả về rác định dạng hoặc metadata kỹ thuật như: `Normal`, `false`, `0`, `EN-US`, `JA`, `X-NONE`, `Style Definitions`, mã CSS/HTML/XML, hoặc các chuỗi OCR lỗi không phải nội dung bài học.
+   - Chỉ giữ lại nội dung học liệu nhìn thấy được: chữ Hán, pinyin, bản dịch, ghi chú kiến thức, ví dụ thực sự có trong slide và phần luyện tập thực sự có trong slide.
+   - Với ví dụ, phải bám đúng layout đang hiển thị trên slide. Nếu slide viết trên cùng một dòng thì không tự ý tách thành nhiều dòng.
 
 Lưu ý: Bạn chỉ cần trả về JSON đúng theo định dạng Schema. Việc format in đậm/in nghiêng sẽ được thực hiện tự động bằng mã nguồn ở phía ứng dụng. Mọi giải thích phải bằng tiếng Việt.

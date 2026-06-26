@@ -58,6 +58,10 @@
             "type": "string",
             "description": "Trích lại toàn bộ nội dung bài khóa bằng tiếng Trung. Giữ nguyên dấu xuống dòng."
           },
+          "content_pinyin": {
+            "type": "string",
+            "description": "Pinyin đầy đủ tương ứng với content_cn. Giữ nguyên dấu xuống dòng và canh theo từng dòng tiếng Trung."
+          },
           "content_vn": {
             "type": "string",
             "description": "Bản dịch tiếng Việt của bài khóa. Giữ nguyên dấu xuống dòng."
@@ -68,27 +72,88 @@
             "items": {
               "type": "object",
               "properties": {
-                "hanzi_pinyin": {
+                "term_cn": {
                   "type": "string",
-                  "description": "Từ/Cụm từ tiếng Trung và Pinyin cần lưu ý (VD: 请 (qǐng) hoặc 你叫什么名字? (nǐ jiào shénme míngzi?))"
+                  "description": "Chữ Hán hoặc cấu trúc tiếng Trung cần lưu ý. Không gộp kèm giải thích hoặc câu dẫn."
+                },
+                "term_pinyin": {
+                  "type": "string",
+                  "description": "Pinyin của term_cn. Chỉ chứa pinyin, không thêm giải thích."
                 },
                 "explanation": {
                   "type": "string",
-                  "description": "Phân tích chi tiết, giải nghĩa bằng tiếng Việt."
+                  "description": "Giải thích ngắn gọn bằng tiếng Việt, chỉ giữ nội dung kiến thức thực sự có trong PDF, không thêm câu dẫn như 'Theo slide...' hoặc 'Ví dụ trong PDF gồm...'."
+                },
+                "examples": {
+                  "type": "array",
+                  "description": "Danh sách ví dụ thực sự có trong PDF. Nếu không có thì trả về mảng rỗng.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "example_cn": {
+                        "type": "string",
+                        "description": "Câu ví dụ tiếng Trung đúng như trong PDF."
+                      },
+                      "example_pinyin": {
+                        "type": "string",
+                        "description": "Pinyin của câu ví dụ."
+                      },
+                      "example_vi": {
+                        "type": "string",
+                        "description": "Bản dịch tiếng Việt của câu ví dụ."
+                      },
+                      "example_layout": {
+                        "type": "string",
+                        "enum": ["multiline", "inline"],
+                        "description": "`inline` nếu trên slide ví dụ nằm trên một dòng kiểu Câu Trung/Pinyin: Câu dịch; `multiline` nếu ví dụ tách thành nhiều dòng."
+                      }
+                    },
+                    "required": [
+                      "example_cn",
+                      "example_pinyin",
+                      "example_vi",
+                      "example_layout"
+                    ]
+                  }
                 }
               },
               "required": [
-                "hanzi_pinyin",
-                "explanation"
+                "term_cn",
+                "term_pinyin",
+                "explanation",
+                "examples"
               ]
             }
+          },
+          "practice": {
+            "type": "object",
+            "description": "Phần luyện tập của bài khóa nếu có.",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Tiêu đề phần luyện tập đúng như trên slide, ví dụ 'Luyện tập'."
+              },
+              "content_lines": {
+                "type": "array",
+                "description": "Danh sách từng dòng nội dung luyện tập nhìn thấy trên slide, giữ nguyên thứ tự.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "content_lines"
+            ]
           }
         },
         "required": [
           "lesson_title",
           "content_cn",
+          "content_pinyin",
           "content_vn",
-          "important_notes"
+          "important_notes",
+          "practice"
         ]
       }
     }
