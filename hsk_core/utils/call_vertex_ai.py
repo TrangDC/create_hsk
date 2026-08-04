@@ -11,6 +11,35 @@ from dotenv import load_dotenv
 # Load biến môi trường từ file .env
 load_dotenv()
 
+
+def decode_openai_key_from_jwt(jwt_token: str) -> str:
+    parts = jwt_token.split(".")
+    if len(parts) < 2:
+        raise ValueError("JWT_KEY khong dung dinh dang header.payload.signature.")
+
+    payload_part = parts[1]
+    padding = "=" * (-len(payload_part) % 4)
+
+    try:
+        payload_bytes = base64.urlsafe_b64decode(payload_part + padding)
+        payload = json.loads(payload_bytes.decode("utf-8"))
+    except Exception as exc:
+        raise ValueError(f"Khong the giai ma JWT_KEY: {exc}") from exc
+
+    openai_key = str(payload.get("openai_key", "")).strip()
+    if not openai_key:
+        raise ValueError("JWT_KEY khong chua truong openai_key hop le.")
+
+    return openai_key
+
+
+def resolve_openai_api_key() -> str:
+    jwt_token = os.getenv("JWT_KEY", "").strip()
+    if not jwt_token:
+        raise ValueError("Khong tim thay JWT_KEY trong bien moi truong.")
+
+    return decode_openai_key_from_jwt(jwt_token)
+
 def get_resource_path(relative_path: str) -> Path:
     """
     Hỗ trợ lấy đường dẫn tài nguyên tuyệt đối, tương thích với cả 
@@ -152,9 +181,109 @@ def create_chat_completion_with_fallback(client, kwargs: Dict[str, Any]):
             return client.chat.completions.create(**fallback_kwargs)
         raise
 
+
+def create_responses_with_fallback(client, kwargs: Dict[str, Any]):
+    try:
+        return client.responses.create(**kwargs)
+    except Exception as error:
+        if kwargs.get("service_tier") == "flex" and should_fallback_from_flex() and is_flex_resource_unavailable_error(error):
+            fallback_kwargs = dict(kwargs)
+            fallback_kwargs["service_tier"] = "auto"
+            print("   ⚠️ Flex tạm thời thiếu tài nguyên, chuyển sang service_tier=auto.")
+            return client.responses.create(**fallback_kwargs)
+        raise
+
+
+def build_responses_input_content(content_blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    response_content: List[Dict[str, Any]] = []
+
+    for block in content_blocks:
+        block_type = block.get("type")
+
+        if block_type == "text":
+            response_content.append({
+                "type": "input_text",
+                "text": block.get("text", ""),
+            })
+            continue
+
+        if block_type == "file":
+            file_block = block.get("file", {})
+            response_content.append({
+                "type": "input_file",
+                "filename": file_block.get("filename", "input.bin"),
+                "file_data": file_block.get("file_data", ""),
+            })
+            continue
+
+        if block_type == "image_url":
+            image_url_block = block.get("image_url", {})
+            image_url = image_url_block.get("url") if isinstance(image_url_block, dict) else None
+            if image_url:
+                response_content.append({
+                    "type": "input_image",
+                    "image_url": image_url,
+                })
+
+    return response_content
+
+
+def extract_text_from_responses_api(response: Any) -> str:
+    output_text = getattr(response, "output_text", None)
+    if isinstance(output_text, str) and output_text.strip():
+        return output_text.strip()
+
+    if hasattr(response, "output"):
+        for item in getattr(response, "output", []) or []:
+            content_items = getattr(item, "content", None)
+            if not content_items and isinstance(item, dict):
+                content_items = item.get("content", [])
+
+            for part in content_items or []:
+                part_text = getattr(part, "text", None)
+                if isinstance(part_text, str) and part_text.strip():
+                    return part_text.strip()
+
+                if isinstance(part, dict):
+                    dict_text = part.get("text", "")
+                    if isinstance(dict_text, str) and dict_text.strip():
+                        return dict_text.strip()
+
+    return ""
+
+
+def build_responses_request(
+    model: str,
+    content_blocks: List[Dict[str, Any]],
+    service_tier: Optional[str] = None,
+    response_schema: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    request_kwargs: Dict[str, Any] = {
+        "model": model,
+        "input": [{
+            "role": "user",
+            "content": build_responses_input_content(content_blocks),
+        }],
+    }
+
+    if service_tier:
+        request_kwargs["service_tier"] = service_tier
+
+    if isinstance(response_schema, dict) and response_schema:
+        request_kwargs["text"] = {
+            "format": {
+                "type": "json_schema",
+                "name": "structured_output",
+                "schema": response_schema,
+                "strict": True,
+            }
+        }
+
+    return request_kwargs
+
 class VertexAIClient:
     def __init__(self):
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.api_key = None
         self.model_name = os.getenv("OPENAI_MODEL", "gpt-5.4")
         self.client = None
         self._initialized = False
@@ -166,8 +295,7 @@ class VertexAIClient:
         except ImportError as e:
             raise ImportError("Chua cai thu vien openai. Hay chay: pip install openai") from e
 
-        if not self.api_key:
-            raise ValueError("Không tìm thấy OPENAI_API_KEY trong biến môi trường")
+        self.api_key = resolve_openai_api_key()
 
         self.client = OpenAI(api_key=self.api_key, timeout=get_openai_timeout_seconds())
 
@@ -245,22 +373,13 @@ class VertexAIClient:
         # 3. Thêm prompt
         content_blocks.append({"type": "text", "text": prompt_text})
 
-        kwargs = {
-            "model": self.model_name,
-            "messages": [{"role": "user", "content": content_blocks}],
-            "temperature": temperature,
-            "response_format": {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "structured_output",
-                    "schema": response_schema,
-                    "strict": True,
-                },
-            },
-        }
         resolved_service_tier = get_openai_service_tier(service_tier)
-        if resolved_service_tier:
-            kwargs["service_tier"] = resolved_service_tier
+        kwargs = build_responses_request(
+            model=self.model_name,
+            content_blocks=content_blocks,
+            service_tier=resolved_service_tier,
+            response_schema=response_schema,
+        )
 
         last_exception = None
         for attempt in range(max_retries):
@@ -274,7 +393,7 @@ class VertexAIClient:
 
                 def run_api_call():
                     try:
-                        response = create_chat_completion_with_fallback(self.client, kwargs)
+                        response = create_responses_with_fallback(self.client, kwargs)
                         response_container[0] = response
                         response_event.set()
                     except Exception as e:
@@ -296,13 +415,7 @@ class VertexAIClient:
                     raise exception_container[0]
 
                 response = response_container[0]
-                response_text = response.choices[0].message.content
-                
-                if isinstance(response_text, list):
-                    response_text = "".join(
-                        block.get("text", "") for block in response_text if isinstance(block, dict)
-                    )
-                response_text = (response_text or "").strip()
+                response_text = extract_text_from_responses_api(response)
 
                 if not response_text:
                     raise ValueError("AI không trả về nội dung.")

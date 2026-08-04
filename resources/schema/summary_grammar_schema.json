@@ -29,6 +29,14 @@
             "items": {
               "type": "object",
               "properties": {
+                "content_type": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "table"
+                  ],
+                  "description": "Kiểu nội dung của mục ngữ pháp: `text` cho nội dung chữ thông thường, `table` cho nội dung trình bày dạng bảng."
+                },
                 "highlight_text": {
                   "type": "string",
                   "description": "Chỉ là nhãn ngắn hoặc cụm công thức cốt lõi cần tô đỏ trong DOCX; không chứa cả đoạn giải thích dài"
@@ -36,6 +44,34 @@
                 "detail_text": {
                   "type": "string",
                   "description": "Phần diễn giải, ghi chú hoặc quy tắc đi kèm mục ngữ pháp. Nếu không có thì trả về chuỗi rỗng. Phần này không tô đỏ trong DOCX"
+                },
+                "table_data": {
+                  "type": "object",
+                  "description": "Dữ liệu bảng nếu mục ngữ pháp được trình bày dạng bảng. Với mục text thông thường, trả về headers=[] và rows=[].",
+                  "properties": {
+                    "headers": {
+                      "type": "array",
+                      "description": "Danh sách tiêu đề cột từ trái sang phải. Nếu bảng không có header rõ ràng thì trả về [].",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "rows": {
+                      "type": "array",
+                      "description": "Danh sách các hàng của bảng, mỗi hàng là một mảng cell theo đúng thứ tự cột.",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "headers",
+                    "rows"
+                  ],
+                  "additionalProperties": false
                 },
                 "examples": {
                   "type": "array",
@@ -66,8 +102,10 @@
                 }
               },
               "required": [
+                "content_type",
                 "highlight_text",
                 "detail_text",
+                "table_data",
                 "examples"
               ],
               "additionalProperties": false
@@ -77,6 +115,10 @@
             "type": "object",
             "description": "Chỉ chọn một trong hai dạng luyện tập tùy theo nội dung phù hợp nhất của phần ngữ pháp",
             "properties": {
+              "practice_title": {
+                "type": "string",
+                "description": "Dòng tiêu đề/chỉ dẫn của phần luyện tập đúng như trên slide, ví dụ: Chọn đáp án đúng, Điền vào chỗ trống. Nếu không có thì trả về chuỗi rỗng."
+              },
               "practice_type": {
                 "type": "string",
                 "enum": [
@@ -117,6 +159,7 @@
               }
             },
             "required": [
+              "practice_title",
               "practice_type",
               "questions"
             ],

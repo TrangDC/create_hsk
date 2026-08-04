@@ -23,6 +23,7 @@ vertexai>=0.9.0
 
 # Office / document
 python-docx>=0.8.11
+python-pptx>=0.6.23
 
 # Packaging
 pyinstaller>=5.8.0

@@ -27,6 +27,14 @@ Yêu cầu trích xuất:
 	- Không được chép cả đoạn giải thích dài, không gộp nhiều dòng vào highlight_text.
 	- Nếu slide có phần giải thích, ghi chú hoặc diễn giải đi kèm ngay dưới mục đó, hãy đưa vào detail_text.
 	- detail_text phải giữ sát wording gốc trong slide, không viết lại.
+	- content_type:
+	  - dùng `text` nếu nội dung mục này là chữ/ghi chú/công thức thông thường.
+	  - dùng `table` nếu nội dung mục này trên slide được trình bày dưới dạng bảng.
+	- Nếu content_type là `table`, hãy điền dữ liệu bảng vào `table_data`:
+	  - `headers`: danh sách tiêu đề cột theo đúng thứ tự từ trái sang phải.
+	  - `rows`: danh sách các hàng, mỗi hàng là một mảng cell theo đúng thứ tự cột.
+	  - Nếu bảng không có header rõ ràng, `headers` trả về mảng rỗng [].
+	  - Không chuyển bảng thành đoạn văn tuần tự nếu có thể giữ được cấu trúc bảng.
 	- examples phải lấy đúng các ví dụ nằm dưới mục đó trong slide.
 5. Mỗi ví dụ phải có:
 	- example_cn: câu tiếng Trung.
@@ -36,12 +44,16 @@ Yêu cầu trích xuất:
 	- Chỉ chọn đúng MỘT loại đã có trong slide:
 	  - multiple_choice
 	  - fill_in_blank
+	- Nếu slide có dòng tiêu đề/chỉ dẫn của phần bài tập như `Chọn đáp án đúng`, `Điền vào chỗ trống`, `Chọn từ thích hợp`... thì phải trích xuất nguyên văn vào `practice_title`.
 	- Không dùng đồng thời cả hai loại trong cùng một grammar section.
 	- Không tự tạo thêm câu luyện tập nếu slide không có.
 	- Mỗi question luôn phải có trường options.
 	- Nếu câu hỏi không có lựa chọn đáp án, options phải là mảng rỗng [].
+	- Với câu hỏi `multiple_choice`, nếu trên slide có đủ các phương án nhưng bị thiếu nhãn A/B/C/D... thì được phép tự bổ sung nhãn theo đúng thứ tự xuất hiện của các phương án.
+	- Chỉ được bổ sung nhãn lựa chọn, không được tự thêm phương án mới, không được đổi nội dung phương án, không được suy đoán thêm đáp án ngoài slide.
 7. Nếu một phần ngữ pháp không có phần luyện tập trong slide:
 	- vẫn trả về practice.
+	- practice_title trả về chuỗi rỗng `""`.
 	- practice_type lấy theo dạng phù hợp nhất với dữ liệu có sẵn trong slide.
 	- questions để mảng rỗng.
 8. Giữ nguyên thứ tự nội dung như trong slide:
@@ -50,10 +62,9 @@ Yêu cầu trích xuất:
 	- ví dụ
 	- luyện tập
 9. Nếu trong slide có nội dung trình bày dưới dạng bảng:
-	- Hãy chuyển nội dung bảng sang dạng text tuần tự, dễ đọc.
-	- Không giữ cấu trúc bảng trong JSON.
-	- Vẫn phải giữ đúng thứ tự hàng/cột theo cách có thể đọc được bằng văn bản.
-	- Nếu bảng chứa ví dụ, quy tắc, mục nhỏ hoặc bài tập, hãy chuyển chúng thành các field text phù hợp trong schema hiện có.
+	- Ưu tiên giữ cấu trúc bảng trong `table_data` thay vì chuyển thành text phẳng.
+	- Giữ đúng thứ tự hàng/cột như trên slide.
+	- Nếu bảng chứa ví dụ, quy tắc hoặc mục nhỏ, hãy đặt chúng vào item phù hợp và dùng `content_type = table`.
 10. Không thêm markdown.
 11. Không thêm giải thích ngoài JSON.
 12. Không thêm field ngoài schema.
@@ -66,8 +77,10 @@ Quy tắc chất lượng:
 - Nếu slide có nhiều mục nhỏ trong cùng một phần ngữ pháp, phải tách đúng vào items.
 - highlight_text phải ngắn, chỉ là tiêu đề nhỏ hoặc công thức chính; không dùng highlight_text để chứa cả đoạn phân tích hay giải thích.
 - Nếu một mục có cả tiêu đề/công thức và phần diễn giải, tách tiêu đề/công thức vào highlight_text, phần diễn giải vào detail_text.
+- Nếu một mục là bảng, không ép toàn bộ bảng vào highlight_text hoặc detail_text.
 - Nếu slide có ví dụ theo bullet hoặc theo từng dòng, giữ đúng thứ tự đó trong examples.
-- Nếu slide có bảng, phải chuyển bảng thành text theo thứ tự đọc tự nhiên từ trên xuống dưới, trái sang phải.
+- Nếu slide có bảng, phải giữ được cấu trúc bảng trong `table_data` khi schema cho phép.
 - Nếu practice_type là multiple_choice thì mỗi câu nên có options nếu slide có sẵn.
+- Nếu practice_type là multiple_choice và slide thiếu nhãn A/B/C/D cho options, được phép tự gán nhãn theo thứ tự xuất hiện để dữ liệu dễ dùng hơn, nhưng tuyệt đối không thay đổi nội dung các phương án.
 - Nếu practice_type là fill_in_blank thì options bắt buộc là [].
 - Tất cả ví dụ phải có đủ tiếng Trung, pinyin và nghĩa Việt nếu slide có đủ các phần đó.

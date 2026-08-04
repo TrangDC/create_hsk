@@ -73,6 +73,51 @@ def _append_example_block(doc, example):
         _set_run_font(run, italic=True)
 
 
+def _append_examples(doc, examples):
+    examples = examples or []
+    if not examples:
+        return
+
+    paragraph = doc.add_paragraph()
+    run = paragraph.add_run("Ví dụ:")
+    _set_run_font(run, bold=True, italic=True)
+
+    for example in examples:
+        _append_example_block(doc, example)
+
+
+def _append_grammar_table(doc, table_data):
+    table_data = table_data or {}
+    headers = table_data.get("headers", []) or []
+    rows = table_data.get("rows", []) or []
+
+    if not headers and not rows:
+        return
+
+    column_count = len(headers) if headers else max((len(row) for row in rows), default=0)
+    if column_count == 0:
+        return
+
+    table = doc.add_table(rows=1 if headers else 0, cols=column_count)
+    _set_table_no_borders(table)
+
+    if headers:
+        header_cells = table.rows[0].cells
+        for idx, header in enumerate(headers):
+            header_cells[idx].text = header
+            for paragraph in header_cells[idx].paragraphs:
+                _set_paragraph_font(paragraph, bold=True)
+
+    for row in rows:
+        cells = table.add_row().cells
+        normalized_row = list(row) + [""] * (column_count - len(row))
+        for idx, value in enumerate(normalized_row[:column_count]):
+            cells[idx].text = str(value)
+        for cell in cells:
+            for paragraph in cell.paragraphs:
+                _set_paragraph_font(paragraph)
+
+
 def response2docx_grammar(file_path, prompt, file_name, project_id, creds, model_name, vocab_records):
     client = VertexClient(project_id, creds, model_name)
 
@@ -147,7 +192,7 @@ def response2docx_grammar(file_path, prompt, file_name, project_id, creds, model
     for section in data.get("grammar_sections", []):
         p_section = doc.add_paragraph()
         run_section = p_section.add_run(f"Phần {section.get('section_number', '')}: {section.get('section_title', '')}")
-        _set_run_font(run_section, italic=True)
+        _set_run_font(run_section, bold=True)
 
         for item in section.get("items", []):
             p_item = doc.add_paragraph()
@@ -159,19 +204,23 @@ def response2docx_grammar(file_path, prompt, file_name, project_id, creds, model
                 run_detail = p_detail.add_run(item.get("detail_text", ""))
                 _set_run_font(run_detail)
 
-            for example in item.get("examples", []):
-                _append_example_block(doc, example)
+            if item.get("content_type") == "table" or item.get("table_data", {}).get("rows"):
+                _append_grammar_table(doc, item.get("table_data", {}))
+
+            _append_examples(doc, item.get("examples", []))
 
         p_practice = doc.add_paragraph()
         practice_run = p_practice.add_run("Luyện tập")
-        _set_run_font(practice_run, italic=True)
+        _set_run_font(practice_run, bold=True, italic=True)
 
         practice = section.get("practice", {})
+        practice_title = practice.get("practice_title", "").strip()
         practice_type = practice.get("practice_type", "")
-        practice_label = "Trắc nghiệm" if practice_type == "multiple_choice" else "Điền từ"
-        p_practice_type = doc.add_paragraph()
-        practice_type_run = p_practice_type.add_run(practice_label)
-        _set_run_font(practice_type_run)
+
+        if practice_title:
+            p_practice_title = doc.add_paragraph()
+            practice_title_run = p_practice_title.add_run(practice_title)
+            _set_run_font(practice_title_run, bold=True)
 
         for idx, question in enumerate(practice.get("questions", []), 1):
             p_question = doc.add_paragraph()
