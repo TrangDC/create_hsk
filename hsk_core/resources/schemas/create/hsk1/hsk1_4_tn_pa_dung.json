@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "properties": {
+    "reading_comprehension_choice": {
+      "type": "array",
+      "description": "Dạng TN phương án đúng (đọc hiểu). Gồm 4 câu, mỗi câu có ngữ cảnh, câu hỏi và 3 phương án.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": {
+            "type": "integer"
+          },
+          "do_kho": {
+            "type": "string",
+            "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+          },
+          "context_chinese": {
+            "type": "string",
+            "description": "Câu chứa thông tin. BẮT BUỘC chỉ là một câu kể, không phải hội thoại."
+          },
+          "query_chinese": {
+            "type": "string",
+            "description": "Câu hỏi truy vấn thông tin đã cho."
+          },
+          "answer_options": {
+            "type": "array",
+            "description": "Danh sách 3 phương án trả lời.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "chinese_text": {
+                  "type": "string"
+                },
+                "pinyin": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "chinese_text",
+                "pinyin"
+              ]
+            }
+          },
+          "correct_answer": {
+            "type": "integer",
+            "description": "Đáp án đúng, là số thứ tự của phương án (1, 2, hoặc 3)."
+          }
+        },
+        "required": [
+          "question_id",
+          "do_kho",
+          "context_chinese",
+          "query_chinese",
+          "answer_options",
+          "correct_answer"
+        ]
+      }
+    }
+  },
+  "required":[
+    "reading_comprehension_choice"
+  ]
+}

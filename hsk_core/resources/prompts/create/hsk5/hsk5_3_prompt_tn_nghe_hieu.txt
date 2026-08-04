@@ -1,0 +1,24 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo các câu hỏi thi HSK5 chuẩn xác dựa trên các yêu cầu chi tiết được cung cấp.
+
+Hãy tạo ra `{number}` câu hỏi nghe hiểu bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK5.
+Cụ thể, hãy tạo ra `{number}` câu hỏi thuộc dạng "{matrix_name}". Đây là dạng bài mà cứ 2 câu hỏi sẽ dùng chung 1 đoạn văn bản học liệu. Vì vậy, số lượng học liệu (`script_chinese`) sẽ bằng `{number}` chia cho 2:
+*   Mỗi đoạn văn bản học liệu (`script_chinese`) phải hoàn chỉnh, ngắn gọn.
+*   Với MỖI đoạn văn bản học liệu, hãy tạo ra 2 câu hỏi trắc nghiệm liên quan.
+*   Mỗi câu hỏi phải có:
+    *   `query_chinese`: Nội dung câu hỏi.
+    *   `answer_options`: Một danh sách 4 phương án trả lời.
+    *   `correct_answer`: Số thứ tự (1-4) của phương án đúng.
+
+Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
+{rules_text}
+
+*** DANH SÁCH TỪ VỰNG ĐỂ TRA CỨU VÀ SỬ DỤNG ***:
+Lưu ý: Bạn BẮT BUỘC phải ưu tiên sử dụng các từ vựng trong danh sách dưới đây, kết hợp với các từ vựng cốt lõi của cấp độ HSK5 để xây dựng học liệu và câu hỏi sao cho tự nhiên và đúng ngữ pháp. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP.
+{vocab_md}
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể. KHÔNG cần cung cấp Pinyin.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "listening_comprehension".
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

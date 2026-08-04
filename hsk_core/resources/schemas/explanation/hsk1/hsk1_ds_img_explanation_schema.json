@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng Đúng/Sai có hình ảnh và script.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời phân tích logic bằng tiếng Việt, so sánh giữa mô tả ảnh và nội dung script để kết luận Đúng/Sai. Lời giải cần ngắn gọn, súc tích, không dài.",
+      "example": "Trong hình ảnh chúng ta thấy 5 quyển sách. Nội dung là \"三本书\" (Sān běn shū) có nghĩa là \"ba quyển sách\". Vì vậy, đáp án là Sai."
+    },
+    "context_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa nội dung script gốc của câu hỏi.",
+      "properties": {
+        "chinese_text": {
+          "type": "string",
+          "description": "Nội dung script bằng tiếng Trung.",
+          "example": "三本书"
+        },
+        "pinyin": {
+          "type": "string",
+          "description": "Phiên âm Pinyin cho script.",
+          "example": "Sān běn shū"
+        }
+      },
+      "required": ["chinese_text", "pinyin"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của script.",
+      "properties": {
+        "vietnamese_text": {
+          "type": "string",
+          "description": "Bản dịch tiếng Việt của script.",
+          "example": "Ba quyển sách"
+        }
+      },
+      "required": ["vietnamese_text"]
+    }
+  },
+  "required": ["analysis_paragraph", "context_block", "translation_block"]
+}

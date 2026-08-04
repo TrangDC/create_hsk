@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "properties": {
+    "topik_11_prompt_chon_dap_an_dich_dung": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "question_text": { 
+            "type": "string", 
+            "description": "Câu Tiếng việt dùng để hỏi. Ví dụ: 'Vì đường trơn nên tôi đã suýt nữa thì ngã ở phía trước trung tâm đồ thất lạc.' " 
+          },
+          "options": {
+            "type": "array",    
+            "items": {
+              "type": "object",
+              "description": "Mỗi đối tượng trong mảng này đại diện cho một phương án trả lời.",
+              "properties": {
+                "display_text": { "type": "string", "description": "Nội dung hiển thị ở đáp án (Cột G)." },
+                "explanation": { "type": "string", "description": "giải thích ngắn gọn tại sao đúng/sai (dùng cho Cột I)." },
+                "is_correct": { "type": "boolean" , "description": "Xác định phương án trả lời có đúng hay không (dùng cho Cột H)." }
+              },
+              "required": ["display_text", "explanation", "is_correct"]
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": ["question_id", "question_text", "options"]
+      }
+    }
+  },
+  "required": ["topik_11_prompt_chon_dap_an_dich_dung"]
+}

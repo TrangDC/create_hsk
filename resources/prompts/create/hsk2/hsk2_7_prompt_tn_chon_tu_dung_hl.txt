@@ -6,7 +6,8 @@ Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài li
 
 Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Chọn từ điền vào chỗ trống":
 *   Tạo ra một học liệu chung `shared_material` gồm 4 từ vựng (A-D), mỗi từ có cả tiếng Trung và Pinyin.
-*   Tạo ra ```4``` câu hỏi (`questions`), mỗi câu có một chỗ trống `( )` để điền từ. Các câu hỏi có thể là câu đơn hoặc hội thoại ngắn.
+*   Tạo ra ```4``` câu hỏi (`questions`), mỗi câu có một chỗ trống `( )` để điền từ. Các câu hỏi bao gồm 3 câu đơn và 1 câu hội thoại ngắn.
+    LƯU Ý về `speaker` (người nói): Trường hợp là câu đơn, speaker để trống. Khi câu là đoạn hội thoại 2 lượt lời, speaker mới có giá trị là '男', '女'.
 *   Đáp án `correct_answer` phải là chữ cái (A-D) của từ đúng.
 
 YÊU CẦU ĐẦU RA:

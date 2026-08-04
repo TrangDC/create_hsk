@@ -363,6 +363,10 @@ def generate_single_audio_narakeet(text, output_path):
     if not text:
         return False
         
+    # Thêm check: nếu file audio đã có sẵn, bỏ qua sinh lại để tiết kiệm cost
+    if os.path.exists(output_path):
+        return True
+        
     # 1. Đảm bảo thư mục tồn tại
     directory = os.path.dirname(output_path)
     if directory and not os.path.exists(directory):

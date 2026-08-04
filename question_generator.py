@@ -152,7 +152,8 @@ def run_question_generation(level: str, pdf_folder_path: str, output_folder_path
                 structured_data = extract_structured_data_from_pdf(
                     pdf_path=pdf_files[0],
                     prompt_file_path=PREPROCESSING_PROMPT_PATH,
-                    schema_file_path=PREPROCESSING_SCHEMA_PATH
+                    schema_file_path=PREPROCESSING_SCHEMA_PATH,
+                    service_tier="flex"
                 )
                 preprocessed_text_content = format_structured_data_for_prompt(structured_data)
                 print("--- ✅ Tiền xử lý thành công. Sử dụng dữ liệu đã bóc tách để tạo câu hỏi. ---")
@@ -180,7 +181,8 @@ def run_question_generation(level: str, pdf_folder_path: str, output_folder_path
         for p_name in PROMPT_CONFIGS.keys():
             api_kwargs = {
                 'prompt_file_path': os.path.join(PROMPTS_FOLDER, f"{p_name}.txt"),
-                'schema_file_path': os.path.join(SCHEMAS_FOLDER, f"{p_name}.json")
+                'schema_file_path': os.path.join(SCHEMAS_FOLDER, f"{p_name}.json"),
+                'service_tier': 'flex'
             }
             # (LOGIC MỚI) Quyết định nguồn dữ liệu đầu vào
             if preprocessed_text_content:

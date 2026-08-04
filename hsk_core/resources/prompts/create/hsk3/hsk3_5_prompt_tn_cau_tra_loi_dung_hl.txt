@@ -1,0 +1,22 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo các câu hỏi thi HSK3 chuẩn xác dựa trên các yêu cầu chi tiết được cung cấp.
+
+Hãy tạo ra `{number}` câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK3.
+Cụ thể, hãy tạo ra `{number}` câu hỏi thuộc dạng "{matrix_name}":
+*   Tạo ra một học liệu chung `shared_material` gồm `{number}` câu thoại mẫu (đánh chữ cái từ A). Đây là các câu có thể đứng TRƯỚC một câu trả lời.
+*   Tạo ra `{number}` câu hỏi (`questions`), mỗi câu là một **câu trả lời**.
+*   Nhiệm vụ là chọn câu thoại trong học liệu (`shared_material`) phù hợp để đứng **trước** câu trả lời này, tạo thành một đoạn hội thoại logic.
+*   Đáp án `correct_answer` phải là chữ cái (A, B, C...) của câu thoại đúng.
+
+Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
+{rules_text}
+
+*** DANH SÁCH TỪ VỰNG ĐỂ TRA CỨU VÀ SỬ DỤNG ***:
+Lưu ý: Bạn BẮT BUỘC phải ưu tiên sử dụng các từ vựng trong danh sách dưới đây, kết hợp với các từ vựng cốt lõi của cấp độ HSK3 để xây dựng câu hỏi sao cho tự nhiên và đúng ngữ pháp. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP.
+{vocab_md}
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "sentence_matching_inverted_questions".
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

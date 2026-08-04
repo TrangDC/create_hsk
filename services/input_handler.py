@@ -84,6 +84,7 @@ class InputDataManager:
             topic = get_val('topic') or "General"
 
             item = {
+                "excel_row": idx + 2,
                 "needs_processing": needs_processing, # Biến quan trọng
                 "raw_stt": stt,
                 "word": str(word).strip(),

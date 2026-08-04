@@ -89,7 +89,7 @@ def create_merged_gif(ai_image_path, list_char_gif_paths, output_path):
             char_assets.append({'img': img, 'n_frames': n_frames})
             total_frames_needed += n_frames
 
-        PAUSE_FRAMES = 35
+        PAUSE_FRAMES = 70 # Tăng số frame dừng lại (vì tốc độ GIF chạy nhanh hơn)
         total_loop_frames = total_frames_needed + PAUSE_FRAMES
         total_width_chars = (len(char_assets) * CHAR_SIZE) + ((len(char_assets) - 1) * CHAR_GAP)
         start_x = (CANVAS_W - total_width_chars) // 2
@@ -124,15 +124,15 @@ def create_merged_gif(ai_image_path, list_char_gif_paths, output_path):
         # --- TỐI ƯU BẢNG MÀU (FIX LỖI ĐỔI MÀU) ---
         if rgb_frames:
             # Bước 1: Lấy frame cuối cùng (thường là frame đầy đủ màu nhất) làm mẫu để tạo bảng màu
-            # Nếu dùng MEDIANCUT cho frame cuối, các màu của ảnh AI sẽ được giữ cố định
-            sample_frame = rgb_frames[-1].quantize(colors=256, method=Image.MEDIANCUT)
+            # Thêm dither=Image.NONE để tránh vỡ hạt (lốm đốm) ở ảnh dạng Flat Vector
+            sample_frame = rgb_frames[-1].quantize(colors=256, method=Image.MEDIANCUT, dither=Image.NONE)
             
             final_frames = []
             for f in rgb_frames:
-                # Ép tất cả các frame khác dùng chung bảng màu của sample_frame
-                final_frames.append(f.quantize(palette=sample_frame))
+                # Ép tất cả các frame khác dùng chung bảng màu của sample_frame, không dùng dither
+                final_frames.append(f.quantize(palette=sample_frame, dither=Image.NONE))
 
-            durations = [60] * total_loop_frames
+            durations = [30] * total_loop_frames # Giảm xuống 30ms (tăng tốc độ chạy)
             final_frames[0].save(
                 output_path,
                 save_all=True,

@@ -230,74 +230,73 @@ class StrokeGifManager:
         return None
     
 def main():
-
     # --- DỮ LIỆU INPUT ---
     input_vocab = [
-  { "word": "可以", "meaning": "Có thể", "example": "我可以去吗？" },
-  { "word": "再", "meaning": "Lại / Nữa", "example": "再见。" },
-  { "word": "问题", "meaning": "Vấn đề / Câu hỏi", "example": "没问题。" },
-  { "word": "卖", "meaning": "Bán", "example": "卖书。" },
-  { "word": "打电话", "meaning": "Gọi điện thoại", "example": "我在打电话。" },
-  { "word": "一下", "meaning": "Một lát / Thử xem", "example": "看一下。" },
-  { "word": "服务员", "meaning": "Người phục vụ", "example": "服务员，点菜。" },
-  { "word": "女士", "meaning": "Quý cô / Bà", "example": "女士们，先生们。" },
-  { "word": "请", "meaning": "Mời / Xin", "example": "请进。" },
-  { "word": "坐", "meaning": "Ngồi", "example": "请坐。" },
-  { "word": "给", "meaning": "Đưa cho / Cho", "example": "给我那本书。" },
-  { "word": "杯", "meaning": "Cốc / Ly (lượng từ)", "example": "一杯茶。" },
-  { "word": "要", "meaning": "Muốn / Cần", "example": "我要咖啡。" },
-  { "word": "早饭", "meaning": "Bữa sáng", "example": "吃早饭。" },
-  { "word": "这个", "meaning": "Cái này", "example": "我要这个。" },
-  { "word": "面包", "meaning": "Bánh mì", "example": "买面包。" },
-  { "word": "鸡蛋", "meaning": "Trứng gà", "example": "吃鸡蛋。" },
-  { "word": "先生", "meaning": "Ông / Ngài", "example": "王先生。" },
-  { "word": "一半", "meaning": "Một nửa", "example": "给我一半。" },
-  { "word": "茶", "meaning": "Trà", "example": "喝茶。" },
-  { "word": "上", "meaning": "Trên / Lên", "example": "上车。" },
-  { "word": "火车", "meaning": "Tàu hỏa", "example": "坐火车。" },
-  { "word": "中午", "meaning": "Buổi trưa", "example": "中午好。" },
-  { "word": "开", "meaning": "Mở / Lái (xe)", "example": "开门。" },
-  { "word": "有些", "meaning": "Có một số / Có vài", "example": "有些人。" },
-  { "word": "有的", "meaning": "Có cái / Có người", "example": "有的书很有趣。" },
-  { "word": "了", "meaning": "Rồi (trợ từ)", "example": "太好了。" },
-  { "word": "写", "meaning": "Viết", "example": "写汉字。" },
-  { "word": "都", "meaning": "Đều", "example": "我们都去。" },
-  { "word": "听见", "meaning": "Nghe thấy", "example": "我听见了。" },
-  { "word": "不要", "meaning": "Đừng / Không muốn", "example": "不要说话。" },
-  { "word": "说话", "meaning": "Nói chuyện", "example": "他在说话。" },
-  { "word": "听", "meaning": "Nghe", "example": "听音乐。" },
-  { "word": "哪些", "meaning": "Những cái nào", "example": "哪些书？" },
-  { "word": "字", "meaning": "Chữ", "example": "写字。" },
-  { "word": "汉语", "meaning": "Tiếng Trung", "example": "学汉语。" },
-  { "word": "汉字", "meaning": "Chữ Hán", "example": "汉字很难。" },
-  { "word": "明年", "meaning": "Năm sau", "example": "明年见。" },
-  { "word": "上", "meaning": "Đi học / Lên (lớp)", "example": "上学。" },
-  { "word": "中学", "meaning": "Trường trung học", "example": "他在中学。" },
-  { "word": "小学", "meaning": "Trường tiểu học", "example": "去小学。" },
-  { "word": "中学生", "meaning": "Học sinh trung học", "example": "我是中学生。" },
-  { "word": "小学生", "meaning": "Học sinh tiểu học", "example": "他是小学生。" },
-  { "word": "上学", "meaning": "Đi học", "example": "每天上学。" },
-  { "word": "他们", "meaning": "Họ / Các anh ấy", "example": "他们来了。" },
-  { "word": "她们", "meaning": "Họ / Các cô ấy", "example": "她们很漂亮。" },
-  { "word": "它们", "meaning": "Chúng nó (vật/động vật)", "example": "它们是猫。" },
-  { "word": "晚", "meaning": "Muộn / Tối", "example": "太晚了。" },
-  { "word": "爱", "meaning": "Yêu", "example": "我爱你。" },
-  { "word": "哪个", "meaning": "Cái nào", "example": "哪个好？" },
-  { "word": "去年", "meaning": "Năm ngoái", "example": "去年我去过。" },
-  { "word": "男朋友", "meaning": "Bạn trai", "example": "我的男朋友。" },
-  { "word": "几", "meaning": "Mấy / Vài", "example": "几个人？" },
-  { "word": "年", "meaning": "Năm", "example": "一年。" },
-  { "word": "好玩儿", "meaning": "Vui / Thú vị", "example": "真好玩儿。" },
-  { "word": "飞机", "meaning": "Máy bay", "example": "坐飞机。" },
-  { "word": "要", "meaning": "Sắp / Phải", "example": "要下雨了。" },
-  { "word": "小时", "meaning": "Tiếng / Giờ (đồng hồ)", "example": "两个小时。" },
-  { "word": "家人", "meaning": "Người nhà", "example": "我的家人。" },
-  { "word": "时间", "meaning": "Thời gian", "example": "没时间。" },
-  { "word": "机场", "meaning": "Sân bay", "example": "去机场。" },
-  { "word": "接", "meaning": "Đón / Nhận", "example": "接电话。" },
-  { "word": "住", "meaning": "Sống / Ở", "example": "你住哪儿？" },
-  { "word": "早", "meaning": "Sớm", "example": "很早。" },
-  { "word": "那", "meaning": "Kia / Đó", "example": "那是什么？" }
+  {
+    "word": "初中",
+    "meaning": "trung học cơ sở (cấp 2)",
+    "example": "读初中的时候，我的数学成绩一直很好。"
+  },
+  {
+    "word": "把",
+    "meaning": "giới từ (dùng để đưa tân ngữ lên trước động từ)",
+    "example": "请你把桌子上的这瓶矿泉水喝了。"
+  },
+  {
+    "word": "夫妻",
+    "meaning": "vợ chồng",
+    "example": "这对年轻夫妻去年刚搬到我们小区。"
+  },
+  {
+    "word": "直到",
+    "meaning": "cho đến khi",
+    "example": "直到下课，他才发现自己把书带错了。"
+  },
+  {
+    "word": "遇见",
+    "meaning": "gặp gỡ, bắt gặp",
+    "example": "昨天我在去图书馆的路上遇见了王老师。"
+  },
+  {
+    "word": "照顾",
+    "meaning": "chăm sóc",
+    "example": "爷爷住院了，爸爸每天都在医院照顾他。"
+  },
+  {
+    "word": "动物园",
+    "meaning": "vườn bách thú",
+    "example": "周末去动物园看大熊猫的游客非常多。"
+  },
+  {
+    "word": "全",
+    "meaning": "toàn bộ, tất cả",
+    "example": "这个好消息很快就传遍了全校。"
+  },
+  {
+    "word": "野生",
+    "meaning": "hoang dã",
+    "example": "保护野生动物是每个人的责任。"
+  },
+  {
+    "word": "害怕",
+    "meaning": "sợ hãi",
+    "example": "因为没做完作业，他有点儿害怕见到老师。"
+  },
+  {
+    "word": "屋子",
+    "meaning": "căn phòng, căn nhà",
+    "example": "请把屋子收拾干净，一会儿有客人要来。"
+  },
+  {
+    "word": "查",
+    "meaning": "kiểm tra, tra cứu",
+    "example": "你可以上网查查，去机场坐哪条地铁最快。"
+  },
+  {
+    "word": "矿泉水",
+    "meaning": "nước khoáng",
+    "example": "运动会那天，学校为每位学生准备了矿泉水。"
+  }
 ]
 
     # Cấu hình thư mục output theo yêu cầu

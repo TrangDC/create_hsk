@@ -1,0 +1,24 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo các câu hỏi thi HSK2 chuẩn xác dựa trên các yêu cầu chi tiết được cung cấp.
+
+Hãy tạo ra `{number}` câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK2.
+Cụ thể, hãy tạo ra `{number}` câu hỏi thuộc dạng "{matrix_name}":
+*   Mỗi câu hỏi phải có một `script` (câu nói) và một `image_des` (mô tả ảnh bằng tiếng Việt).
+*   Nội dung script và mô tả ảnh phải liên quan đến nhau để có thể phán đoán Đúng/Sai.
+*   Đáp án `correct_answer` phải là số 1 (cho Đúng) hoặc số 0 (cho Sai).
+*   Các câu hỏi phải có cả đáp án Đúng và Sai.
+*   CÁC MÔ TẢ HÌNH ẢNH TUYỆT ĐỐI KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN.
+
+Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
+{rules_text}
+
+*** DANH SÁCH TỪ VỰNG ĐỂ TRA CỨU VÀ SỬ DỤNG ***:
+Lưu ý: Bạn BẮT BUỘC phải ưu tiên sử dụng các từ vựng trong danh sách dưới đây, kết hợp với các từ vựng cốt lõi của cấp độ HSK2 để xây dựng câu hỏi sao cho tự nhiên và đúng ngữ pháp. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP.
+{vocab_md}
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "true_false_image_questions".
+-   **Lưu ý quan trọng:** TUYỆT ĐỐI KHÔNG tạo trường "explanation" hay bất kỳ lời giải nào trong kết quả trả về.
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

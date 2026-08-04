@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "sentence_reordering": {
+      "type": "array",
+      "description": "Danh sách 4 câu hỏi sắp xếp thành phần câu cho HSK4.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "do_kho": { "type": "string", "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'." },
+          "components": {
+            "type": "array",
+            "description": "Danh sách các thành phần câu bị xáo trộn.",
+            "items": { "type": "string" }
+          },
+          "correct_order": { "type": "string", "description": "Chuỗi số thể hiện thứ tự đúng, ví dụ: '24135'." }
+        },
+        "required": ["question_id", "do_kho", "components", "correct_order"]
+      }
+    }
+  },
+  "required": ["sentence_reordering"]
+}

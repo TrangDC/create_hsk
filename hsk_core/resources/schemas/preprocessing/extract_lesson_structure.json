@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "vocabulary": {
+      "type": "array",
+      "description": "Danh sách các từ vựng mới trong bài học.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "word": { "type": "string" },
+          "pinyin": { "type": "string" },
+          "meaning": { "type": "string" }
+        },
+        "required": ["word", "pinyin", "meaning"]
+      }
+    },
+    "grammar_points": {
+      "type": "array",
+      "description": "Danh sách các điểm ngữ pháp quan trọng.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "structure": { "type": "string" },
+          "usage": { "type": "string" }
+        },
+        "required": ["structure", "usage"]
+      }
+    },
+    "situational_contexts": {
+      "type": "array",
+      "description": "Danh sách các tóm tắt tình huống giao tiếp từ các đoạn hội thoại.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "Chủ đề chính của cuộc trò chuyện."
+          },
+          "participants": {
+            "type": "array",
+            "description": "Tên các nhân vật tham gia.",
+            "items": { "type": "string" }
+          },
+          "summary": {
+            "type": "string",
+            "description": "Một đoạn văn tường thuật tóm tắt lại nội dung chính của hội thoại."
+          }
+        },
+        "required": ["topic", "participants", "summary"]
+      }
+    }
+  },
+  "required": ["vocabulary", "grammar_points", "situational_contexts"]
+}

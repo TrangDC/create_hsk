@@ -6,6 +6,7 @@ from google.cloud import texttospeech
 from google.oauth2 import service_account
 from pydub import AudioSegment
 from dotenv import load_dotenv
+import openpyxl
 
 load_dotenv()
 
@@ -15,13 +16,19 @@ load_dotenv()
 class HSKTextProcessor:
     def __init__(self):
         self.chinese_char_pattern = re.compile(r'[\u4e00-\u9fff]')
-        self.question_numbers = {i: f"第{self._to_chinese_num(i)}题" for i in range(1, 21)}
+        # Tăng range lên 100 để an toàn cho đề có số câu dài hơn
+        self.question_numbers = {i: f"第{self._to_chinese_num(i)}题" for i in range(1, 101)}
+        self.sentence_split_pattern = re.compile(r'(?<=[。！？!?；;])\s*')
 
     def _to_chinese_num(self, n):
-        nums =["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+        nums = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
         if n <= 10: return nums[n]
         if n < 20: return "十" + nums[n%10]
-        if n == 20: return "二十"
+        if n < 100:
+            tens = n // 10
+            ones = n % 10
+            if ones == 0: return nums[tens] + "十"
+            return nums[tens] + "十" + nums[ones]
         return str(n)
 
     def is_contains_chinese(self, text):
@@ -44,65 +51,118 @@ class HSKTextProcessor:
 
     def extract_clean_chinese(self, text_block):
         if not text_block or not isinstance(text_block, str): return []
-        lines = text_block.split('\n')
-        return[l.strip() for l in lines if self.is_contains_chinese(l) and "http" not in l.lower() and not self.is_option_line(l)]
+        lines = str(text_block).split('\n')
+        return [l.strip() for l in lines if self.is_contains_chinese(l) and "http" not in l.lower() and not self.is_option_line(l)]
 
-    def build_script(self, col_f, col_i, q_idx):
-        script =[]
-        text_i_raw = str(col_i).split("Phụ đề:")[1].split("Tạm dịch:")[0] if "Phụ đề:" in str(col_i) else ""
-        text_i = self.extract_clean_chinese(text_i_raw)
-        text_f = self.extract_clean_chinese(col_f)
+    def split_tts_segments(self, text, max_chars=90):
+        if not text:
+            return []
 
-        # LƯU Ý MỚI: Zephyr = Nữ, Charon = Nam, Leda = Dẫn chuyện
+        normalized = re.sub(r'\s+', ' ', str(text)).strip()
+        if not normalized:
+            return []
 
-        # CÂU 1 - 8 (Câu đơn: Nam đọc 1 dòng, Nữ đọc 1 dòng)
-        if 1 <= q_idx <= 8:
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
-            if text_i:
-                content = self.clean_tags(text_i[0], remove_all=True)
-                script.extend([{'v': 'Charon', 't': content}, {'v': 'Zephyr', 't': content}])
+        parts = [part.strip() for part in self.sentence_split_pattern.split(normalized) if part.strip()]
+        if not parts:
+            parts = [normalized]
 
-        # CÂU 9 - 12 (Cặp thoại)
-        elif 9 <= q_idx <= 12:
-            if q_idx == 9: script.append({'v': 'Leda', 't': "第九题到十二题是根据下面一段话。"})
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
-            block =[]
+        segments = []
+        for part in parts:
+            if len(part) <= max_chars:
+                segments.append(part)
+                continue
+
+            start = 0
+            while start < len(part):
+                segments.append(part[start:start + max_chars].strip())
+                start += max_chars
+
+        return [segment for segment in segments if segment]
+
+    def expand_narration_lines(self, lines):
+        expanded = []
+        for line in lines:
+            cleaned = self.clean_tags(line, remove_all=True)
+            segments = self.split_tts_segments(cleaned)
+            if segments:
+                expanded.append(segments)
+        return expanded
+
+    def is_dialogue_line(self, text):
+        return bool(re.search(r'(男|女)[：:]', text or ''))
+
+    def build_script(self, row_data, is_first_in_group=False, is_merged_group=False, is_last_in_group=False):
+        """
+        Xây dựng kịch bản cho một câu hỏi.
+        row_data: {q_idx, text_i, text_f, ...}
+        """
+        script = []
+        q_idx = row_data['q_idx']
+        text_i = row_data['text_i']
+        text_f = row_data['text_f']
+        is_dialogue = any(self.is_dialogue_line(line) for line in text_i)
+
+        # 1. Xử lý Intro/Ví dụ nếu là câu đầu tiên của nhóm
+        if is_first_in_group:
+            if is_merged_group:
+                # Dạng gộp nhóm (như 9-12 cũ)
+                intro_text = "一段对话" if is_dialogue else "一段话"
+                # Sẽ replace "...题" bằng end_q ở lớp ngoài
+                script.append({'v': 'Leda', 't': f"第{self._to_chinese_num(q_idx)}题到第...题是根据下面{intro_text}。", 'delay_after': 5000})
+            elif text_f:
+                # Dạng có ví dụ (như 13 cũ)
+                if len(text_f) >= 1:
+                    delay = 1200 if len(text_f) >= 2 else 15000
+                    script.append({'v': 'Leda', 't': text_f[0], 'delay_after': delay})
+                if len(text_f) >= 2:
+                    script.append({'v': 'Zephyr', 't': self.clean_tags(text_f[1]), 'delay_after': 15000})
+
+        # 2. Đọc số câu
+        script.append({'v': 'Leda', 't': self.question_numbers.get(q_idx, f"第{q_idx}题"), 'delay_after': 1500})
+
+        # 3. Đọc nội dung chính
+        if is_dialogue and len(text_i) >= 1:
+            # Dạng đối thoại
+            # Lượt 1
             for i, line in enumerate(text_i):
-                # Bắt chính xác tag để không bị nhầm khi trong câu có chữ "Nữ" hoặc "Nam"
-                if "女：" in line or "女:" in line:
-                    v = 'Zephyr' # Nữ
-                elif "男：" in line or "男:" in line:
-                    v = 'Charon' # Nam
-                else:
-                    # Nếu file Excel vô tình thiếu Tag, tự động gán luân phiên để chống lỗi
-                    v = 'Charon' if i % 2 == 0 else 'Zephyr'
-                
-                block.append({'v': v, 't': self.clean_tags(line, remove_all=True)})
-            script.extend(block * 2)
-
-        # CÂU 13 (Cột F có ví dụ)
-        elif q_idx == 13:
-            if len(text_f) >= 1: script.append({'v': 'Leda', 't': text_f[0]}) # Dòng ví dụ
-            if len(text_f) >= 2: script.append({'v': 'Zephyr', 't': self.clean_tags(text_f[1])}) # Câu hỏi -> Nữ
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
+                if "女：" in line or "女:" in line: v = 'Zephyr'
+                elif "男：" in line or "男:" in line: v = 'Charon'
+                else: v = 'Charon' if i % 2 == 0 else 'Zephyr'
+                delay = 1200 if i < len(text_i) - 1 else 5000
+                script.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
             
-            # Cột I: Dòng 1 Nội dung (Nam), Dòng 2 Câu hỏi (Nữ)
-            if len(text_i) >= 2:
-                block =[{'v': 'Charon', 't': self.clean_tags(text_i[0], remove_all=True)},
-                         {'v': 'Zephyr', 't': self.clean_tags(text_i[1], remove_all=True)}]
-                script.extend(block * 2)
+            # Lượt 2
+            for i, line in enumerate(text_i):
+                if "女：" in line or "女:" in line: v = 'Zephyr'
+                elif "男：" in line or "男:" in line: v = 'Charon'
+                else: v = 'Charon' if i % 2 == 0 else 'Zephyr'
+                # Nếu là trong nhóm gộp (merged) và chưa phải câu cuối -> nghỉ 15s để làm bài
+                end_delay = 15000 if (is_merged_group and not is_last_in_group) else 0
+                delay = 1200 if i < len(text_i) - 1 else end_delay
+                script.append({'v': v, 't': self.clean_tags(line, remove_all=True), 'delay_after': delay})
+        elif len(text_i) >= 1:
+            # Dạng câu đơn / đoạn văn: tách thành các nhịp đọc ngắn hơn nhưng giữ cùng voice
+            narration_line_groups = self.expand_narration_lines(text_i)
+            if not narration_line_groups:
+                return script
 
-        # CÂU 14 TRỞ ĐI
-        elif q_idx >= 14:
-            script.append({'v': 'Leda', 't': self.question_numbers[q_idx]})
-            # Cột I: Dòng 1 Nội dung (Nam), Dòng 2 Câu hỏi (Nữ)
-            if len(text_i) >= 2:
-                block =[{'v': 'Charon', 't': self.clean_tags(text_i[0], remove_all=True)},
-                         {'v': 'Zephyr', 't': self.clean_tags(text_i[1], remove_all=True)}]
-                script.extend(block * 2)
-            elif text_i:
-                content = self.clean_tags(text_i[0], remove_all=True)
-                script.extend([{'v': 'Charon', 't': content}, {'v': 'Zephyr', 't': content}])
+            def append_narration_pass(voice, final_delay):
+                for line_idx, line_segments in enumerate(narration_line_groups):
+                    is_last_line = line_idx == len(narration_line_groups) - 1
+                    for seg_idx, segment in enumerate(line_segments):
+                        is_last_segment = seg_idx == len(line_segments) - 1
+                        if is_last_line and is_last_segment:
+                            delay = final_delay
+                        elif is_last_segment:
+                            delay = 1200
+                        else:
+                            delay = 0
+                        script.append({'v': voice, 't': segment, 'delay_after': delay})
+
+            append_narration_pass('Charon', 5000)
+            end_delay = 15000 if (is_merged_group and not is_last_in_group) else 0
+            append_narration_pass('Zephyr', end_delay)
+        
         return script
 
 # ==========================================
@@ -110,7 +170,7 @@ class HSKTextProcessor:
 # ==========================================
 class VertexAudioGenerator:
     # Danh sách các model name hỗ trợ
-    SUPPORTED_MODELS = ['gemini-2.5-pro-tts', 'gemini-2.5-flash-tts', 'Chirp3-HD']
+    SUPPORTED_MODELS = ['gemini-3.1-flash-tts-preview', 'gemini-2.5-pro-preview-tts', 'Chirp3-HD']
     
     # Danh sách voice nam và nữ
     MALE_VOICES = ['Charon', 'Orus', 'Enceladus']
@@ -130,7 +190,6 @@ class VertexAudioGenerator:
         self.narrator_voice = self.NARRATOR_VOICE
         
         self.client = self._init_client()
-        self.silence = AudioSegment.silent(duration=1000)
         self.language_code = "cmn-CN"
 
     def _init_client(self):
@@ -168,7 +227,7 @@ class VertexAudioGenerator:
         """
         voice_name = self._get_voice_name(voice_key)
         
-        if self.model_name in ['gemini-2.5-pro-tts', 'gemini-2.5-flash-tts']:
+        if self.model_name in ['gemini-3.1-flash-tts-preview', 'gemini-2.5-pro-preview-tts']:
             # API Gemini yêu cầu model_name trong VoiceSelectionParams
             return texttospeech.VoiceSelectionParams(
                 language_code=self.language_code,
@@ -218,122 +277,311 @@ class VertexAudioGenerator:
         Tạo audio file từ script.
         
         Args:
-            script: List of {'v': role, 't': text}
+            script: List of {'v': role, 't': text, 'delay_after': int}
             out_path: Đường dẫn lưu file MP3
         """
         combined = AudioSegment.empty()
         for i, item in enumerate(script):
             seg = self.generate_single(item['t'], item['v'])
             combined += seg
-            if i < len(script) - 1: 
-                combined += self.silence
+            
+            delay = item.get('delay_after', 1000)
+            if i < len(script) - 1 and delay > 0:
+                combined += AudioSegment.silent(duration=delay)
+                
         combined.export(out_path, format="mp3")
         return os.path.abspath(out_path)
 
 # ==========================================
 # PHẦN 3: HÀM CHẠY TEST (MAIN RUNNER)
 # ==========================================
+def clean_filename(text):
+    """
+    Làm sạch tên file: bỏ các prefix như 'Ảnh:', 'Audio:', 'Audio, image:', 
+    lấy dòng cuối cùng nếu có nhiều dòng, và bỏ đuôi file .mp3/.png...
+    """
+    if pd.isna(text) or not str(text).strip():
+        return None
+    
+    # Tách dòng và lấy dòng chứa thông tin mã file (thường là dòng có dấu ( ) hoặc mã H1, H2...)
+    lines = [l.strip() for l in str(text).split('\n') if l.strip()]
+    if not lines: return None
+    
+    # Ưu tiên dòng có chứa định dạng mã (ví dụ: H1, H2, T1, C...)
+    target = lines[-1]
+    for line in lines:
+        if re.search(r'H[1-6]\(.*\)', line, re.IGNORECASE):
+            target = line
+            break
+    
+    # Xóa prefix (chấp nhận cả dấu : của VN và Trung Quốc, thêm URL)
+    prefix_pattern = r'^(Ảnh|Audio|Image|Illustration|Audio,\s*image|Audio,\s*hình\s*ảnh|URL)\s*[:：]\s*'
+    target = re.sub(prefix_pattern, '', target, flags=re.IGNORECASE)
+    
+    # Xóa đuôi file nếu có
+    target = re.sub(r'\.(mp3|png|jpg|jpeg|gif)$', '', target, flags=re.IGNORECASE)
+    
+    # Xử lý các ký tự cấm trong tên file Windows: \ / : * ? " < > |
+    target = re.sub(r'[\\/:*?"<>|]', '_', target)
+    
+    return target.strip()
+
+def get_range_from_filename(filename):
+    """
+    Phân tích tên file để tìm dải câu hỏi (ví dụ: C9_12 -> 9, 12)
+    """
+    if not filename: return None
+    # Tìm mẫu _C[số]_[số] ở cuối tên file
+    match = re.search(r'_C(\d+)_(\d+)$', filename)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    return None
+
+def extract_subtitle_block(cell_value):
+    """
+    Lấy phần text nằm sau marker 'Phụ đề' và trước 'Tạm dịch'.
+    Chấp nhận cả ':' và '：', đồng thời chịu được khoảng trắng / xuống dòng khác nhau.
+    """
+    if pd.isna(cell_value) or not str(cell_value).strip():
+        return None
+
+    text = str(cell_value)
+    match = re.search(
+        r'Phụ đề\s*[:：]\s*(.*?)(?:\n*\s*Tạm dịch\s*[:：]|$)',
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+    if not match:
+        return None
+
+    subtitle_block = match.group(1).strip()
+    return subtitle_block or None
+
+def has_url_reference(cell_value):
+    if pd.isna(cell_value) or not str(cell_value).strip():
+        return False
+
+    text = str(cell_value)
+    return bool(re.search(r'(^|\n)\s*URL\s*[:：]\s*\S+', text, flags=re.IGNORECASE))
+
+def has_audio_material(cell_value):
+    if pd.isna(cell_value) or not str(cell_value).strip():
+        return False
+
+    text = str(cell_value)
+    return bool(
+        re.search(
+            r'(^|\n)\s*(Audio\s*,\s*image|Audio\s*,\s*hình\s*ảnh|Audio)\s*[:：]',
+            text,
+            flags=re.IGNORECASE
+        )
+    )
+
+def get_merged_ranges_b(excel_path, sheet_name=None):
+    """
+    Lấy danh sách các khoảng merge ở cột B (cột 2).
+    Trả về list dict gồm start/end/value để các dòng nằm trong merge có thể
+    dùng lại giá trị ở ô đầu tiên của vùng merge.
+    """
+    try:
+        wb = openpyxl.load_workbook(excel_path, read_only=False, data_only=True)
+        if sheet_name and sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+        else:
+            ws = wb[wb.sheetnames[0]]
+        ranges = []
+        if hasattr(ws, 'merged_cells'):
+            for m_range in ws.merged_cells.ranges:
+                if m_range.min_col <= 2 <= m_range.max_col:
+                    ranges.append({
+                        'start_row': m_range.min_row,
+                        'end_row': m_range.max_row,
+                        'value': ws.cell(row=m_range.min_row, column=2).value,
+                    })
+        wb.close()
+        return ranges
+    except Exception as e:
+        print(f"Lỗi khi đọc merge cells: {e}")
+        return []
+
 def test_file(excel_path, output_dir, model_name='Chirp3-HD', male_voice='Charon', female_voice='Zephyr', log_fn=print):
     """
     Xử lý file Excel và tạo audio tương ứng.
-
-    Args:
-        excel_path: Đường dẫn file Excel input
-        output_dir: Root thư mục lưu audio output (ví dụ "output")
-        model_name: Model TTS (gemini-2.5-pro-tts, gemini-2.5-flash-tts, Chirp3-HD)
-        male_voice: Voice nam (Charon, Orus, Enceladus)
-        female_voice: Voice nữ (Zephyr, Leda, Carrllihoe)
-        log_fn: hàm để nhận thông điệp tiến độ (mặc định là print)
-    """    # xác định tên folder con dựa trên tên file input
+    """
     base_name = os.path.splitext(os.path.basename(excel_path))[0]
     audio_folder = os.path.join(output_dir, "audio", base_name)
     if not os.path.exists(audio_folder):
         os.makedirs(audio_folder, exist_ok=True)
 
-    # tạo bản sao Excel bằng pywin32 để không làm mất định dạng
-    dest_excel = os.path.join(audio_folder, f"{base_name}_Result_Final.xlsx")
-    try:
-        import win32com.client as win32
-        excel_app = win32.gencache.EnsureDispatch('Excel.Application')
-        excel_app.DisplayAlerts = False
-        wb_copy = excel_app.Workbooks.Open(os.path.abspath(excel_path))
-        wb_copy.SaveAs(os.path.abspath(dest_excel))
-        wb_copy.Close(False)
-        excel_app.Quit()
-    except Exception as e:
-        # nếu pywin32 không tồn tại, fallback về sao chép file bình thường
-        import shutil
-        shutil.copy2(excel_path, dest_excel)
+    # Đọc dữ liệu
+    excel_file = pd.ExcelFile(excel_path)
+    sheet_name = excel_file.sheet_names[0]
+    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    # Lấy thông tin merge thực tế từ Excel
+    merged_ranges = get_merged_ranges_b(excel_path, sheet_name=sheet_name)
+    merged_b_value_by_row = {}
+    for merged_range in merged_ranges:
+        for row_num in range(merged_range['start_row'], merged_range['end_row'] + 1):
+            merged_b_value_by_row[row_num] = merged_range['value']
 
-    # dùng pandas đọc dữ liệu từ bản sao để xử lý nội dung
-    df = pd.read_excel(dest_excel)
-
-    # khởi tạo processor/generator giống như trước
+    log_fn(f"Đang xử lý sheet: {sheet_name}")
+    
     processor = HSKTextProcessor()
     generator = VertexAudioGenerator(model_name=model_name, male_voice=male_voice, female_voice=female_voice)
 
-    group_9_12_script = []
-    log_fn("--- Bắt đầu xử lý file ---")
-    log_fn(f"Model: {model_name} | Voice Nam: {male_voice} | Voice Nữ: {female_voice}")
-
-    # nếu pywin32 thành công ở trên, mở file để cập nhật đường dẫn trực tiếp
-    excel_updater = None
-    try:
-        import win32com.client as win32
-        excel_app = win32.gencache.EnsureDispatch('Excel.Application')
-        excel_app.DisplayAlerts = False
-        workbook = excel_app.Workbooks.Open(os.path.abspath(dest_excel))
-        worksheet = workbook.Worksheets(1)
-        excel_updater = (excel_app, workbook, worksheet)
-    except Exception:
-        excel_updater = None
-
+    # BƯỚC 1: Parse data và map với thông tin merge + thông tin từ tên file
+    parsed_rows = []
+    skipped_rows = []
     for idx, row in df.iterrows():
-        q_idx = idx + 1  # Dòng 2 Excel là Câu 1
-        col_f, col_i = row.iloc[5], row.iloc[8]
-        if "Phụ đề:" not in str(col_i):
+        excel_row_idx = idx + 2 # pd.read_excel header=0 -> dòng data đầu là 2
+        col_b, col_f, col_i = row.iloc[1], row.iloc[5], row.iloc[8]
+        effective_col_b = col_b if not pd.isna(col_b) and str(col_b).strip() else merged_b_value_by_row.get(excel_row_idx)
+        subtitle_block = extract_subtitle_block(col_i)
+        if not subtitle_block:
             continue
 
-        script = processor.build_script(col_f, col_i, q_idx)
-        if 9 <= q_idx <= 12:
-            group_9_12_script.extend(script)
-            if q_idx == 12:
-                path = generator.create_audio(group_9_12_script, os.path.join(audio_folder, "Câu_9_12.mp3"))
-                for r in range(idx - 3, idx + 1):
-                    if r < len(df):
-                        # cập nhật dataframe để giữ track
-                        df.iloc[r, 10] = path
-                        # viết vào file Excel qua COM nếu có
-                        if excel_updater:
-                            excel_row = r + 2
-                            excel_updater[2].Cells(excel_row, 11).Value = path
-                log_fn("Đã xong cụm Câu 9-12")
+        has_col_f_url = has_url_reference(col_f)
+        has_col_b_audio = has_audio_material(effective_col_b)
+        if not (has_col_f_url or has_col_b_audio):
+            skipped_rows.append((idx + 1, excel_row_idx))
+            continue
+        
+        # 1. Tìm merge range từ Excel
+        my_range = None
+        for merged_range in merged_ranges:
+            r_start = merged_range['start_row']
+            r_end = merged_range['end_row']
+            if r_start <= excel_row_idx <= r_end:
+                my_range = (r_start, r_end)
+                break
+        
+        # 2. Tìm merge range từ tên file (Cột B)
+        filename_b = clean_filename(effective_col_b)
+        file_range = get_range_from_filename(filename_b)
+
+        parsed_rows.append({
+            'q_idx': idx + 1,
+            'excel_row': excel_row_idx,
+            'merge_range': my_range,
+            'file_range': file_range,
+            'col_b': effective_col_b,
+            'col_f': col_f,
+            'text_i': processor.extract_clean_chinese(subtitle_block),
+            'text_f': processor.extract_clean_chinese(col_f)
+        })
+
+    if skipped_rows:
+        skipped_desc = ", ".join([f"Câu {q_idx} (row {excel_row})" for q_idx, excel_row in skipped_rows[:10]])
+        suffix = "..." if len(skipped_rows) > 10 else ""
+        log_fn(f"⚠️ Bỏ qua {len(skipped_rows)} dòng có phụ đề nhưng không có URL ở cột F hoặc học liệu Audio ở cột B: {skipped_desc}{suffix}")
+
+    if not parsed_rows:
+        log_fn("❌ Không tìm thấy dữ liệu hợp lệ trong file Excel.")
+        return audio_folder
+
+    # BƯỚC 2: Gom nhóm dựa trên merge_range HOẶC file_range
+    groups = []
+    i = 0
+    while i < len(parsed_rows):
+        row = parsed_rows[i]
+        
+        # Ưu tiên gom theo merge range của Excel
+        if row['merge_range']:
+            group = []
+            range_end = row['merge_range'][1]
+            while i < len(parsed_rows) and parsed_rows[i]['excel_row'] <= range_end:
+                group.append(parsed_rows[i])
+                i += 1
+            groups.append(group)
+        
+        # Nếu ko có merge Excel, check xem tên file có chứa dải câu hỏi (C9_12)
+        elif row['file_range']:
+            start_q, end_q = row['file_range']
+            # Chỉ gom nếu start_q khớp với câu hiện tại
+            if start_q == row['q_idx']:
+                group = []
+                while i < len(parsed_rows) and parsed_rows[i]['q_idx'] <= end_q:
+                    group.append(parsed_rows[i])
+                    i += 1
+                groups.append(group)
+            else:
+                groups.append([row])
+                i += 1
         else:
-            path = generator.create_audio(script, os.path.join(audio_folder, f"Câu_{q_idx}.mp3"))
-            if idx < len(df):
-                df.iloc[idx, 10] = path
-                if excel_updater:
-                    excel_updater[2].Cells(idx + 2, 11).Value = path
-            log_fn(f"Đã xong Câu {q_idx}")
+            # Dòng đơn (không merge)
+            groups.append([row])
+            i += 1
 
-    # lưu kết quả nếu không dùng COM, otherwise COM đã lưu trực tiếp
-    if not excel_updater:
-        df.to_excel(dest_excel, index=False)
-    else:
-        workbook.Save()
-        workbook.Close(False)
-        excel_app.Quit()
+    # BƯỚC 3: Xử lý từng nhóm tạo audio
+    generated_audio_paths = []
+    log_fn("--- Bắt đầu tạo audio ---")
 
-    log_fn(f"\n--- HOÀN THÀNH ---")
-    log_fn(f"File kết quả: {dest_excel}")
+    for group in groups:
+        is_merged = (len(group) > 1)
+        
+        if is_merged:
+            # TẠO 1 FILE CHUNG CHO NHÓM MERGE
+            group_script = []
+            first_row = group[0]
+            start_q = group[0]['q_idx']
+            end_q = group[-1]['q_idx']
+            
+            # Làm sạch tên file từ cột B
+            filename = clean_filename(first_row['col_b'])
+            if not filename:
+                filename = f"Câu_{start_q}_{end_q}"
+            
+            for j, row in enumerate(group):
+                is_first = (j == 0)
+                is_last = (j == len(group) - 1)
+                s = processor.build_script(row, is_first_in_group=is_first, is_merged_group=True, is_last_in_group=is_last)
+                
+                # Cập nhật text dẫn nếu là câu đầu
+                if is_first:
+                    for item in s:
+                        if "题到第...题" in item['t']:
+                            item['t'] = item['t'].replace("题到第...题", f"题到第{processor._to_chinese_num(end_q)}题")
+                group_script.extend(s)
+            
+            path = generator.create_audio(group_script, os.path.join(audio_folder, f"{filename}.mp3"))
+            generated_audio_paths.append(path)
+            log_fn(f"✅ Đã xong nhóm Câu {start_q}-{end_q} -> {filename}.mp3")
+        
+        else:
+            # TẠO FILE RIÊNG LẺ
+            row = group[0]
+            q_idx = row['q_idx']
+            # Làm sạch tên file từ cột F (hoặc B nếu F trống)
+            filename = clean_filename(row['col_f'])
+            if not filename:
+                filename = clean_filename(row['col_b'])
+            if not filename:
+                filename = f"Câu_{q_idx}"
+            
+            # check_first_in_group=True để luôn add Ví dụ nếu có col_f (tiếng Trung)
+            script = processor.build_script(row, is_first_in_group=True, is_merged_group=False)
+            
+            path = generator.create_audio(script, os.path.join(audio_folder, f"{filename}.mp3"))
+            generated_audio_paths.append(path)
+            log_fn(f"✅ Đã xong Câu {q_idx} -> {filename}.mp3")
 
-    # trả về đường dẫn folder audio và file excel kết quả
-    return audio_folder, dest_excel
+    # BƯỚC 4: Gộp file tổng
+    if generated_audio_paths:
+        log_fn("\n--- Đang tạo file tổng Full.mp3 ---")
+        try:
+            combined = AudioSegment.empty()
+            delay_segment = AudioSegment.silent(duration=15000)
+            for i, path in enumerate(generated_audio_paths):
+                if os.path.exists(path):
+                    audio = AudioSegment.from_file(path, format="mp3")
+                    combined += audio
+                    if i < len(generated_audio_paths) - 1:
+                        combined += delay_segment
+            
+            merged_path = os.path.join(audio_folder, f"{base_name}_Full.mp3")
+            combined.export(merged_path, format="mp3")
+            log_fn(f"🎉 HOÀN THÀNH! File tổng: {os.path.basename(merged_path)}")
+        except Exception as e:
+            log_fn(f"⚠️ Lỗi gộp file: {e}")
 
-if __name__ == "__main__":
-    # Thay đổi đường dẫn file test tại đây
-    EXCEL_INPUT = r"D:\Edmicro\Tools\create_hsk\input\Bài 13.xlsx" 
-    # folder gốc 'output'; hàm sẽ tạo subfolder audio/<basename>
-    FOLDER_AUDIO = os.path.join(".", "output")
-    
-    test_file(EXCEL_INPUT, FOLDER_AUDIO)
+    return audio_folder

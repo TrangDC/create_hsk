@@ -4,8 +4,6 @@ import time
 from google import genai
 from google.genai import types
 from google.oauth2 import service_account
-import vertexai
-from vertexai.preview.vision_models import ImageGenerationModel
 from dotenv import load_dotenv
 
 # Load biến môi trường
@@ -18,14 +16,9 @@ class ImageGenerationService:
     def __init__(self):
         self.credentials = self._get_vertex_ai_credentials()
         self.project_id = PROJECT_ID
-        self.model_name = "gemini-3-pro-image-preview"
+        self.model_name = "gemini-3.1-flash-lite-image"
         self.location = "global"
         self.client = None
-
-        # 2. Cấu hình cho Imagen (Cũ - HSK)
-        self.imagen_model_name = "imagen-4.0-ultra-generate-001"
-        self.imagen_location = "us-central1" # Imagen bắt buộc us-central1
-        self.imagen_model = None
 
         if self.credentials and self.project_id:
             try:
@@ -37,17 +30,6 @@ class ImageGenerationService:
                 )
             except Exception as e:
                 print(f"❌ Lỗi khởi tạo Client trong __init__: {e}")
-
-            # Init Imagen (Vertex AI SDK cũ)
-            try:
-                vertexai.init(
-                    project=self.project_id,
-                    location=self.imagen_location,
-                    credentials=self.credentials
-                )
-                self.imagen_model = ImageGenerationModel.from_pretrained(self.imagen_model_name)
-            except Exception as e:
-                print(f"❌ Lỗi khởi tạo Imagen Model: {e}")    
         else:
             print("⚠️ Cảnh báo: Không thể khởi tạo Client do thiếu Credentials.")
 
@@ -204,104 +186,92 @@ class ImageGenerationService:
                     return None
         return None
 
-    def generate_image_legacy(self, prompt, max_retries=3):
+    def generate_image_with_image_ref(self, prompt, image_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=3):
         """
-        Tạo ảnh sử dụng Imagen Ultra (Cho HSK).
-        Code logic lấy từ yêu cầu cũ.
+        Tạo ảnh với tham chiếu từ file ảnh mẫu.
+        Returns: tuple (image_bytes, usage_dict) hoặc (None, usage_dict) nếu thất bại.
+        usage_dict = {
+            "prompt_tokens": int,
+            "output_tokens": int,
+            "total_tokens": int,
+            "attempts": int,   # số lần thử thực tế
+        }
         """
+        usage = {"prompt_tokens": 0, "output_tokens": 0, "total_tokens": 0, "attempts": 0}
 
-        if not self.imagen_model:
-            print("❌ Lỗi: Imagen Model chưa được khởi tạo")
-            return None
+        if not self.client:
+            return None, usage
+
+        request_contents = []
         
-        prompt_gen_image= f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác theo mô tả sau: {prompt}."
-        prompt_gen_image += f"**Lưu ý**: Không vẽ theo phong cách hoạt hình hay tranh vẽ tay."
-        prompt_gen_image += f"Với hình ảnh có chữ, ưu tiên sử dụng từ Tiếng Anh để đảm bảo chữ chính xác không lỗi."
-        prompt_gen_image += f"Chỉ sinh ra ảnh có chữ Tiếng Việt trong trường hợp mô tả ảnh yêu cầu có chữ Tiếng Việt."
+        # Nếu có file ảnh mẫu
+        if image_path and os.path.exists(image_path):
+            try:
+                # Lấy đúng mime type
+                ext = os.path.splitext(image_path)[1].lower()
+                mime_type = "image/png" if ext == ".png" else "image/jpeg"
+                
+                with open(image_path, "rb") as f:
+                    image_bytes = f.read()
+                
+                request_contents.append(
+                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+                )
+                
+                final_prompt = (
+                    f"Follow the visual style and aesthetic of the attached reference image. "
+                    f"Action: {prompt}"
+                )
+            except Exception as e:
+                print(f"⚠️ Không thể đọc file ảnh mẫu: {e}")
+                final_prompt = prompt
+        else:
+            final_prompt = prompt
+
+        request_contents.append(types.Part.from_text(text=final_prompt))
 
         for attempt in range(1, max_retries + 1):
-        #     try:
-        #         # Re-init client để tránh stale connection
-        #         client = genai.Client(
-        #             vertexai=True, 
-        #             project=self.project_id, 
-        #             location=self.location, 
-        #             credentials=self.credentials
-        #         )
-
-        #         if attempt > 1:
-        #             print(f"   🔄 Thử lại lần {attempt}/{max_retries}...")
-        #         else:
-        #             print(f"   🎨 Đang sinh ảnh: {prompt[:30]}...")
-
-        #         response = client.models.generate_content(
-        #             model=self.model_name,
-    
-        #             contents=f"Vẽ hình ảnh theo phong cách thật, tả thực, minh họa chính xác cho mô tả sau: {prompt}. Lưu ý: + Không vẽ theo phong cách hoạt hình hay tranh vẽ tay. Với hình ảnh có chữ, ưu tiên sử dụng từ Tiếng Anh phải đảm bảo chữ chính xác. Chỉ sinh ra ảnh có chữ Tiếng Việt trong trường hợp mô tả ảnh yêu cầu có chữ Tiếng Việt.",
-        #             config=types.GenerateContentConfig(
-        #                 response_modalities=["IMAGE"],
-        #                 candidate_count=1,
-        #                 image_config=types.ImageConfig(aspect_ratio="1:1"),
-        #             )
-        #         )
-
-        #         # Kiểm tra dữ liệu ảnh
-        #         if response.parts:
-        #             for part in response.parts:
-        #                 if part.inline_data and part.inline_data.data:
-        #                     # ✅ THÀNH CÔNG -> Trả về luôn
-        #                     return part.inline_data.data
-
-        #         # ❌ NẾU KHÔNG CÓ DATA -> Raise Exception để kích hoạt cơ chế retry bên dưới
-        #         print(f"      ⚠️ API trả về rỗng (Lần {attempt}).")
-        #         raise Exception("Empty response from API (No image data)")
-
-        #     except Exception as e:
-        #         # Bắt mọi lỗi (bao gồm lỗi Empty response vừa raise ở trên)
-        #         print(f"      ❌ Gặp lỗi (Lần {attempt}): {str(e)}")
-                
-        #         if attempt < max_retries:
-        #             print(f"      ⏳ Đợi 3 giây trước khi thử lại...")
-        #             time.sleep(3)
-        #         else:
-        #             print("      ❌ ĐÃ THẤT BẠI HOÀN TOÀN sau tất cả các lần thử.")
-        #             return None
-        
-        # return None
+            usage["attempts"] = attempt
             try:
-                if attempt > 1: print(f"   🔄 Imagen retry ({attempt}/{max_retries})...")
-                else: print(f"   🎨 [Imagen] Đang sinh ảnh: {prompt[:30]}...")
-
-                # Gọi API Imagen cũ
-                response = self.imagen_model.generate_images(
-                    number_of_images=1, # Chỉ lấy 1 ảnh để tiết kiệm
-                    prompt=prompt_gen_image,
-                    aspect_ratio="1:1",
-                    negative_prompt="",
-                    person_generation="allow_all",
-                    safety_filter_level="block_few",
-                    add_watermark=False,
+                if attempt > 1:
+                    print(f"   🔄 Thử lại lần {attempt}/{max_retries}...")
+                
+                # Gọi Model Image Generation
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=request_contents,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["IMAGE"],
+                        candidate_count=1,
+                        image_config=types.ImageConfig(aspect_ratio=aspect_ratio),
+                    )
                 )
 
-                if response.images and len(response.images) > 0:
-                    # Imagen SDK trả về object GeneratedImage
-                    # Ta lấy bytes trực tiếp từ thuộc tính _image_bytes (hoặc save vào buffer)
-                    # Cách chuẩn nhất với SDK này là truy cập ._image_bytes
-                    return response.images[0]._image_bytes
-                
-                print(f"      ⚠️ Imagen không trả về ảnh (Lần {attempt}).")
-                raise Exception("Empty response")
+                # Lấy usage metadata nếu có
+                if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                    meta = response.usage_metadata
+                    usage["prompt_tokens"]  = getattr(meta, 'prompt_token_count', 0) or 0
+                    usage["output_tokens"]  = getattr(meta, 'candidates_token_count', 0) or 0
+                    usage["total_tokens"]   = getattr(meta, 'total_token_count', 0) or 0
+
+                if response.parts:
+                    for part in response.parts:
+                        if part.inline_data and part.inline_data.data:
+                            return part.inline_data.data, usage
+
+                raise Exception("Empty image data from API")
 
             except Exception as e:
-                print(f"      ❌ Lỗi Imagen (Lần {attempt}): {str(e)}")
-                if attempt < max_retries: time.sleep(3)
-                else: return None
-        return None
-
+                print(f"      ❌ Lỗi sinh ảnh (Lần {attempt}): {str(e)}")
+                if attempt < max_retries:
+                    time.sleep(retry_delay)
+                else:
+                    return None, usage
+        return None, usage
 
 # --- KHỐI TEST ---
 if __name__ == "__main__":
     service = ImageGenerationService()
     test_prompt = "Một con mèo đang ngủ."
-    img = service.generate_image(test_prompt)
+    img = service.generate_image_with_image_ref(test_prompt, None, aspect_ratio="1:1")
     if img: print("Thành công")

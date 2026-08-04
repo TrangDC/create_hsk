@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "properties": {
+    "image_matching_questions": {
+      "type": "object",
+      "description": "Dạng Chọn ảnh đúng. Gồm 1 học liệu chung là 4 mô tả ảnh và 4 câu hỏi.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Danh sách gồm 4 chuỗi đánh thứ tự từ A. đến D., mô tả hình ảnh theo cấu trúc Ảnh: {mô tả} bằng tiếng Việt.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách 4 câu hỏi để chọn ảnh tương ứng.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": {
+                "type": "integer"
+              },
+              "do_kho": {
+                "type": "string",
+                "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+              },
+              "question_text_chinese": {
+                "type": "string",
+                "description": "Câu hỏi tiếng Trung."
+              },
+              "pinyin": {
+                "type": "string",
+                "description": "Phiên âm Pinyin cho câu hỏi."
+              },
+              "correct_answer": {
+                "type": "integer",
+                "description": "Đáp án đúng, là số thứ tự của ảnh (từ 1 đến 4) trong 'shared_material'."
+              }
+            },
+            "required": [
+              "question_id",
+              "do_kho",
+              "question_text_chinese",
+              "pinyin",
+              "correct_answer"
+            ]
+          }
+        }
+      },
+      "required":[
+        "shared_material",
+        "questions"
+      ]
+    }
+  },
+  "required":[
+    "image_matching_questions"
+  ]
+}

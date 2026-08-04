@@ -1,0 +1,23 @@
+Bạn là một giáo viên Tiếng Trung sáng tạo. Nhiệm vụ của bạn là tạo các câu hỏi thi HSK4 chuẩn xác dựa trên các yêu cầu chi tiết được cung cấp.
+
+Hãy tạo ra `{number}` câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK4.
+Cụ thể, hãy tạo ra `{number}` câu hỏi thuộc dạng "{matrix_name}":
+*   Với mỗi câu hỏi, hãy tạo một cặp gồm:
+    1.  `image_description`: Một mô tả chi tiết, rõ ràng bằng tiếng Việt về một hình ảnh. Hình ảnh này nên gợi mở và dễ dàng để đặt câu.
+    2.  `vocabulary_word`: Một từ vựng tiếng Trung HSK4 quan trọng. Từ vựng này phải có liên quan logic đến hình ảnh được mô tả.
+    3.  `sample_sentence`: Tạo một câu trả lời MẪU bằng tiếng Trung. Câu này phải mô tả hoặc liên quan đến hình ảnh và sử dụng chính xác `vocabulary_word` đã cho. Câu mẫu này dùng để làm đáp án tham khảo.
+
+Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
+{rules_text}
+
+*** DANH SÁCH TỪ VỰNG ĐỂ TRA CỨU VÀ SỬ DỤNG ***:
+Lưu ý: Bạn BẮT BUỘC phải ưu tiên sử dụng các từ vựng trong danh sách dưới đây, kết hợp với các từ vựng cốt lõi của cấp độ HSK4 để xây dựng câu hỏi sao cho tự nhiên và đúng ngữ pháp. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP.
+{vocab_md}
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể cho `vocabulary_word` và `sample_sentence`, tiếng Việt cho `image_description`.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "image_with_word_sentence_creation".
+-   Tính liên quan: `image_description` và `vocabulary_word` phải liên quan chặt chẽ với nhau.
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

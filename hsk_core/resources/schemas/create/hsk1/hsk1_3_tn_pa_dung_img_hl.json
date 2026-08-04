@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "properties": {
+    "shared_image_comprehension": {
+      "type": "object",
+      "description": "Dạng TN phương án đúng (hình ảnh) (HL). Gồm 1 học liệu 4 ảnh và 4 script hội thoại.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Danh sách 4 chuỗi (đánh thứ tự từ A. đến D.) mô tả hình ảnh theo cấu trúc Ảnh: {mô tả} bằng Tiếng Việt.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách 4 script hội thoại, mỗi script tương ứng với một ảnh.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": {
+                "type": "integer"
+              },
+              "do_kho": {
+                "type": "string",
+                "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+              },
+              "script_chinese": {
+                "type": "string",
+                "description": "Hội thoại tiếng Trung giữa 男 và 女."
+              },
+              "script_pinyin": {
+                "type": "string",
+                "description": "Phiên âm Pinyin tương ứng."
+              },
+              "correct_answer": {
+                "type": "integer",
+                "description": "Đáp án đúng, là số thứ tự của ảnh (1 đến 4) trong 'shared_material'."
+              }
+            },
+            "required": [
+              "question_id",
+              "do_kho",
+              "script_chinese",
+              "script_pinyin",
+              "correct_answer"
+            ]
+          }
+        }
+      },
+      "required": [
+        "shared_material",
+        "questions"
+      ]
+    }
+  },
+  "required": [
+    "shared_image_comprehension"
+  ]
+}
