@@ -363,6 +363,7 @@ def generate_content(
     schema_file_path: str,
     pdf_file_paths: Optional[List[str]] = None,
     text_content: Optional[str] = None,
+    extra_context_text: Optional[str] = None,
     service_tier: Optional[str] = None,
     max_retries: int = 5,
     retry_delay: int = 5,
@@ -410,6 +411,9 @@ def generate_content(
         content_blocks.append({"type": "text", "text": text_content})
 
     content_blocks.append({"type": "text", "text": prompt_text})
+
+    if extra_context_text:
+        content_blocks.append({"type": "text", "text": extra_context_text})
 
     openai_client = create_openai_client(openai_api_key)
     openai_model = os.getenv("OPENAI_MODEL", "gpt-5.4")

@@ -96,15 +96,21 @@ class PipelineWorker(QObject):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
 
-    def __init__(self, pdf_folder, hsk_level, preproc_mode=0):
+    def __init__(self, pdf_path, hsk_level, preproc_mode=0, old_output_folder=None):
         super().__init__()
-        self.pdf_folder = pdf_folder
+        self.pdf_path = pdf_path
         self.hsk_level = hsk_level
         self.preproc_mode = preproc_mode
+        self.old_output_folder = old_output_folder
 
     def run(self):
         try:
-            result_path = run_full_pipeline(self.pdf_folder, self.hsk_level, self.preproc_mode)
+            result_path = run_full_pipeline(
+                self.pdf_path,
+                self.hsk_level,
+                self.preproc_mode,
+                self.old_output_folder
+            )
             if result_path:
                 self.finished.emit(result_path)
             else:
@@ -1380,19 +1386,32 @@ class HSKGeneratorApp(QWidget):
         layout.setSpacing(20)
         layout.setContentsMargins(25, 25, 25, 25)
 
-        # 1. Phần chọn thư mục
+        # 1. Phần chọn file PDF
         path_layout = QHBoxLayout()
         path_layout.setSpacing(15)
-        self.path_label = QLabel('Thư mục PDF:')
+        self.path_label = QLabel('File PDF:')
         self.path_input = QLineEdit()
-        self.path_input.setPlaceholderText("Chọn thư mục chứa các file PDF bài khóa...")
+        self.path_input.setPlaceholderText("Chọn file PDF bài học...")
         self.browse_button = QPushButton('Chọn...')
         self.browse_button.setStyleSheet("background-color: #28a745; min-width: 100px;")
-        self.browse_button.clicked.connect(self._browse_folder)
+        self.browse_button.clicked.connect(self._browse_pdf_file)
         path_layout.addWidget(self.path_label, 0)
         path_layout.addWidget(self.path_input, 1)
         path_layout.addWidget(self.browse_button, 0)
         layout.addLayout(path_layout)
+
+        old_output_layout = QHBoxLayout()
+        old_output_layout.setSpacing(15)
+        self.old_output_label = QLabel('Thư mục output cũ:')
+        self.old_output_input = QLineEdit()
+        self.old_output_input.setPlaceholderText("Tùy chọn: chọn thư mục chứa generated_question_data.json cũ...")
+        self.old_output_browse_button = QPushButton('Chọn...')
+        self.old_output_browse_button.setStyleSheet("background-color: #17a2b8; min-width: 100px;")
+        self.old_output_browse_button.clicked.connect(self._browse_old_output_folder)
+        old_output_layout.addWidget(self.old_output_label, 0)
+        old_output_layout.addWidget(self.old_output_input, 1)
+        old_output_layout.addWidget(self.old_output_browse_button, 0)
+        layout.addLayout(old_output_layout)
 
         # 2. Phần chọn HSK Level
         hsk_layout = QHBoxLayout()
@@ -2220,11 +2239,17 @@ class HSKGeneratorApp(QWidget):
         if idx == 4: # Tab Summary (Index 4)
              self.sum_log_display.insertPlainText(text)       
 
-    def _browse_folder(self):
-        """Mở dialog để chọn thư mục."""
-        folder_path = QFileDialog.getExistingDirectory(self, 'Chọn thư mục chứa file PDF')
+    def _browse_pdf_file(self):
+        """Mở dialog để chọn file PDF bài học."""
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Chọn file PDF bài học', '', 'PDF Files (*.pdf)')
+        if file_path:
+            self.path_input.setText(file_path)
+
+    def _browse_old_output_folder(self):
+        """Mở dialog để chọn thư mục output cũ chứa generated_question_data.json."""
+        folder_path = QFileDialog.getExistingDirectory(self, 'Chọn thư mục output cũ')
         if folder_path:
-            self.path_input.setText(folder_path)
+            self.old_output_input.setText(folder_path)
 
     def _browse_excel_file(self):
         """Mở dialog để chọn file Excel."""
@@ -2256,13 +2281,18 @@ class HSKGeneratorApp(QWidget):
 
     def _start_pipeline(self):
         """Bắt đầu chạy pipeline trong một luồng riêng."""
-        pdf_folder = self.path_input.text()
+        pdf_path = self.path_input.text().strip()
+        old_output_folder = self.old_output_input.text().strip() or None
         hsk_level = self.hsk_combo.currentText()
         # Lấy index: 0, 1 hoặc 2
         preproc_mode = self.preproc_combo.currentIndex()
 
-        if not pdf_folder or not os.path.isdir(pdf_folder):
-            QMessageBox.warning(self, 'Lỗi đầu vào', 'Vui lòng chọn một thư mục PDF hợp lệ.')
+        if not pdf_path or not os.path.isfile(pdf_path) or not pdf_path.lower().endswith('.pdf'):
+            QMessageBox.warning(self, 'Lỗi đầu vào', 'Vui lòng chọn một file PDF hợp lệ.')
+            return
+
+        if old_output_folder and not os.path.isdir(old_output_folder):
+            QMessageBox.warning(self, 'Lỗi đầu vào', 'Thư mục output cũ không hợp lệ.')
             return
 
         # Vô hiệu hóa nút chạy và xóa log cũ
@@ -2272,7 +2302,7 @@ class HSKGeneratorApp(QWidget):
         
         # Tạo và khởi chạy thread
         self.thread = QThread()
-        self.worker = PipelineWorker(pdf_folder, hsk_level, preproc_mode)
+        self.worker = PipelineWorker(pdf_path, hsk_level, preproc_mode, old_output_folder)
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)

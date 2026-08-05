@@ -6,14 +6,20 @@ import traceback
 from question_generator import run_question_generation
 from explanation_generator import run_explanation_generation
 
-def run_full_pipeline(pdf_folder_path: str, level: str, preproc_mode: int = 0) -> str | None:
+def run_full_pipeline(
+    pdf_path: str,
+    level: str,
+    preproc_mode: int = 0,
+    old_output_folder: str | None = None
+) -> str | None:
     """
     Hàm tổng điều phối toàn bộ quy trình tạo câu hỏi và lời giải.
 
     Args:
-        pdf_folder_path (str): Đường dẫn đến thư mục chứa các file PDF đầu vào.
+        pdf_path (str): Đường dẫn đến file PDF đầu vào.
         hsk_level (str): Cấp độ HSK cần tạo (ví dụ: "hsk1", "hsk2",...).
         preproc_mode (int): Chế độ phân tích PDF (0: mặc định, 1: chỉ từ vựng & bài khóa, 2: chỉ từ vựng & ngữ pháp).
+        old_output_folder (str | None): Thư mục output cũ chứa generated_question_data.json.
 
     Returns:
         str | None: Đường dẫn đến thư mục chứa kết quả nếu thành công, ngược lại trả về None.
@@ -21,20 +27,10 @@ def run_full_pipeline(pdf_folder_path: str, level: str, preproc_mode: int = 0) -
     # --- 1. CHUẨN BỊ MÔI TRƯỜNG ---
     output_dir = "output"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    pdf_files = [os.path.join(pdf_folder_path, f) for f in os.listdir(pdf_folder_path) if f.lower().endswith('.pdf')]
-    if not pdf_files:
-            print(f"❌ Lỗi: Không tìm thấy file PDF nào trong '{pdf_folder_path}'.")
-            return None, None
-    if level in ["topik1", "topik2", "topik3"]:
-        # Ưu tiên tìm file có chữ "Bài"
-        candidate_files = [f for f in pdf_files if "Bài" in os.path.basename(f)]
-        if candidate_files:
-            chosen_pdf = candidate_files[0]
-        else:
-            # Nếu không có file nào chứa chữ "Bài", lấy file đầu tiên bất kỳ
-            chosen_pdf = pdf_files[0]
-    else:
-        chosen_pdf = pdf_files[0]        
+    if not pdf_path or not os.path.isfile(pdf_path):
+            print(f"❌ Lỗi: Không tìm thấy file PDF tại '{pdf_path}'.")
+            return None
+    chosen_pdf = pdf_path
     # Lấy tên file gốc bỏ đuôi .pdf
     base_name = os.path.splitext(os.path.basename(chosen_pdf))[0]
     output_folder_with_timestamp = os.path.join(output_dir, "excel", f"{base_name}_{level}_{timestamp}")
@@ -43,7 +39,9 @@ def run_full_pipeline(pdf_folder_path: str, level: str, preproc_mode: int = 0) -
     print("="*60)
     print("BẮT ĐẦU TẠO ĐỀ")
     print(f"Cấp độ HSK/TOPIK: {level.upper()}")
-    print(f"Thư mục PDF: {os.path.abspath(pdf_folder_path)}")
+    print(f"File PDF: {os.path.abspath(pdf_path)}")
+    if old_output_folder:
+        print(f"Thư mục output cũ: {os.path.abspath(old_output_folder)}")
     print(f"Thư mục Output: {os.path.abspath(output_folder_with_timestamp)}")
     print("="*60)
 
@@ -52,9 +50,10 @@ def run_full_pipeline(pdf_folder_path: str, level: str, preproc_mode: int = 0) -
         # ---- QUY TRÌNH 1: TẠO CÂU HỎI ----
         intermediate_file, output_excel = run_question_generation(
             level=level,
-            pdf_folder_path=pdf_folder_path,
+            pdf_path=pdf_path,
             output_folder_path=output_folder_with_timestamp,
-            preproc_mode=preproc_mode  # <--- THÊM MỚI
+            preproc_mode=preproc_mode,
+            old_output_folder=old_output_folder
         )
         # Kiểm tra nếu bước 1 thành công thì mới chạy bước 2
         if intermediate_file and output_excel:
@@ -81,15 +80,15 @@ def run_full_pipeline(pdf_folder_path: str, level: str, preproc_mode: int = 0) -
 if __name__ == "__main__":
     
     # --- Cấu hình cho việc kiểm thử ---
-    PDF_INPUT_DIR = "input"
+    PDF_INPUT_PATH = "input/sample.pdf"
     HSK_LEVEL_TO_RUN = "hsk1"
 
     print("--- Chạy ở chế độ kiểm thử 'run_pipeline.py' ---")
     
     # Gọi hàm chính
     final_output_path = run_full_pipeline(
-        pdf_folder_path=PDF_INPUT_DIR, 
-        hsk_level=HSK_LEVEL_TO_RUN
+        pdf_path=PDF_INPUT_PATH,
+        level=HSK_LEVEL_TO_RUN
     )
 
     # Kiểm tra kết quả trả về
