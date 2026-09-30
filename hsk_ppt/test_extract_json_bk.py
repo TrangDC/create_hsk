@@ -340,11 +340,102 @@ def get_section_schema():
         "required": ["lesson_info", "section_title", "full_dialogue", "vocabulary", "extra_knowledge", "simple_dialogue", "exercise"]
     }
 
-def extract_single_section(client: VertexClient, pdf_path: str, prompt_text: str) -> dict:
+
+def get_hsk4_lesson_schema():
+    """Schema cho HSK4: giữ nguyên số lượng và thứ tự unit thực tế trong PDF."""
+    return {
+        "type": "OBJECT",
+        "properties": {
+            "lesson_info": {
+                "type": "OBJECT",
+                "properties": {
+                    "level": {"type": "STRING"},
+                    "lesson_number": {"type": "INTEGER"},
+                    "title_cn": {"type": "STRING"},
+                    "title_vi": {"type": "STRING"}
+                },
+                "required": ["level", "lesson_number", "title_cn", "title_vi"]
+            },
+            "vocabulary_source": {
+                "type": "OBJECT",
+                "properties": {
+                    "source": {"type": "STRING"},
+                    "items": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "id": {"type": "STRING"},
+                                "hz": {"type": "STRING"},
+                                "pinyin": {"type": "STRING"},
+                                "type": {"type": "STRING"},
+                                "meanings": {"type": "ARRAY", "items": {"type": "STRING"}}
+                            },
+                            "required": ["id", "hz", "pinyin", "type", "meanings"]
+                        }
+                    }
+                },
+                "required": ["source", "items"]
+            },
+            "units": {
+                "type": "ARRAY",
+                "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "id": {"type": "STRING"},
+                        "unit_type": {"type": "STRING"},
+                        "title": {"type": "STRING"},
+                        "order": {"type": "INTEGER"},
+                        "content": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "hz": {"type": "ARRAY", "items": {"type": "STRING"}},
+                                "pinyin": {"type": "ARRAY", "items": {"type": "STRING"}},
+                                "vi": {"type": "ARRAY", "items": {"type": "STRING"}}
+                            },
+                            "required": ["hz", "pinyin", "vi"]
+                        },
+                        "vocabulary_ids": {"type": "ARRAY", "items": {"type": "STRING"}},
+                        "sentences": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "id": {"type": "STRING"},
+                                    "hz": {"type": "STRING"},
+                                    "pinyin": {"type": "STRING"},
+                                    "vi": {"type": "STRING"}
+                                },
+                                "required": ["id", "hz", "pinyin", "vi"]
+                            }
+                        },
+                        "exercises": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "type": {"type": "STRING"},
+                                    "question": {"type": "STRING"},
+                                    "options": {"type": "ARRAY", "items": {"type": "STRING"}},
+                                    "given_words": {"type": "ARRAY", "items": {"type": "STRING"}},
+                                    "answer": {"type": "STRING"}
+                                },
+                                "required": ["type", "question", "answer"]
+                            }
+                        }
+                    },
+                    "required": ["id", "unit_type", "title", "order", "content", "vocabulary_ids", "sentences", "exercises"]
+                }
+            }
+        },
+        "required": ["lesson_info", "vocabulary_source", "units"]
+    }
+
+def extract_single_section(client: VertexClient, pdf_path: str, prompt_text: str, response_schema=None) -> dict:
     """Hàm gọi AI để xử lý 1 section duy nhất"""
     
     # Lấy schema đã định nghĩa
-    schema = get_section_schema()
+    schema = response_schema or get_section_schema()
     
     # Đọc file PDF
     with open(pdf_path, "rb") as f:
@@ -411,6 +502,21 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"Không tìm thấy file PDF tại: {pdf_path}")
 
+    level = level.upper()
+    if level == "HSK4":
+        print("Đang xử lý HSK4 theo schema unit linh hoạt...")
+        client = VertexClient(None, None, "gpt-6-luna", "us-central1")
+        lesson_data = extract_single_section(
+            client,
+            pdf_path,
+            base_prompt,
+            response_schema=get_hsk4_lesson_schema(),
+        )
+        with open(output_json_path, 'w', encoding='utf-8') as f:
+            json.dump(lesson_data, f, ensure_ascii=False, indent=2)
+        print(f"\n✅ THÀNH CÔNG! Đã lưu dữ liệu HSK4 vào: {output_json_path}")
+        return lesson_data
+
     # Lấy danh sách ngữ pháp cấm sinh (từ hsk_index.json)
     pdf_filename = os.path.basename(pdf_path)
     grammar_blacklist = _get_grammar_blacklist(level, pdf_filename)
@@ -418,7 +524,6 @@ def process_full_hsk_lesson(pdf_path: str, base_prompt: str, level: str, output_
     print(f"📋 Blacklist ngữ pháp (lấy từ hsk_index): \n- {grammar_blacklist_str}")
 
     # Xác định số lần lặp dựa trên Level
-    level = level.upper()
     print(f"Đang xử lý cấp độ: {level}")
     total_iterations = 4 if level in ["HSK2", "HSK3"] else 3
     

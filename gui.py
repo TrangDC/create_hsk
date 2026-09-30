@@ -11,6 +11,7 @@ from hsk_ppt.test_extract_json_grammar import process_grammar_lesson
 from hsk_ppt.prepare_images import prepare_images_for_json
 from hsk_ppt.test_generate_ppt_bk import PPTGenerator
 from hsk_ppt.test_generate_ppt_grammar import GrammarPPTGenerator
+from hsk_ppt.hsk4_book_ppt_generator import HSK4BookPPTGenerator
 
 # ==========================================
 # SUPPRESS SUBPROCESS WINDOWS GLOBALLY
@@ -1206,10 +1207,11 @@ class PPTGeneratorWorker(QObject):
             bk_template = os.path.join(base_dir, "resources", "ppt_templates", "HSK Bài Khóa template.pptx")
             gr_template = os.path.join(base_dir, "resources", "ppt_templates", "HSK Ngữ pháp template.pptx")
             bk_prompt = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Bai_Khoa.txt")
+            hsk4_bk_prompt = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Bai_Khoa_HSK4.txt")
             gr_prompt = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Ngu_Phap.txt")
 
             missing_files = [
-                path for path in (bk_template, gr_template, bk_prompt, gr_prompt)
+                path for path in (bk_template, gr_template, bk_prompt, hsk4_bk_prompt, gr_prompt)
                 if not os.path.isfile(path)
             ]
             if missing_files:
@@ -1221,12 +1223,15 @@ class PPTGeneratorWorker(QObject):
             
             with open(bk_prompt, 'r', encoding='utf-8') as f:
                 bk_prompt_text = f.read()
+            with open(hsk4_bk_prompt, 'r', encoding='utf-8') as f:
+                hsk4_bk_prompt_text = f.read()
             with open(gr_prompt, 'r', encoding='utf-8') as f:
                 gr_prompt_text = f.read()
 
             if self.ppt_type in ["Cả hai", "Bài khóa"]:
                 self.progress.emit(f"Đang trích xuất JSON Bài Khóa ({self.hsk_level})...")
-                process_full_hsk_lesson(self.pdf_path, bk_prompt_text, self.hsk_level, bk_json_path)
+                prompt_text = hsk4_bk_prompt_text if self.hsk_level.upper() == "HSK4" else bk_prompt_text
+                process_full_hsk_lesson(self.pdf_path, prompt_text, self.hsk_level, bk_json_path)
 
             if self.ppt_type in ["Cả hai", "Ngữ pháp"]:
                 self.progress.emit(f"Đang trích xuất JSON Ngữ Pháp ({self.hsk_level})...")
@@ -1245,7 +1250,8 @@ class PPTGeneratorWorker(QObject):
             if self.ppt_type in ["Cả hai", "Bài khóa"]:
                 self.progress.emit("Đang render PPT Bài Khóa...")
                 if os.path.exists(bk_json_path):
-                    gen_bk = PPTGenerator(bk_template, bk_json_path)
+                    generator_class = HSK4BookPPTGenerator if self.hsk_level.upper() == "HSK4" else PPTGenerator
+                    gen_bk = generator_class(bk_template, bk_json_path)
                     gen_bk.build()
                     gen_bk.save(bk_ppt_path)
                 
