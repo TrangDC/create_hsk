@@ -38,7 +38,7 @@ def get_grammar_schema():
                             "properties": {
                                 "sub_title": {"type": "string", "description": "Tên dạng cấu trúc. VD: Dạng khẳng định"},
                                 "formula": {"type": "string", "description": "Công thức ngữ pháp cốt lõi (VD: Chủ ngữ + Động từ + Tân ngữ). Nếu không có, hãy để chuỗi rỗng ''"},
-                                "usage": {"type": "string", "description": "Đoạn văn giải thích cách dùng, ý nghĩa, hoàn cảnh sử dụng. Bao gồm cả giải thích phân tích thành phần câu (nếu có)."},
+                                "usage": {"type": "string", "description": "Chỉ chứa phần giải thích cách dùng, ý nghĩa, hoàn cảnh sử dụng và phân tích thành phần câu (nếu có), viết gọn trong 2-4 câu. Không được chứa ví dụ, Pinyin, bản dịch, mô tả ảnh hoặc nội dung của mảng examples."},
                                 "examples": {
                                     "type": "array",
                                     "description": "Danh sách ví dụ minh họa cho cấu trúc này",
@@ -204,7 +204,7 @@ def process_grammar_lesson(pdf_path: str, base_prompt: str, level: str, index_fi
 
     print(f"Bắt đầu xử lý file PDF Ngữ Pháp cấp độ {level} - Bài {lesson_number}. Tổng số chủ điểm: {total_topics}...")
     
-    client = VertexClient(None, None, "gpt-5.4", "us-central1")  # Dùng OpenAI backend
+    client = VertexClient(None, None, "gpt-6-luna", "us-central1")  # Dùng OpenAI backend
     
     final_json = {
         "lesson_info": {},
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     # Các tham số file cần thiết
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     PDF_FILE_PATH = os.path.join(base_dir, "hsk_ppt", "input", "HSK2", "Bài 4_你穿红色的很好看.pdf")
-    PROMPT_FILE_PATH = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Ngu_Phap_New.txt")
+    PROMPT_FILE_PATH = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Ngu_Phap.txt")
     INDEX_FILE_PATH = os.path.join(base_dir, "resources", "ppt_templates", "hsk_index.json")
     OUTPUT_JSON_FILE = os.path.join(base_dir, "hsk_ppt", "HSK2_Grammar_test_output.json")
     HSK_LEVEL = "HSK2"

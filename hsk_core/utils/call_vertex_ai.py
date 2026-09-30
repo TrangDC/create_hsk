@@ -284,7 +284,7 @@ def build_responses_request(
 class VertexAIClient:
     def __init__(self):
         self.api_key = None
-        self.model_name = os.getenv("OPENAI_MODEL", "gpt-5.4")
+        self.model_name = os.getenv("OPENAI_MODEL", "gpt-6-luna")
         self.client = None
         self._initialized = False
         

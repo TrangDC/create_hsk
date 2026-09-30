@@ -197,6 +197,12 @@ class GrammarPPTGenerator:
         total_height_pt = total_lines * line_height_pt + 12 # cộng thêm margin bù
         return (total_height_pt / 72)
 
+    def _clean_usage_text(self, text: str) -> str:
+        """Keep the explanation separate from examples duplicated by the JSON generator."""
+        markers = r"(?:Ví dụ\s*\d*\s*:|Mô tả ảnh\s*:|Example\s*\d*\s*:|Image description\s*:)"
+        cleaned = re.split(markers, str(text), maxsplit=1, flags=re.IGNORECASE)[0]
+        return re.sub(r"\s+", " ", cleaned).strip()
+
     def _apply_title_styling(self, shape, text: str, max_font=135, min_font=40):
         if not text:
             return
@@ -677,7 +683,7 @@ class GrammarPPTGenerator:
                 r_f2.font.color.rgb = self.hex_to_rgb_color("A40400") # Màu đỏ cho công thức
 
             # 3. Textbox: Cách dùng (Usage)
-            usage_text = struct.get("usage", "").strip()
+            usage_text = self._clean_usage_text(struct.get("usage", ""))
             usage_top = formula_top + h_form + Inches(0.15) if formula_text else formula_top
             
             est_h_use = self.get_text_height(f"Cách dùng: {usage_text}", font_size_main, 15.27) if usage_text else 0

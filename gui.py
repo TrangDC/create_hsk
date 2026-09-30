@@ -5,6 +5,7 @@ import traceback
 from dotenv import load_dotenv
 import json
 import random
+from datetime import datetime
 from hsk_ppt.test_extract_json_bk import process_full_hsk_lesson
 from hsk_ppt.test_extract_json_grammar import process_grammar_lesson
 from hsk_ppt.prepare_images import prepare_images_for_json
@@ -71,7 +72,7 @@ from services.media_merger import create_merged_gif
 from services.input_handler import InputDataManager
 from services.image_gen_service import ImageGenerationService
 from services.image_gen_logger import ImageGenLogger
-from services.gif_downloader import StrokeGifManager
+from services.gif_downloader import StrokeGifManager, log_gif_failure
 from services.vocab_extractor import build_lesson_map, get_vocab_sheet_names
 from call_vertexai import generate_content
 # Giả sử các module này đã có sẵn trong project của bạn
@@ -373,7 +374,7 @@ class EngFlashcardWorker(QObject):
                                         self.progress.emit(f"      ❌ Lỗi sinh audio câu ví dụ")
                         
                         import time
-                        time.sleep(1) # Tránh rate limit
+                        time.sleep(0.2) # Tránh rate limit
 
                 # --- Kết thúc sheet: upload log lên Drive ---
                 self.progress.emit(f"\n📤 Đang upload log sheet '{sheet}' lên Drive...")
@@ -645,7 +646,7 @@ class SummaryWorker(QObject):
                 file_name, 
                 self.project_id, 
                 self.creds, 
-                os.getenv("OPENAI_MODEL", "gpt-5.4")
+                os.getenv("OPENAI_MODEL", "gpt-6-luna")
             )
             
             self.finished.emit(f"Hoàn tất! File lưu tại:\n{os.path.abspath(docx_path)}")
@@ -755,7 +756,7 @@ class GrammarSummaryWorker(QObject):
                 file_name,
                 self.project_id,
                 self.creds,
-                os.getenv("OPENAI_MODEL", "gpt-5.4"),
+                os.getenv("OPENAI_MODEL", "gpt-6-luna"),
                 vocab_records
             )
 
@@ -773,6 +774,7 @@ class FlashcardWorker(QObject):
         self.excel_path = excel_path
         self.sheet_name = sheet_name
         self.output_base = output_base
+        self.static_thumbnail = any(f"HSK{level}" in sheet_name.upper() for level in ("4", "5"))
 
         # Cấu hình đường dẫn nội bộ
         self.img_final_dir = os.path.join(self.output_base, "images")
@@ -866,6 +868,21 @@ Trả về JSON chuẩn theo Schema.
             self.progress.emit("🚀 KHỞI ĐỘNG FLASHCARD GENERATOR...")
             self._setup_folders()
             self._setup_resources()
+            gif_failure_log = os.path.join(self.output_base, "gif_download_failures.log")
+            with open(gif_failure_log, "a", encoding="utf-8") as f:
+                f.write(f"\n=== Bắt đầu lượt tải {datetime.now():%Y-%m-%d %H:%M:%S} ===\n")
+
+            # Cache dữ liệu text AI theo từng từ để các lần chạy sau không gọi AI lại.
+            ai_cache_path = os.path.join(self.output_base, "flashcard_ai_text_cache.json")
+            try:
+                with open(ai_cache_path, "r", encoding="utf-8") as f:
+                    ai_text_cache = json.load(f)
+                if not isinstance(ai_text_cache, dict):
+                    ai_text_cache = {}
+            except (FileNotFoundError, json.JSONDecodeError):
+                ai_text_cache = {}
+
+            self.progress.emit(f"📝 Cache dữ liệu AI: {ai_cache_path}")
 
             # 1. XỬ LÝ INPUT
             self.progress.emit(f"📄 Đang đọc dữ liệu từ Excel...")
@@ -877,7 +894,10 @@ Trả về JSON chuẩn theo Schema.
 
             # 2. INIT SERVICES
             self.progress.emit("⚙️ Khởi tạo AI & Image Services...")
-            gif_manager = StrokeGifManager(gif_folder=self.raw_gif_dir, png_folder=self.raw_gif_dir)
+            gif_manager = None if self.static_thumbnail else StrokeGifManager(
+                gif_folder=self.raw_gif_dir,
+                png_folder=self.raw_gif_dir,
+            )
             img_service = ImageGenerationService()
 
             excel_results = []
@@ -907,31 +927,45 @@ Trả về JSON chuẩn theo Schema.
                     "audio1": get_updated_filename('exist_audio1', 'filename_audio_word'),
                     "audio2": get_updated_filename('exist_audio2', 'filename_audio_ex')
                 }
+                row_number = item.get('excel_row', idx + 2)
+                raw_img_path = os.path.join(self.raw_img_dir, f"{word}_{row_number}_ai.png")
+                needs_raw_image = not os.path.exists(raw_img_path)
 
                 # KIỂM TRA XEM CÓ CẦN XỬ LÝ AI/MEDIA KHÔNG
-                if item['needs_processing']:
+                if item['needs_processing'] or needs_raw_image:
                     self.progress.emit(f"\n[{idx+1}/{total_items}] 🔄 Đang bổ sung dữ liệu: {word}...")
 
                     # --- A. GỌI AI (Đọc prompt/schema từ file) ---
-                    ai_data = {}
-                    try:
-                        with open(self.prompt_path, 'r', encoding='utf-8') as f:
-                            prompt_template = f.read()
-                        
-                        prompt_input = prompt_template.format(
-                            word=word, 
-                            pinyin=item['pinyin'] or "",
-                            meaning=item['meaning'] or "", 
-                            example=item['example'] or ""
-                        )
-                        
-                        temp_path = f"resources/prompts/temp_{idx}.txt"
-                        with open(temp_path, 'w', encoding='utf-8') as f: f.write(prompt_input)
+                    cached_ai_data = ai_text_cache.get(word)
+                    if isinstance(cached_ai_data, dict) and cached_ai_data:
+                        ai_data = cached_ai_data
+                        self.progress.emit(f"   ♻️ Dùng lại dữ liệu AI đã lưu: {word}")
+                    else:
+                        ai_data = {}
+                        try:
+                            with open(self.prompt_path, 'r', encoding='utf-8') as f:
+                                prompt_template = f.read()
+                            
+                            prompt_input = prompt_template.format(
+                                word=word, 
+                                pinyin=item['pinyin'] or "",
+                                meaning=item['meaning'] or "", 
+                                example=item['example'] or ""
+                            )
+                            
+                            temp_path = f"resources/prompts/temp_{idx}.txt"
+                            with open(temp_path, 'w', encoding='utf-8') as f: f.write(prompt_input)
 
-                        ai_data = generate_content(temp_path, self.schema_path, [self.mascot_pdf], None, service_tier="flex")
-                        if os.path.exists(temp_path): os.remove(temp_path)
-                    except Exception as e:
-                        self.progress.emit(f"⚠️ Lỗi AI tại từ '{word}': {e}")
+                            ai_data = generate_content(temp_path, self.schema_path, [self.mascot_pdf], None, service_tier="flex")
+                            if os.path.exists(temp_path): os.remove(temp_path)
+
+                            if isinstance(ai_data, dict) and ai_data:
+                                ai_text_cache[word] = ai_data
+                                with open(ai_cache_path, "w", encoding="utf-8") as f:
+                                    json.dump(ai_text_cache, f, ensure_ascii=False, indent=2)
+                                self.progress.emit(f"   💾 Đã lưu dữ liệu AI: {word}")
+                        except Exception as e:
+                            self.progress.emit(f"⚠️ Lỗi AI tại từ '{word}': {e}")
 
                     # --- B. ĐIỀN KHUYẾT THÔNG TIN TEXT (Nếu Excel trống mới lấy AI) ---
                     if not row_data['pronunciation']: row_data['pronunciation'] = ai_data.get('pinyin', '')
@@ -948,9 +982,7 @@ Trả về JSON chuẩn theo Schema.
                     # --- C. XỬ LÝ MEDIA (Chỉ sinh những cái còn thiếu) ---
                     
                     # 1. Ảnh minh họa (Thumbnail)
-                    if not row_data['thumbnail']:
-                        row_number = item.get('excel_row', idx + 2)
-                        raw_img_path = os.path.join(self.raw_img_dir, f"{word}_{row_number}_ai.png")
+                    if not row_data['thumbnail'] or needs_raw_image:
                         has_img = False
                         
                         # Sinh ảnh AI nếu chưa có
@@ -958,6 +990,12 @@ Trả về JSON chuẩn theo Schema.
                             try:
                                 use_mascot = ai_data.get('use_mascot', True)
                                 prompt = ai_data.get('image_prompt_en', f"illustration of {word}")
+                                prompt = (
+                                    f"{prompt}\n\n"
+                                    "IMPORTANT: The image must contain illustration only. NO ENGLISH TEXT."
+                                    "Do not generate any English, Chinese, Vietnamese or other language text, letters, Chinese characters, numbers, "
+                                    "pinyin, subtitles, labels, logos, or watermarks."
+                                )
                                 pdf = self.mascot_pdf if use_mascot else None
                                 img_bytes = img_service.generate_image_pdfs(prompt, pdf, aspect_ratio="3:2")
                                 if img_bytes:
@@ -973,25 +1011,46 @@ Trả về JSON chuẩn theo Schema.
                                     else:
                                         img = img.convert("RGB")
                                         
-                                    img.save(raw_img_path, format="JPEG", quality=85, optimize=True)
+                                    if self.static_thumbnail:
+                                        img.save(raw_img_path, format="PNG", optimize=True)
+                                    else:
+                                        img.save(raw_img_path, format="JPEG", quality=85, optimize=True)
                                     has_img = True
                             except Exception as e: self.progress.emit(f"⚠️ Lỗi Image Gen: {e}")
                         else: has_img = True
 
-                        # Tải GIF nét viết
-                        gifs = []
-                        for char in word:
-                            g = gif_manager.download_char(char) # Trả về (gif_path, png_path)
-                            if g and os.path.exists(g): gifs.append(g)
-                        
-                        if len(gifs) != len(word): gifs = [] # Nếu thiếu nét thì coi như ko có gif
-
-                        # Merge thành GIF cuối cùng
                         final_gif_path = os.path.join(self.img_final_dir, item['filename_image'])
                         if has_img:
-                            if create_merged_gif(raw_img_path, gifs, final_gif_path):
+                            if self.static_thumbnail:
+                                with open(raw_img_path, "rb") as source, open(final_gif_path, "wb") as target:
+                                    target.write(source.read())
                                 row_data['thumbnail'] = item['filename_image']
-                                self.progress.emit(f"   ✅ Đã tạo ảnh mới: {item['filename_image']}")
+                                self.progress.emit(f"   ✅ Đã tạo ảnh PNG: {item['filename_image']}")
+                            else:
+                                # Tải GIF nét viết và ghép vào ảnh cho HSK1-3.
+                                gifs = []
+                                for char in word:
+                                    download_error = None
+                                    try:
+                                        g = gif_manager.download_char(char) # Trả về (gif_path, png_path)
+                                    except Exception as e:
+                                        download_error = str(e)
+                                        g = None
+                                    if g and os.path.exists(g): gifs.append(g)
+                                    else:
+                                        log_gif_failure(
+                                            gif_failure_log,
+                                            word,
+                                            char,
+                                            download_error or "Không tìm thấy GIF hợp lệ",
+                                        )
+
+                                if len(gifs) != len(word): gifs = [] # Nếu thiếu nét thì coi như ko có gif
+
+                                # Merge thành GIF cuối cùng
+                                if create_merged_gif(raw_img_path, gifs, final_gif_path):
+                                    row_data['thumbnail'] = item['filename_image']
+                                    self.progress.emit(f"   ✅ Đã tạo ảnh mới: {item['filename_image']}")
                         
                     # 2. Audio Từ (audio1) - Sử dụng Google TTS
                     if not row_data['audio1']:
@@ -1127,9 +1186,9 @@ class PPTGeneratorWorker(QObject):
 
     def run(self):
         try:
-            # Lấy đường dẫn thư mục linh hoạt giữa file thực thi (exe) và python script
+            # PyInstaller one-file extracts bundled resources to _MEIPASS.
             if getattr(sys, 'frozen', False):
-                base_dir = os.path.dirname(sys.executable)
+                base_dir = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
             else:
                 base_dir = os.path.dirname(os.path.abspath(__file__))
             
@@ -1148,6 +1207,17 @@ class PPTGeneratorWorker(QObject):
             gr_template = os.path.join(base_dir, "resources", "ppt_templates", "HSK Ngữ pháp template.pptx")
             bk_prompt = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Bai_Khoa.txt")
             gr_prompt = os.path.join(base_dir, "resources", "prompts", "ppt_generation", "Prompt_Ngu_Phap.txt")
+
+            missing_files = [
+                path for path in (bk_template, gr_template, bk_prompt, gr_prompt)
+                if not os.path.isfile(path)
+            ]
+            if missing_files:
+                raise FileNotFoundError(
+                    "Thiếu tài nguyên khi chạy ứng dụng: "
+                    + "; ".join(missing_files)
+                    + ". Hãy build lại ứng dụng với HSK_TOPIK_Creator.spec."
+                )
             
             with open(bk_prompt, 'r', encoding='utf-8') as f:
                 bk_prompt_text = f.read()

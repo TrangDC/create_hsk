@@ -440,6 +440,108 @@
           { "hz": "固定格式“从……起” / Fixed Pattern “从……起”", "vi": "Cấu trúc cố định “Bắt đầu từ...”" }
         ]
       }
+    ],
+    "HSK4": [
+      {
+        "lesson": 1,
+        "name": "我们来中国学习了 (We have come to China to study)",
+        "grammar": [
+          { "hz": "指示代词“任何” / Demonstrative Pronoun “任何”", "vi": "Đại từ chỉ thị “任何” (Bất kỳ / Bất cứ)" },
+          { "hz": "假设复句“要是……，就……” / Hypothetical Complex Sentence “要是……，就……”", "vi": "Câu phức giả thiết “Nếu... thì...”" },
+          { "hz": "介词“随着” / Preposition “随着”", "vi": "Giới từ “随着” (Cùng với / Đi đôi với / Theo...)" },
+          { "hz": "并列复句“一方面……，另一方面……” / Coordinate Complex Sentence “一方面……，另一方面……”", "vi": "Câu phức liên hợp “Một mặt... mặt khác...”" }
+        ]
+      },
+      {
+        "lesson": 2,
+        "name": "租到了合适的房子 (I have rented a suitable apartment)",
+        "grammar": [
+          { "hz": "固定格式“×就是了” / Fixed Pattern “×就是了”", "vi": "Cấu trúc cố định “...就是了” (... là được / thế là xong)" },
+          { "hz": "转折复句“……，不过……” / Adversative Complex Sentence “……，不过……”", "vi": "Câu phức chuyển ngoặt “……，不过……” (..., nhưng/có điều...)" },
+          { "hz": "连词/副词“并” / Conjunction/Adverb “并”", "vi": "Liên từ / Phó từ “并” (Đồng thời / Thực sự / Hoàn toàn)" },
+          { "hz": "连词/介词“由于” / Conjunction/Preposition “由于”", "vi": "Liên từ / Giới từ “由于” (Do / Bởi vì)" }
+        ]
+      },
+      {
+        "lesson": 3,
+        "name": "手机扫一下 (Just scan with your phone)",
+        "grammar": [
+          { "hz": "转折复句“……×是×，就是/不过……” / Adversative Complex Sentence “……×是×，就是/不过……”", "vi": "Câu phức chuyển ngoặt “... thì có ... thật, nhưng/có điều...”" },
+          { "hz": "递进复句“不仅/不光……，还/而且……” / Progressive Complex Sentence “不仅/不光……，还/而且……”", "vi": "Câu phức tăng tiến “Không những/không chỉ... mà còn...”" },
+          { "hz": "连词“甚至” / Conjunction “甚至”", "vi": "Liên từ “甚至” (Thậm chí / Ngay cả)" },
+          { "hz": "承接复句“……，于是……” / Successive Complex Sentence “……，于是……”", "vi": "Câu phức tiếp nối “……，于是……” (..., thế là / do đó...)" }
+        ]
+      },
+      {
+        "lesson": 4,
+        "name": "很高兴能帮到你 (I'm glad I could help you)",
+        "grammar": [
+          { "hz": "可能补语“动词+得/不了” / Complement of Potentiality “Verb+得/不了”", "vi": "Bổ ngữ khả năng dạng “Động từ + 得/不了” (Làm được / Không thể làm được)" },
+          { "hz": "连词“再说” / Conjunction “再说”", "vi": "Liên từ “再说” (Hơn nữa / Vả lại)" },
+          { "hz": "并列复句“既……，又/也……” / Coordinate Complex Sentence “既……，又/也……”", "vi": "Câu phức liên hợp “既……，又/也……” (Vừa... lại vừa...)" },
+          { "hz": "固定短语“来得及/来不及” / Set Phrases “来得及/来不及”", "vi": "Cụm từ cố định “Kịp / Không kịp”" }
+        ]
+      },
+      {
+        "lesson": 5,
+        "name": "“不怕辣”和“怕不辣” (“Not afraid of spicy” vs. “Afraid of not spicy”)",
+        "grammar": [
+          { "hz": "范围副词“至少” / Adverb of Scope “至少”", "vi": "Phó từ phạm vi “至少” (Ít nhất / Tối thiểu)" },
+          { "hz": "副词/动词“够” / Adverb/Verb “够”", "vi": "Phó từ / Động từ “够” (Đủ)" },
+          { "hz": "固定格式“各×各的” / Fixed Pattern “各×各的”", "vi": "Cấu trúc cố định “各×各的” (Mạnh ai nấy làm / Ai làm phần nấy)" },
+          { "hz": "介词“等” / Preposition “等”", "vi": "Giới từ “等” (Đợi đến khi / Đến lúc...)" }
+        ]
+      },
+      {
+        "lesson": 6,
+        "name": "我陪你看病 (I will go with you to see the doctor)",
+        "grammar": [
+          { "hz": "形容词“厉害” / Adjective “厉害”", "vi": "Tính từ “厉害” (Lợi hại / Dữ dội / Trầm trọng)" },
+          { "hz": "固定格式“（没）有什么（好）×的” / Fixed Pattern “（没）有什么（好）×的”", "vi": "Cấu trúc cố định “(Không) có gì đáng để...”" },
+          { "hz": "频率副词“偶尔” / Adverb of Frequency “偶尔”", "vi": "Phó từ tần suất “偶尔” (Thỉnh thoảng / Đôi khi)" },
+          { "hz": "目的复句“……，好……” / Purpose Complex Sentence “……，好……”", "vi": "Câu phức mục đích “……，好……” (..., để / tiện cho...)" }
+        ]
+      },
+      {
+        "lesson": 7,
+        "name": "在工作中学习 (Learning on the job)",
+        "grammar": [
+          { "hz": "固定格式“在……方面” / Fixed Pattern “在……方面”", "vi": "Cấu trúc cố định “Về phương diện / Về mặt...”" },
+          { "hz": "因果复句“既然……，就……” / Causal Complex Sentence “既然……，就……”", "vi": "Câu phức nguyên nhân kết quả “Đã... thì...”" },
+          { "hz": "固定格式“拿……来说” / Fixed Pattern “拿……来说”", "vi": "Cấu trúc cố định “Lấy... mà nói / Đơn cử như...”" },
+          { "hz": "兼语句“主语+使+宾语+动词短语” / Pivotal Sentence “Subject+使+Object+Verbal Phrase”", "vi": "Câu kiêm ngữ “Chủ ngữ + 使 + Tân ngữ + Cụm động từ” (Làm cho/Khiến cho ai...)" }
+        ]
+      },
+      {
+        "lesson": 8,
+        "name": "该放松时就放松 (Relax when it's time to relax)",
+        "grammar": [
+          { "hz": "条件复句“不管……，都/也……” / Conditional Complex Sentence “不管……，都/也……”", "vi": "Câu phức điều kiện “Bất kể/Dù cho... đều/cũng...”" },
+          { "hz": "假设复句“……，否则……” / Hypothetical Complex Sentence “……，否则……”", "vi": "Câu phức giả thiết “……，否则……” (..., nếu không thì...)" },
+          { "hz": "比较句“跟……相比” / Comparative Sentence “跟……相比”", "vi": "Câu so sánh “跟……相比” (So với...)" },
+          { "hz": "固定短语“有A有B” / Set Phrase “有A有B”", "vi": "Cụm từ cố định “有A有B” (Có cả A lẫn B)" }
+        ]
+      },
+      {
+        "lesson": 9,
+        "name": "遇见你，刚刚好 (Meeting you, just perfect)",
+        "grammar": [
+          { "hz": "紧缩复句“不……也……” / Contracted Complex Sentence “不……也……”", "vi": "Câu phức rút gọn “Không... thì cũng...”" },
+          { "hz": "转折复句“尽管……，但是/可是……” / Adversative Complex Sentence “尽管……，但是/可是……”", "vi": "Câu phức chuyển ngoặt “Dù rằng/Mặc dù... nhưng...”" },
+          { "hz": "指示代词“此” / Demonstrative Pronoun “此”", "vi": "Đại từ chỉ thị “此” (Này / Đây)" },
+          { "hz": "时间副词“从来” / Adverb of Time “从来”", "vi": "Phó từ chỉ thời gian “从来” (Từ trước đến nay)" }
+        ]
+      },
+      {
+        "lesson": 10,
+        "name": "南方不懂北方的冷 (Southerners just don't get the Northern cold)",
+        "grammar": [
+          { "hz": "固定格式“说什么/怎么（着）也得×” / Fixed Pattern “说什么/怎么（着）也得×”", "vi": "Cấu trúc cố định “Nói gì thì nói / Dù thế nào cũng phải...”" },
+          { "hz": "固定短语“有的是” / Set Phrase “有的是”", "vi": "Cụm từ cố định “有的是” (Có rất nhiều / Đầy rẫy)" },
+          { "hz": "连词“而” / Conjunction “而”", "vi": "Liên từ “而” (Mà / Lại / Nhưng)" },
+          { "hz": "频率副词“再次” / Adverb of Frequency “再次”", "vi": "Phó từ tần suất “再次” (Lại / Một lần nữa)" }
+        ]
+      }
     ]
   }
 }

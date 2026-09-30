@@ -47,7 +47,7 @@ class ProcessingThread(QThread):
             
             self.progress.emit(f"Đang xử lý: {compressed_pdf_path}")
             docx_path = f"output/summary/{file_name}.docx"
-            response2docx(compressed_pdf_path, prompt_gen_answer, file_name, self.project_id , self.creds, "gpt-5.4")
+            response2docx(compressed_pdf_path, prompt_gen_answer, file_name, self.project_id , self.creds, "gpt-6-luna")
             generated_files.append(docx_path)
         except Exception as e:
             self.error.emit(f"Lỗi trong quá trình xử lý: {str(e)}")

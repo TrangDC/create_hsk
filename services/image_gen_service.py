@@ -57,7 +57,7 @@ class ImageGenerationService:
             print(f"❌ Lỗi tạo credentials: {e}")
             return None
 
-    def generate_image(self, prompt, aspect_ratio="1:1", max_retries=5, retry_delay=3,):
+    def generate_image(self, prompt, aspect_ratio="1:1", max_retries=5, retry_delay=1,):
         """
         Tạo ảnh với cơ chế KIÊN TRÌ (Retry mạnh mẽ).
         Chỉ trả về None khi đã thử hết max_retries.
@@ -116,7 +116,7 @@ class ImageGenerationService:
         
         return None
 
-    def generate_image_pdfs(self, prompt, pdf_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=3):
+    def generate_image_pdfs(self, prompt, pdf_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=1):
         """
         Tạo ảnh với tham chiếu từ file PDF Mascot và ép quy tắc nền trắng.
         """
@@ -186,7 +186,7 @@ class ImageGenerationService:
                     return None
         return None
 
-    def generate_image_with_image_ref(self, prompt, image_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=3):
+    def generate_image_with_image_ref(self, prompt, image_path=None, aspect_ratio="1:1", max_retries=5, retry_delay=1):
         """
         Tạo ảnh với tham chiếu từ file ảnh mẫu.
         Returns: tuple (image_bytes, usage_dict) hoặc (None, usage_dict) nếu thất bại.

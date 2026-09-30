@@ -326,7 +326,7 @@ class VertexClient:
                 kwargs["service_tier"] = resolved_service_tier
 
             model_lower = self.model_name.lower()
-            is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-5.4"])
+            is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-6-luna"])
             if not is_o_model:
                 kwargs["temperature"] = temperature
                 kwargs["top_p"] = top_p

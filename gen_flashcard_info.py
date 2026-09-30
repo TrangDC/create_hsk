@@ -67,7 +67,8 @@ Nhiệm vụ:
    - Nếu Input trống, hãy tự đề xuất nội dung phù hợp trình độ HSK.
 2. Quyết định hình ảnh:
    - 'use_mascot': True nếu là hành động/cảm xúc nhân hóa. False nếu là danh từ đồ vật cụ thể.
-   - 'image_prompt_en': Viết prompt vẽ ảnh Flat illustration, nền trắng, nét vẽ đơn giản hiện đại.
+    - 'image_prompt_en': Viết prompt vẽ ảnh Flat illustration, nền trắng, nét vẽ đơn giản hiện đại.
+      Bắt buộc không có chữ, ký tự, số, pinyin, phụ đề, logo hoặc watermark trong ảnh; chỉ có hình minh họa.
 """
     with open(PROMPT_PATH, 'w', encoding='utf-8') as f:
         f.write(prompt_content.strip())
@@ -85,6 +86,7 @@ def main():
         # hsk_sheets = input_manager.get_hsk_sheets()
         # print(f"📄 Tìm thấy các sheet: {hsk_sheets}")
         target_sheet = "HSK1 test"  # Thay đổi theo nhu cầu của bạn
+        static_thumbnail = any(f"HSK{level}" in target_sheet.upper() for level in ("4", "5"))
         
         # Lấy dữ liệu từ Class InputHandler
         input_data_list = input_manager.process_specific_sheet(target_sheet)
@@ -99,7 +101,7 @@ def main():
 
     # --- 2. KHỞI TẠO SERVICES ---
     try:
-        gif_manager = StrokeGifManager(gif_folder=RAW_GIF_DIR, png_folder=RAW_GIF_DIR)
+        gif_manager = None if static_thumbnail else StrokeGifManager(gif_folder=RAW_GIF_DIR, png_folder=RAW_GIF_DIR)
         img_service = ImageGenerationService()
         # TTS không cần init client object vì dùng Narakeet REST API
         print("✅ Services initialized.")
@@ -116,6 +118,8 @@ def main():
         
         # --- KIỂM TRA FILE ĐÃ TỒN TẠI TRONG THƯ MỤC CHƯA ---
         expected_thumb_path = os.path.join(IMG_FINAL_DIR, item['filename_image'])
+        row_number = item.get('excel_row', idx + 2)
+        raw_img_path = os.path.join(RAW_IMG_DIR, f"{word}_{row_number}_ai.png")
         expected_audio1_path = os.path.join(AUDIO_DIR, item['filename_audio_word'])
         expected_audio2_path = os.path.join(AUDIO_DIR, item['filename_audio_ex'])
         
@@ -126,8 +130,8 @@ def main():
         # Kiểm tra xem text đã đầy đủ trong Excel chưa
         text_completed = bool(item['pinyin'] and item['type'] and item['meaning'] and item['example'])
         
-        # Chỉ gọi Vertex AI nếu thiếu thông tin text HOẶC thiếu ảnh (vì AI sinh prompt vẽ ảnh)
-        need_ai = not text_completed or not thumb_exists
+        # Gọi AI nếu thiếu text, thiếu ảnh cuối, hoặc raw image đã bị xóa.
+        need_ai = not text_completed or not thumb_exists or not os.path.exists(raw_img_path)
 
         # Khởi tạo row_data với các thông tin cơ bản và điền sẵn media nếu có
         row_data = {
@@ -227,9 +231,7 @@ def main():
         use_mascot = ai_data.get('use_mascot', True)
         
         # 1. Sinh ảnh AI và Gộp GIF (Chỉ làm khi chưa có file thumbnail)
-        if not thumb_exists:
-            row_number = item.get('excel_row', idx + 2)
-            raw_img_path = os.path.join(RAW_IMG_DIR, f"{word}_{row_number}_ai.png")
+        if not thumb_exists or not os.path.exists(raw_img_path):
             has_ai_img = False
             
             # Kiểm tra nếu ảnh chưa tồn tại thì mới sinh
@@ -247,23 +249,30 @@ def main():
             else:
                 has_ai_img = True
 
-            # 2. Tải GIF nét viết
-            char_gif_paths = []
-            for char in word:
-                # download_char trả về (gif_path, png_path), ta chỉ lấy gif_path
-                g, _ = gif_manager.download_char(char)
-                if g and os.path.exists(g): char_gif_paths.append(g)
-
-            # 3. Gộp ảnh (Thumbnail)
             final_gif_path = os.path.join(IMG_FINAL_DIR, item['filename_image'])
-            
-            if has_ai_img and char_gif_paths:
-                success = create_merged_gif(raw_img_path, char_gif_paths, final_gif_path)
-                if success:
-                    print(f"   ✅ Ảnh gộp: {item['filename_image']}")
+            if has_ai_img:
+                if static_thumbnail:
+                    with open(raw_img_path, "rb") as source, open(final_gif_path, "wb") as target:
+                        target.write(source.read())
+                    print(f"   ✅ Ảnh PNG: {item['filename_image']}")
                     row_data['thumbnail'] = item['filename_image']
                 else:
-                    row_data['thumbnail'] = ""
+                    # Tải GIF nét viết và gộp ảnh cho HSK1-3.
+                    char_gif_paths = []
+                    for char in word:
+                        # download_char trả về (gif_path, png_path), ta chỉ lấy gif_path
+                        g, _ = gif_manager.download_char(char)
+                        if g and os.path.exists(g): char_gif_paths.append(g)
+
+                    if char_gif_paths:
+                        success = create_merged_gif(raw_img_path, char_gif_paths, final_gif_path)
+                        if success:
+                            print(f"   ✅ Ảnh gộp: {item['filename_image']}")
+                            row_data['thumbnail'] = item['filename_image']
+                        else:
+                            row_data['thumbnail'] = ""
+                    else:
+                        row_data['thumbnail'] = ""
             else:
                 print("   ⚠️ Thiếu ảnh AI hoặc GIF nét viết -> Không tạo được Thumbnail")
                 row_data['thumbnail'] = ""

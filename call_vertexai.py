@@ -366,7 +366,7 @@ def generate_content(
     extra_context_text: Optional[str] = None,
     service_tier: Optional[str] = None,
     max_retries: int = 5,
-    retry_delay: int = 5,
+    retry_delay: int = 2,
     timeout_seconds: int = 150
 ) -> Dict[str, Any] | List[Any]:
     """
@@ -416,9 +416,9 @@ def generate_content(
         content_blocks.append({"type": "text", "text": extra_context_text})
 
     openai_client = create_openai_client(openai_api_key)
-    openai_model = os.getenv("OPENAI_MODEL", "gpt-5.4")
+    openai_model = os.getenv("OPENAI_MODEL", "gpt-6-luna")
     if openai_model.lower().startswith("gemini"):
-        openai_model = "gpt-5.4"
+        openai_model = "gpt-6-luna"
     service_tier = get_openai_service_tier(service_tier)
 
     kwargs = build_responses_request(
@@ -497,7 +497,7 @@ class VertexClient:
         # Giu nguyen interface cu, doi backend sang OpenAI.
         try:
             from openai import OpenAI
-            model= "gpt-5.4"
+            model= "gpt-6-luna"
         except ImportError as e:
             raise ImportError("Chua cai thu vien openai. Hay chay: pip install openai") from e
 
@@ -565,7 +565,7 @@ class VertexClient:
                 kwargs["service_tier"] = service_tier
 
             model_lower = self.model_name.lower()
-            is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-5.4"])
+            is_o_model = any(m in model_lower for m in ["o1", "o3", "gpt-6-luna"])
             if not is_o_model:
                 kwargs["temperature"] = temperature
                 kwargs["top_p"] = top_p

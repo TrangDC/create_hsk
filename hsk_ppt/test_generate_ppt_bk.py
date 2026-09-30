@@ -855,7 +855,7 @@ class PPTGenerator:
         # =========================================================
         # SLIDE 1: ĐIỂM GIỐNG NHAU (Fix lỗi Type)
         # =========================================================
-        sim_data = data.get("similarities", {})
+        sim_data = data.get("similarities") or {}
         if sim_data:
             slide1 = self._next_slide()
             draw_main_title(slide1)
@@ -879,7 +879,7 @@ class PPTGenerator:
                 examples_list =[]
             else:
                 explanation_text = sim_data.get("explanation", "")
-                examples_list = sim_data.get("examples",[])
+                examples_list = sim_data.get("examples") or []
 
             p_s2 = tf1.add_paragraph()
             r_s2 = p_s2.add_run()
@@ -908,7 +908,7 @@ class PPTGenerator:
             draw_main_title(slide2)
 
             box_left, box_top, box_width = Inches(1.79), Inches(2.6), Inches(17.34)
-            diff_explanations = diff_ov_data.get("explanations",[])
+            diff_explanations = diff_ov_data.get("explanations") or []
             
             full_diff_text = "Điểm khác nhau:\n" + "\n".join([f"• {item.get('word', '')}: {item.get('explanation', '')}" for item in diff_explanations])
             diff_height = max(Inches(2.5), Inches(self.get_text_height(full_diff_text, font_size_main, 17.34)))
@@ -934,7 +934,7 @@ class PPTGenerator:
                 r_exp.text = item.get('explanation', '')
                 r_exp.font.name, r_exp.font.size = "Muli", Pt(font_size_main)
 
-            examples = diff_ov_data.get("examples",[])
+            examples = diff_ov_data.get("examples") or []
             if len(examples) > 0:
                 img_w_h = Inches(2.5) 
                 img_y = box_top + diff_height + Inches(0.2)
@@ -986,7 +986,7 @@ class PPTGenerator:
         # SLIDE 3 (Và 4): CHI TIẾT ĐIỂM KHÁC NHAU & MẸO NHỚ
         # =========================================================
         # Bổ sung thêm ảnh do differences bây giờ cũng có local_image_path, image_description để tăng tính trực quan
-        differences = data.get("differences",[])
+        differences = data.get("differences") or []
         memory_tip = data.get("memory_tip", "")
         num_diffs = len(differences)
 
@@ -1165,7 +1165,15 @@ class PPTGenerator:
         section_title = sec.get("section_title", "Hội thoại")
         
         # 2. KIỂM TRA CHẾ ĐỘ: LÀ ĐOẠN VĂN HAY HỘI THOẠI?
-        is_passage = "đoạn văn" in section_title.lower()
+        # Theo prompt, đoạn văn được trả về thành một phần tử duy nhất trong mỗi mảng.
+        is_passage = (
+            "đoạn văn" in section_title.lower()
+            or (
+                len(hz_list) == 1
+                and len(vi_list) <= 1
+                and (not has_pinyin or len(py_list) <= 1)
+            )
+        )
 
         if is_passage:
             # =========================================================
@@ -1174,16 +1182,17 @@ class PPTGenerator:
             def split_passage(text_list, lang='hz'):
                 text = " ".join(text_list)
                 if not text: return[]
-                # Cắt theo dấu chấm kết thúc câu
+                # Chỉ tách theo dấu kết thúc câu, không tách theo dấu phẩy,
+                # dấu chấm phẩy hoặc dấu hai chấm.
                 if lang == 'hz':
-                    sents = re.split(r'([。！？\n])', text)
+                    sents = re.split(r'([。！？])', text)
                 else:
-                    sents = re.split(r'([.!?]\s+|\n)', text)
+                    sents = re.split(r'([.!?])', text)
                 
                 result, temp =[], ""
                 for part in sents:
                     temp += part
-                    if (lang=='hz' and re.search(r'[。！？\n]', part)) or (lang!='hz' and re.search(r'[.!?]\s+|\n', part)):
+                    if (lang=='hz' and re.search(r'[。！？]', part)) or (lang!='hz' and re.search(r'[.!?]', part)):
                         result.append(temp.strip())
                         temp = ""
                 if temp.strip(): result.append(temp.strip())
@@ -1200,21 +1209,41 @@ class PPTGenerator:
             if has_pinyin: py_sents += [""] * (max_len - len(py_sents))
             vi_sents += [""] * (max_len - len(vi_sents))
 
-            def build_passage_chunks(hz_sents, py_sents, vi_sents, max_per_slide=5):
-                num_sents = len(hz_sents)
-                if num_sents <= max_per_slide:
-                    return [(hz_sents, py_sents, vi_sents)]
-                slide_count = math.ceil(num_sents / max_per_slide)
-                base = num_sents // slide_count
-                extra = num_sents % slide_count
+            def estimate_passage_height(hz_chunk, py_chunk, vi_chunk):
+                """Ước tính chiều cao thực tế của ba khối chữ trên slide."""
+                width = 13.21
+                height = self.get_text_height("".join(hz_chunk), 30, width)
+                if has_pinyin:
+                    height += self.get_text_height(" ".join(py_chunk), 22, width)
+                height += self.get_text_height(" ".join(vi_chunk), 22, width)
+                return height + 0.25
 
+            def build_passage_chunks(hz_sents, py_sents, vi_sents):
+                # Slide 16:9 cao 7.5 inch; chừa vùng an toàn phía dưới textbox.
+                max_height = max(3.8, self.prs.slide_height / 914400.0 - 2.61 - 0.25)
                 chunks = []
-                start = 0
-                for i in range(slide_count):
-                    size = base + (1 if i < extra else 0)
-                    end = start + size
-                    chunks.append((hz_sents[start:end], py_sents[start:end], vi_sents[start:end]))
-                    start = end
+                current_hz, current_py, current_vi = [], [], []
+
+                for index, hz_sentence in enumerate(hz_sents):
+                    candidate_hz = current_hz + [hz_sentence]
+                    candidate_py = current_py + [py_sents[index] if has_pinyin else ""]
+                    candidate_vi = current_vi + [vi_sents[index]]
+
+                    if current_hz and (
+                        len(current_hz) >= 4
+                        or estimate_passage_height(candidate_hz, candidate_py, candidate_vi) > max_height
+                    ):
+                        chunks.append((current_hz, current_py, current_vi))
+                        current_hz = [hz_sentence]
+                        current_py = [py_sents[index] if has_pinyin else ""]
+                        current_vi = [vi_sents[index]]
+                    else:
+                        current_hz = candidate_hz
+                        current_py = candidate_py
+                        current_vi = candidate_vi
+
+                if current_hz:
+                    chunks.append((current_hz, current_py, current_vi))
                 return chunks
 
             chunks = build_passage_chunks(hz_sents, py_sents, vi_sents)
@@ -1256,9 +1285,13 @@ class PPTGenerator:
                 box_left = Inches(3.78)
                 box_top = Inches(2.61)
                 box_width = Inches(13.21)
-                base_height = Inches(5.47) if has_pinyin else Inches(3.95)
-                extra_height = Inches(0.25) * max(0, len(chunk_hz) - 5)
-                box_height = base_height + extra_height
+                base_height = 4.6 if has_pinyin else 3.5
+                # Không để textbox vượt đáy slide. Việc phân trang đã ưu tiên
+                # theo chiều cao; giới hạn này là lớp bảo vệ cuối cùng.
+                slide_height_in = self.prs.slide_height / 914400.0
+                available_height = max(3.8, slide_height_in - box_top / 914400.0 - 0.25)
+                estimated_height = estimate_passage_height(chunk_hz, chunk_py, chunk_vi)
+                box_height = Inches(min(max(base_height, estimated_height), available_height))
 
                 # Vẽ Icon hoa (Đặt ở Top-Left của đoạn văn)
                 if os.path.exists(flower_icon_path):
@@ -1278,7 +1311,7 @@ class PPTGenerator:
                     p = tf.paragraphs[0]
                     run = p.add_run()
                     run.text = hz_combined
-                    run.font.name, run.font.size, run.font.bold = "字由点字典楷", Pt(38.4), True
+                    run.font.name, run.font.size, run.font.bold = "字由点字典楷", Pt(30), True
                     run.font.color.rgb = self.hex_to_rgb_color("000000")
 
                 # 2. Render Pinyin (Gộp chung, phân cách bằng ` ``` `)
@@ -1291,7 +1324,7 @@ class PPTGenerator:
                         p.line_spacing = Pt(30)
                         run = p.add_run()
                         run.text = py_text
-                        run.font.name, run.font.size = "Muli", Pt(23.8)
+                        run.font.name, run.font.size = "Muli", Pt(20)
                         run.font.color.rgb = self.hex_to_rgb_color("545454")
 
                 # 3. Render Tiếng Việt (Gộp chung, phân cách bằng ` ``` `)
@@ -1302,7 +1335,7 @@ class PPTGenerator:
                     p.line_spacing = Pt(30)
                     run = p.add_run()
                     run.text = vi_text
-                    run.font.name, run.font.size = "Muli", Pt(23.8)
+                    run.font.name, run.font.size = "Muli", Pt(20)
                     run.font.color.rgb = self.hex_to_rgb_color("A40400")
 
         else:
@@ -1599,7 +1632,7 @@ class PPTGenerator:
                 data = extra.get("grammar_advanced", {})
                 self._render_grammar_advanced_layout(section_title, data)
             elif ex_type == "word_comparison":
-                data = extra.get("word_comparison", {})
+                data = extra.get("word_comparison") or {}
                 self._render_word_comparison_layout(section_title, data)            
             
     def add_exercise_slide(self, sec: dict):
