@@ -369,9 +369,18 @@ def get_hsk4_lesson_schema():
                                 "hz": {"type": "STRING"},
                                 "pinyin": {"type": "STRING"},
                                 "type": {"type": "STRING"},
-                                "meanings": {"type": "ARRAY", "items": {"type": "STRING"}}
+                                "meanings": {"type": "ARRAY", "items": {"type": "STRING"}},
+                                "example": {
+                                    "type": "OBJECT",
+                                    "properties": {
+                                        "hz": {"type": "STRING"},
+                                        "pinyin": {"type": "STRING"},
+                                        "vi": {"type": "STRING"}
+                                    },
+                                    "required": ["hz", "pinyin", "vi"]
+                                }
                             },
-                            "required": ["id", "hz", "pinyin", "type", "meanings"]
+                            "required": ["id", "hz", "pinyin", "type", "meanings", "example"]
                         }
                     }
                 },
@@ -386,10 +395,15 @@ def get_hsk4_lesson_schema():
                         "unit_type": {"type": "STRING"},
                         "title": {"type": "STRING"},
                         "order": {"type": "INTEGER"},
+                        "image_description": {"type": "STRING"},
                         "content": {
                             "type": "OBJECT",
                             "properties": {
-                                "hz": {"type": "ARRAY", "items": {"type": "STRING"}},
+                                "hz": {
+                                    "type": "ARRAY",
+                                    "description": "Hán tự nguyên văn. Với dialogue, mỗi phần tử bắt buộc có nhãn người nói và dấu hai chấm, ví dụ: 甲：你好。 Không được bỏ tên người nói.",
+                                    "items": {"type": "STRING"}
+                                },
                                 "pinyin": {"type": "ARRAY", "items": {"type": "STRING"}},
                                 "vi": {"type": "ARRAY", "items": {"type": "STRING"}}
                             },
@@ -402,11 +416,15 @@ def get_hsk4_lesson_schema():
                                 "type": "OBJECT",
                                 "properties": {
                                     "id": {"type": "STRING"},
-                                    "hz": {"type": "STRING"},
+                                    "hz": {
+                                        "type": "STRING",
+                                        "description": "Một câu nguyên văn. Nếu là dialogue phải giữ nguyên nhãn người nói và dấu hai chấm nếu PDF có nhãn đó."
+                                    },
                                     "pinyin": {"type": "STRING"},
-                                    "vi": {"type": "STRING"}
+                                    "vi": {"type": "STRING"},
+                                    "image_description": {"type": "STRING"}
                                 },
-                                "required": ["id", "hz", "pinyin", "vi"]
+                                "required": ["id", "hz", "pinyin", "vi", "image_description"]
                             }
                         },
                         "exercises": {
@@ -424,7 +442,7 @@ def get_hsk4_lesson_schema():
                             }
                         }
                     },
-                    "required": ["id", "unit_type", "title", "order", "content", "vocabulary_ids", "sentences", "exercises"]
+                    "required": ["id", "unit_type", "title", "order", "image_description", "content", "vocabulary_ids", "sentences", "exercises"]
                 }
             }
         },

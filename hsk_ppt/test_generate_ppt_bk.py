@@ -251,8 +251,8 @@ class PPTGenerator:
         # Ước tính chiều rộng cần thiết: mỗi ký tự tốn khoảng (0.4 * font_size) points
         # Cộng thêm padding ~ 1.5 inches để nhìn cân đối
         est_width_in = len(text) * (font_size * 0.4 / 72) + 1.5
-        new_width = int(Inches(est_width_in))
-        new_height = int(Inches(1.2))  # Chiều cao cố định (1.2") đủ rộng cho text 50pt
+        new_width = int(Cm(15.1))
+        new_height = int(Cm(3.17))
         
         new_left = int(center_x - new_width / 2.0)
         new_top = int(center_y - new_height / 2.0)
@@ -279,7 +279,8 @@ class PPTGenerator:
         tf.vertical_anchor = MSO_ANCHOR.MIDDLE
         
         self._set_text_exact_style(
-            new_shape, text, font_size=font_size, color="FFFFFF", align="center"
+            new_shape, text, font_name="Fraunces", font_size=font_size,
+            color="FFFFFF", align="center"
         )
         self._bring_to_front(new_shape)
 
@@ -1095,7 +1096,7 @@ class PPTGenerator:
         if subtitle_shape:
             self._replace_subtitle_with_rounded_rect(
                 slide, subtitle_shape,
-                f"Bài Khóa - Bài {lesson.get('number', '')}",
+                f"Bài Khóa - Bài {lesson.get('lesson_number', lesson.get('number', ''))}",
                 font_size=50
             )
 
@@ -1133,7 +1134,7 @@ class PPTGenerator:
         if subtitle_shape:
             self._replace_subtitle_with_rounded_rect(
                 slide, subtitle_shape,
-                f"Bài Khóa - Bài {lesson.get('number', '')}",
+                f"Bài Khóa - Bài {lesson.get('lesson_number', lesson.get('number', ''))}",
                 font_size=50
             )
 
@@ -1141,7 +1142,7 @@ class PPTGenerator:
     # CONTENT SLIDES — Lập trình các hàm chèn nội dung vào đây
     # ================================================================
 
-    def add_dialogue_slide(self, sec: dict, force_simple: bool = False):
+    def add_dialogue_slide(self, sec: dict, force_simple: bool = False, highlight_hz: bool = False):
         import re
         
         # 1. Lấy dữ liệu
@@ -1173,7 +1174,7 @@ class PPTGenerator:
                 and len(vi_list) <= 1
                 and (not has_pinyin or len(py_list) <= 1)
             )
-        )
+        ) and not highlight_hz
 
         if is_passage:
             # =========================================================
@@ -1309,10 +1310,15 @@ class PPTGenerator:
                 hz_combined = "".join([text for text in chunk_hz if text])
                 if hz_combined:
                     p = tf.paragraphs[0]
-                    run = p.add_run()
-                    run.text = hz_combined
-                    run.font.name, run.font.size, run.font.bold = "字由点字典楷", Pt(30), True
-                    run.font.color.rgb = self.hex_to_rgb_color("000000")
+                    hz_font = "字由点字云霆楷体" if highlight_hz else "字由点字典楷"
+                    hz_size = 42 if highlight_hz else 30
+                    if highlight_hz:
+                        self._add_hl_text(p, hz_combined, hz_font, hz_size, "000000", "29741D")
+                    else:
+                        run = p.add_run()
+                        run.text = hz_combined
+                        run.font.name, run.font.size, run.font.bold = hz_font, Pt(hz_size), True
+                        run.font.color.rgb = self.hex_to_rgb_color("000000")
 
                 # 2. Render Pinyin (Gộp chung, phân cách bằng ` ``` `)
                 if has_pinyin:
@@ -1324,7 +1330,7 @@ class PPTGenerator:
                         p.line_spacing = Pt(30)
                         run = p.add_run()
                         run.text = py_text
-                        run.font.name, run.font.size = "Muli", Pt(20)
+                        run.font.name, run.font.size = "Muli", Pt(28 if highlight_hz else 20)
                         run.font.color.rgb = self.hex_to_rgb_color("545454")
 
                 # 3. Render Tiếng Việt (Gộp chung, phân cách bằng ` ``` `)
@@ -1335,7 +1341,7 @@ class PPTGenerator:
                     p.line_spacing = Pt(30)
                     run = p.add_run()
                     run.text = vi_text
-                    run.font.name, run.font.size = "Muli", Pt(20)
+                    run.font.name, run.font.size = "Muli", Pt(28 if highlight_hz else 20)
                     run.font.color.rgb = self.hex_to_rgb_color("A40400")
 
         else:
@@ -1409,6 +1415,11 @@ class PPTGenerator:
                     y_step = 4.72 
                     line_spacing_val = Pt(33) 
 
+                if highlight_hz:
+                    hz_size, hz_font = 42, "字由点字云霆楷体"
+                    py_size, py_font = 28, "Muli"
+                    vi_size, vi_font, vi_italic = 28, "Muli", False
+
                 # C. RENDER
                 line_spacing_cm = (line_spacing_val.pt / 72.0) * 2.54
 
@@ -1427,16 +1438,19 @@ class PPTGenerator:
                     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
                     tf.margin_bottom = tf.margin_top = tf.margin_left = tf.margin_right = 0
                     
-                    def add_para(text, font, size, color, is_bold=False, is_italic=False):
+                    def add_para(text, font, size, color, is_bold=False, is_italic=False, highlight=False):
                         p = tf.add_paragraph() if len(tf.paragraphs[0].runs) > 0 else tf.paragraphs[0]
                         p.space_before = p.space_after = Pt(0)
                         p.line_spacing = line_spacing_val
-                        run = p.add_run()
-                        run.text = text
-                        run.font.name, run.font.size, run.font.bold, run.font.italic = font, Pt(size), is_bold, is_italic
-                        run.font.color.rgb = self.hex_to_rgb_color(color)
+                        if highlight:
+                            self._add_hl_text(p, text, font, size, color, "29741D")
+                        else:
+                            run = p.add_run()
+                            run.text = text
+                            run.font.name, run.font.size, run.font.bold, run.font.italic = font, Pt(size), is_bold, is_italic
+                            run.font.color.rgb = self.hex_to_rgb_color(color)
 
-                    add_para(chunk_hz[i], hz_font, hz_size, "000000", is_bold=True)
+                    add_para(chunk_hz[i], hz_font, hz_size, "000000", is_bold=True, highlight=highlight_hz)
                     if has_pinyin: add_para(chunk_py[i], py_font, py_size, "545454")
                     add_para(chunk_vi[i], vi_font, vi_size, "A40400", is_italic=vi_italic)
 

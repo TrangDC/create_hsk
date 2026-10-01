@@ -2299,7 +2299,6 @@ class HSKGeneratorApp(QWidget):
     def _update_log(self, text):
         """Cập nhật văn bản vào khung log hiện tại và tự động cuộn xuống."""
         current_tab_index = self.tab_widget.currentIndex()
-        idx = self.tab_widget.currentIndex()
         if current_tab_index == 0:  # Tab Pipeline
             self.log_display.insertPlainText(text)
             self.log_display.verticalScrollBar().setValue(self.log_display.verticalScrollBar().maximum())
@@ -2312,8 +2311,12 @@ class HSKGeneratorApp(QWidget):
         elif current_tab_index == 3:  # Tab TTS (Index là 3 vì thêm sau cùng)
             self.tts_log_display.insertPlainText(text)
             self.tts_log_display.verticalScrollBar().setValue(self.tts_log_display.verticalScrollBar().maximum())
-        if idx == 4: # Tab Summary (Index 4)
-             self.sum_log_display.insertPlainText(text)       
+        elif current_tab_index == 4:  # Tab tạo PPT HSK
+            self.ppt_log.insertPlainText(text)
+            self.ppt_log.verticalScrollBar().setValue(self.ppt_log.verticalScrollBar().maximum())
+        elif current_tab_index == 5:  # Tab Summary
+            self.sum_log_display.insertPlainText(text)
+            self.sum_log_display.verticalScrollBar().setValue(self.sum_log_display.verticalScrollBar().maximum())
 
     def _browse_pdf_file(self):
         """Mở dialog để chọn file PDF bài học."""
