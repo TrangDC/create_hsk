@@ -68,34 +68,19 @@ class HSK4BookPPTGenerator(PPTGenerator):
             sum(max(1, math.ceil(len(line) / width_chars)) for line in str(text).split("\n")),
         )
 
-    def _estimate_sentence_height(self, sentences, hz_size=42, detail_size=28):
-        text_width = self._safe_text_width(self.SENTENCE_BOX_LEFT_CM)
+    def _estimate_sentence_height(self, sentences, width_cm):
         total = 0.0
         for sentence in sentences:
-            total += self._estimate_lines(sentence.get("hz", ""), hz_size, text_width) * hz_size * 0.045
-            total += self._estimate_lines(sentence.get("pinyin", ""), detail_size, text_width) * detail_size * 0.040
-            total += self._estimate_lines(sentence.get("vi", ""), detail_size, text_width) * detail_size * 0.040
-            total += 0.55
+            total += self._estimate_lines(sentence.get("hz", ""), 42, width_cm) * 1.45
+            total += self._estimate_lines(sentence.get("pinyin", ""), 28, width_cm) * 0.95
+            total += self._estimate_lines(sentence.get("vi", ""), 28, width_cm) * 0.95
+            total += 0.25
         return total
 
     def _safe_text_width(self, left_cm):
         requested_right = left_cm + self.SENTENCE_BOX_WIDTH_CM
         image_safe_right = self.IMAGE_LEFT_CM - self.TEXT_IMAGE_GAP_CM
         return max(10.0, min(requested_right, image_safe_right) - left_cm)
-
-    def _fit_full_font_size(self, lines):
-        available_height = self.FULL_BOX_HEIGHT_CM
-        text_width = self._safe_text_width(self.FULL_BOX_LEFT_CM)
-        font_size = 42
-        while font_size > 30:
-            estimated_height = sum(
-                self._estimate_lines(line, font_size, text_width) * font_size * 0.045 + 0.35
-                for line in lines
-            )
-            if estimated_height <= available_height:
-                break
-            font_size -= 2
-        return font_size
 
     def _highlight_vocabulary(self, text, vocabulary):
         result = self._plain_text(text)
@@ -111,6 +96,16 @@ class HSK4BookPPTGenerator(PPTGenerator):
                 result,
             )
         return result
+
+    def _highlight_example(self, text, marker):
+        text = self._plain_text(text)
+        if not text or not marker:
+            return text
+        return re.sub(
+            rf"(?<!<hl>){re.escape(marker)}(?!</hl>)",
+            f"<hl>{marker}</hl>",
+            text,
+        )
 
     def _add_highlighted_paragraph(self, text_frame, text, highlight_color, font_size=42):
         paragraph = text_frame.add_paragraph() if text_frame.paragraphs[0].runs else text_frame.paragraphs[0]
@@ -138,7 +133,7 @@ class HSK4BookPPTGenerator(PPTGenerator):
                 run.font.size = Pt(font_size)
                 run.font.color.rgb = RGBColor(0, 0, 0)
 
-    def _render_full_text(self, slide, unit, highlight=False):
+    def _render_full_text(self, slide, unit, highlight=False, vocabulary=None):
         self._add_title(slide, unit.get("title", "Bài khóa"))
         self._add_image(slide, unit)
         box = slide.shapes.add_textbox(
@@ -151,33 +146,43 @@ class HSK4BookPPTGenerator(PPTGenerator):
         tf.word_wrap = True
         tf.margin_top = tf.margin_bottom = tf.margin_left = tf.margin_right = 0
         hz_lines = unit.get("content", {}).get("hz", [])
-        font_size = self._fit_full_font_size(hz_lines)
         for index, line in enumerate(hz_lines):
             line = line or ""
             if highlight:
-                self._add_highlighted_paragraph(tf, line, self.FULL_NEW_WORD, font_size)
+                line = self._highlight_vocabulary(line, vocabulary or [])
+                self._add_highlighted_paragraph(tf, line, self.FULL_NEW_WORD, 42)
             else:
                 paragraph = tf.add_paragraph() if tf.paragraphs[0].runs else tf.paragraphs[0]
                 paragraph.space_after = Pt(8 if index < len(hz_lines) - 1 else 0)
                 run = paragraph.add_run()
                 run.text = self._plain_text(line)
                 run.font.name = self.HAN_FONT
-                run.font.size = Pt(font_size)
+                run.font.size = Pt(42)
                 run.font.color.rgb = RGBColor(0, 0, 0)
 
     def _render_vocabulary(self, vocabulary):
         legacy_vocabulary = []
         for item in vocabulary:
             example = item.get("example") or {}
+            word = self._plain_text(item.get("hz", ""))
+            pinyin = item.get("pinyin", "")
+            meanings = item.get("meanings", [])
+            example_hz = self._highlight_example(example.get("hz", ""), word)
+            example_py = self._highlight_example(
+                example.get("pinyin", example.get("py", "")), pinyin
+            )
+            example_vi = example.get("vi", "")
+            for meaning in sorted(meanings, key=len, reverse=True):
+                example_vi = self._highlight_example(example_vi, meaning)
             legacy_vocabulary.append({
                 "hz": item.get("hz", ""),
                 "pinyin": item.get("pinyin", ""),
                 "type": item.get("type", ""),
                 "vi": ", ".join(item.get("meanings", [])),
                 "example": {
-                    "hz": example.get("hz", ""),
-                    "py": example.get("pinyin", example.get("py", "")),
-                    "vi": example.get("vi", "")
+                    "hz": example_hz,
+                    "py": example_py,
+                    "vi": example_vi
                 }
             })
         self.add_vocab_slides({"vocabulary": legacy_vocabulary})
@@ -185,7 +190,11 @@ class HSK4BookPPTGenerator(PPTGenerator):
     def _render_sentence_slide(self, slide, unit, sentences, vocabulary):
         self._add_title(slide, unit.get("title", ""))
         image_path = next(
-            (sentence.get("local_image_path") for sentence in sentences if sentence.get("local_image_path")),
+            (
+                sentence.get("image_group_local_path") or sentence.get("local_image_path")
+                for sentence in sentences
+                if sentence.get("image_group_local_path") or sentence.get("local_image_path")
+            ),
             None,
         )
         if image_path and os.path.exists(image_path):
@@ -197,18 +206,19 @@ class HSK4BookPPTGenerator(PPTGenerator):
                 Cm(self.IMAGE_SIZE_CM),
             )
 
-        hz_size, detail_size = 42, 28
-        while self._estimate_sentence_height(sentences, hz_size, detail_size) > self.SENTENCE_BOX_HEIGHT_CM:
-            if hz_size <= 30:
-                break
-            hz_size -= 2
-            detail_size = max(20, detail_size - 1)
+        if self._estimate_sentence_height(sentences, 31.45) <= 4.64:
+            box_left = 9.73
+            box_top = 8.28
+            box_width = 31.45
+            box_height = 4.64
+        else:
+            box_left = self.SENTENCE_BOX_LEFT_CM
+            box_top = self.SENTENCE_BOX_TOP_CM
+            box_width = self.SENTENCE_BOX_WIDTH_CM
+            box_height = self.SENTENCE_BOX_HEIGHT_CM
 
         box = slide.shapes.add_textbox(
-            Cm(self.SENTENCE_BOX_LEFT_CM),
-            Cm(self.SENTENCE_BOX_TOP_CM),
-            Cm(self._safe_text_width(self.SENTENCE_BOX_LEFT_CM)),
-            Cm(self.SENTENCE_BOX_HEIGHT_CM),
+            Cm(box_left), Cm(box_top), Cm(box_width), Cm(box_height)
         )
         tf = box.text_frame
         tf.word_wrap = True
@@ -218,23 +228,23 @@ class HSK4BookPPTGenerator(PPTGenerator):
         for index, sentence in enumerate(sentences):
             hz = self._highlight_vocabulary(sentence.get("hz", ""), vocabulary)
             p_hz = tf.paragraphs[0] if index == 0 else tf.add_paragraph()
-            self._add_hl_text(p_hz, hz, self.HAN_FONT, hz_size, "000000", self.SENTENCE_NEW_WORD)
+            self._add_hl_text(p_hz, hz, self.HAN_FONT, 42, "000000", self.SENTENCE_NEW_WORD)
             p_hz.space_after = Pt(2)
 
             p_py = tf.add_paragraph()
             p_py.space_after = Pt(2)
             run_py = p_py.add_run()
-            run_py.text = sentence.get("pinyin", "")
+            run_py.text = self._plain_text(sentence.get("pinyin", ""))
             run_py.font.name = "Muli"
-            run_py.font.size = Pt(detail_size)
+            run_py.font.size = Pt(28)
             run_py.font.color.rgb = self.hex_to_rgb_color("545454")
 
             p_vi = tf.add_paragraph()
             p_vi.space_after = Pt(8 if index < len(sentences) - 1 else 0)
             run_vi = p_vi.add_run()
-            run_vi.text = sentence.get("vi", "")
+            run_vi.text = self._plain_text(sentence.get("vi", ""))
             run_vi.font.name = "Muli"
-            run_vi.font.size = Pt(detail_size)
+            run_vi.font.size = Pt(28)
             run_vi.font.color.rgb = self.hex_to_rgb_color("A40400")
 
     def _render_sentences(self, unit, sentences, vocabulary):
@@ -246,27 +256,45 @@ class HSK4BookPPTGenerator(PPTGenerator):
         for exercise in unit.get("exercises", []):
             exercise_type = exercise.get("type")
             if exercise_type == "multiple_choice":
-                options = exercise.get("options") or []
+                data = exercise.get("multiple_choice") or exercise
+                options = data.get("options") or []
+                normalized_options = []
+                for index, option in enumerate(options):
+                    if isinstance(option, dict):
+                        normalized_options.append({
+                            "label": option.get("label", chr(65 + index)),
+                            "hz": option.get("hz", ""),
+                            "py": option.get("py", option.get("pinyin", "")),
+                        })
+                    else:
+                        normalized_options.append({
+                            "label": chr(65 + index), "hz": option, "py": ""
+                        })
                 legacy_exercises.append({
                     "type": exercise_type,
                     "multiple_choice": {
-                        "question": exercise.get("question", ""),
-                        "options": [{"label": chr(65 + i), "hz": option, "py": ""} for i, option in enumerate(options)],
-                        "answer": exercise.get("answer", "")
+                        "question": data.get("question", ""),
+                        "options": normalized_options,
+                        "answer": data.get("answer", "")
                     }
                 })
             elif exercise_type == "true_false":
+                data = exercise.get("true_false") or exercise
                 legacy_exercises.append({
                     "type": exercise_type,
-                    "true_false": {"statement": exercise.get("question", ""), "answer": exercise.get("answer", False)}
+                    "true_false": {
+                        "statement": data.get("statement", data.get("question", "")),
+                        "answer": data.get("answer", False),
+                    }
                 })
             elif exercise_type == "fill_in_the_blanks":
+                data = exercise.get("fill_in_the_blanks") or exercise
                 legacy_exercises.append({
                     "type": exercise_type,
                     "fill_in_the_blanks": {
-                        "instruction": exercise.get("question", "Điền từ vào chỗ trống:"),
-                        "given_words": exercise.get("given_words") or [],
-                        "sentences": exercise.get("sentences") or []
+                        "instruction": data.get("instruction", data.get("question", "Điền từ vào chỗ trống:")),
+                        "given_words": data.get("given_words") or [],
+                        "sentences": data.get("sentences") or [],
                     }
                 })
         self.add_exercise_slide({"exercise": legacy_exercises})
@@ -279,7 +307,9 @@ class HSK4BookPPTGenerator(PPTGenerator):
         ]
         sentences = unit.get("sentences", [])
 
-        self._render_full_text(self._next_slide(), unit, highlight=True)
+        self._render_full_text(
+            self._next_slide(), unit, highlight=True, vocabulary=unit_vocabulary
+        )
 
         self._render_vocabulary(unit_vocabulary[:3])
         for index in range(3, len(unit_vocabulary), 3):
@@ -289,7 +319,7 @@ class HSK4BookPPTGenerator(PPTGenerator):
         current_chunk = []
         for sentence in sentences:
             candidate = current_chunk + [sentence]
-            if current_chunk and self._estimate_sentence_height(candidate) > self.SENTENCE_BOX_HEIGHT_CM:
+            if current_chunk and self._estimate_sentence_height(candidate, 48.04) > 7.92:
                 sentence_chunks.append(current_chunk)
                 current_chunk = [sentence]
             else:
@@ -310,14 +340,14 @@ class HSK4BookPPTGenerator(PPTGenerator):
             for item in self.data.get("vocabulary_source", {}).get("items", [])
             if item.get("id")
         }
-        type_counters = {"dialogue": 0, "passage": 0}
+        content_counter = 0
         for unit in sorted(self.data.get("units", []), key=lambda item: item.get("order", 0)):
             unit = dict(unit)
             unit_type = unit.get("unit_type", "section")
-            if unit_type in type_counters:
-                type_counters[unit_type] += 1
+            if unit_type in {"dialogue", "passage"}:
+                content_counter += 1
                 label = "Hội thoại" if unit_type == "dialogue" else "Đoạn văn"
-                unit["title"] = f"{label} {type_counters[unit_type]}"
+                unit["title"] = f"{label} {content_counter}"
             self.render_unit(unit, vocabulary_by_id)
         self.add_end_slide()
 

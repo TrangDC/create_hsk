@@ -373,9 +373,18 @@ def get_hsk4_lesson_schema():
                                 "example": {
                                     "type": "OBJECT",
                                     "properties": {
-                                        "hz": {"type": "STRING"},
-                                        "pinyin": {"type": "STRING"},
-                                        "vi": {"type": "STRING"}
+                                        "hz": {
+                                            "type": "STRING",
+                                            "description": "Câu ví dụ Hán tự. BẮT BUỘC bọc chính xác từ vựng bằng <hl>...</hl>."
+                                        },
+                                        "pinyin": {
+                                            "type": "STRING",
+                                            "description": "Pinyin câu ví dụ. BẮT BUỘC bọc Pinyin tương ứng của từ vựng bằng <hl>...</hl>."
+                                        },
+                                        "vi": {
+                                            "type": "STRING",
+                                            "description": "Dịch tiếng Việt câu ví dụ. BẮT BUỘC bọc nghĩa tương ứng của từ vựng bằng <hl>...</hl>."
+                                        }
                                     },
                                     "required": ["hz", "pinyin", "vi"]
                                 }
@@ -396,6 +405,10 @@ def get_hsk4_lesson_schema():
                         "title": {"type": "STRING"},
                         "order": {"type": "INTEGER"},
                         "image_description": {"type": "STRING"},
+                        "visual_reference_description": {
+                            "type": "STRING",
+                            "description": "Mô tả nhận diện cố định của nhân vật, ngoại hình, trang phục, bối cảnh và phong cách hình ảnh dùng chung cho toàn bộ unit. Không có chữ trong ảnh."
+                        },
                         "content": {
                             "type": "OBJECT",
                             "properties": {
@@ -429,20 +442,69 @@ def get_hsk4_lesson_schema():
                         },
                         "exercises": {
                             "type": "ARRAY",
+                            "description": "Các bài tập của unit hiện tại. Các unit có thể dùng các dạng khác nhau; toàn bộ lesson phải bao phủ multiple_choice, true_false và fill_in_the_blanks.",
                             "items": {
                                 "type": "OBJECT",
                                 "properties": {
-                                    "type": {"type": "STRING"},
-                                    "question": {"type": "STRING"},
-                                    "options": {"type": "ARRAY", "items": {"type": "STRING"}},
-                                    "given_words": {"type": "ARRAY", "items": {"type": "STRING"}},
-                                    "answer": {"type": "STRING"}
+                                    "type": {
+                                        "type": "STRING",
+                                        "description": "Loại bài: multiple_choice, true_false hoặc fill_in_the_blanks."
+                                    },
+                                    "multiple_choice": {
+                                        "type": "OBJECT",
+                                        "properties": {
+                                            "question": {"type": "STRING"},
+                                            "options": {
+                                                "type": "ARRAY",
+                                                "items": {
+                                                    "type": "OBJECT",
+                                                    "properties": {
+                                                        "label": {"type": "STRING"},
+                                                        "hz": {"type": "STRING"},
+                                                        "py": {"type": "STRING"}
+                                                    },
+                                                    "required": ["label", "hz", "py"]
+                                                }
+                                            },
+                                            "answer": {"type": "STRING"}
+                                        },
+                                        "required": ["question", "options", "answer"]
+                                    },
+                                    "true_false": {
+                                        "type": "OBJECT",
+                                        "properties": {
+                                            "statement": {"type": "STRING"},
+                                            "answer": {"type": "BOOLEAN"}
+                                        },
+                                        "required": ["statement", "answer"]
+                                    },
+                                    "fill_in_the_blanks": {
+                                        "type": "OBJECT",
+                                        "properties": {
+                                            "instruction": {"type": "STRING"},
+                                            "given_words": {
+                                                "type": "ARRAY",
+                                                "items": {"type": "STRING"}
+                                            },
+                                            "sentences": {
+                                                "type": "ARRAY",
+                                                "items": {
+                                                    "type": "OBJECT",
+                                                    "properties": {
+                                                        "full_sentence": {"type": "STRING"}
+                                                    },
+                                                    "required": ["full_sentence"]
+                                                }
+                                            }
+                                        },
+                                        "required": ["instruction", "given_words", "sentences"]
+                                    }
                                 },
-                                "required": ["type", "question", "answer"]
+                                "required": ["type"]
                             }
                         }
                     },
-                    "required": ["id", "unit_type", "title", "order", "image_description", "content", "vocabulary_ids", "sentences", "exercises"]
+                    "required": ["id", "unit_type", "title", "order", "image_description", "visual_reference_description", "content", "vocabulary_ids", "sentences", "exercises"]
                 }
             }
         },
