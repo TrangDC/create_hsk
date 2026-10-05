@@ -368,7 +368,10 @@ def get_hsk4_lesson_schema():
                                 "id": {"type": "STRING"},
                                 "hz": {"type": "STRING"},
                                 "pinyin": {"type": "STRING"},
-                                "type": {"type": "STRING"},
+                                "type": {
+                                    "type": "STRING",
+                                    "description": "Loại từ bắt buộc bằng tiếng Việt đầy đủ: Danh từ, Động từ, Tính từ, Phó từ, Đại từ, Lượng từ, Trợ từ, Cụm từ hoặc Liên từ. Không dùng viết tắt hay tiếng Anh như n, v, adj, adv, noun, verb hoặc adjective."
+                                },
                                 "meanings": {"type": "ARRAY", "items": {"type": "STRING"}},
                                 "example": {
                                     "type": "OBJECT",

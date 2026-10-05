@@ -63,8 +63,19 @@ def is_flex_resource_unavailable_error(error):
     if status_code != 429:
         return False
 
+    error_code = str(getattr(error, "code", "") or "").lower()
     error_message = str(error).lower()
-    return "resource unavailable" in error_message or "insufficient resources" in error_message
+    error_body = getattr(error, "body", None)
+    if isinstance(error_body, dict):
+        error_code = f"{error_code} {error_body.get('code', '')}".lower()
+        error_message = f"{error_message} {error_body.get('message', '')}".lower()
+
+    return (
+        "flex_unavailable" in error_code
+        or "flex processing is temporarily unavailable" in error_message
+        or "resource unavailable" in error_message
+        or "insufficient resources" in error_message
+    )
 
 
 def create_chat_completion_with_fallback(client, kwargs):

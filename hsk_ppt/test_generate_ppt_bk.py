@@ -50,6 +50,27 @@ class PPTGenerator:
         self._slide_cursor += 1
         return self.prs.slides[idx]
 
+    def _delete_slide(self, index: int):
+        """Xóa hoàn toàn slide và dọn dẹp toàn bộ mối quan hệ (rels/notesSlide) để tránh làm hỏng OpenXML khi PowerPoint/Canva mở file."""
+        slide = self.prs.slides[index]
+        slide_part = slide.part
+
+        if slide.has_notes_slide:
+            notes_part = slide.notes_slide.part
+            for rId in list(notes_part.rels.keys()):
+                notes_part.drop_rel(rId)
+            for p in list(self.prs.part.package.iter_parts()):
+                for rId, rel in list(p.rels.items()):
+                    if rel.target_part == notes_part:
+                        p.drop_rel(rId)
+
+        for rId in list(slide_part.rels.keys()):
+            slide_part.drop_rel(rId)
+
+        rId_pres = self.prs.slides._sldIdLst[index].rId
+        self.prs.part.drop_rel(rId_pres)
+        del self.prs.slides._sldIdLst[index]
+
     def _get_all_shapes(self, shapes):
         all_shapes = []
         for shape in shapes:
@@ -239,7 +260,12 @@ class PPTGenerator:
             optimal_font = int(min(max_font, max(min_font, calculated_font)))
 
         self._set_text_exact_style(
-            shape, text, font_size=optimal_font, color="B51F09", align="center"
+            shape,
+            text,
+            font_name=getattr(self, "TITLE_FONT", "Arial"),
+            font_size=optimal_font,
+            color="B51F09",
+            align="center",
         )
 
     def _replace_subtitle_with_rounded_rect(self, slide, old_shape, text: str, font_size: int = 50):
@@ -1812,9 +1838,7 @@ class PPTGenerator:
         # Xóa các slide content thừa
         # Lưu ý: Cần xóa ngược từ dưới lên để không làm sai lệch index của các slide còn lại
         for i in range(self._end_slide_index - 1, self._slide_cursor - 1, -1):
-            rId = self.prs.slides._sldIdLst[i].rId
-            self.prs.part.drop_rel(rId)
-            del self.prs.slides._sldIdLst[i]
+            self._delete_slide(i)
 
         used = self._slide_cursor - 2
         total_content = self._end_slide_index - 2

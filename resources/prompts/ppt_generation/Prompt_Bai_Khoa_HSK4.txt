@@ -52,9 +52,11 @@ Trước khi trả JSON, hãy kiểm tra từng lượt lời: nếu bản PDF c
 1. `vocabulary_source.items` chỉ chứa từ trong bảng từ mới chính thức của bài, không tự tạo thêm từ.
 2. `vocabulary_ids` chỉ tham chiếu tới id có thật trong `vocabulary_source.items`.
 3. `meanings` là mảng nghĩa tiếng Việt; mỗi nghĩa ngăn cách bằng dấu phẩy, không dùng dấu chấm phẩy.
-4. Mỗi từ mới phải có `example.hz`, `example.pinyin`, `example.vi` đầy đủ.
-5. Trong `content.hz`, chỉ bọc từ mới chính thức bằng `<hl>...</hl>` nếu từ đó xuất hiện; không bọc tên người nói.
-6. Trong ví dụ từ vựng, BẮT BUỘC dùng `<hl>` trong cả `example.hz`, `example.pinyin` và `example.vi` để đánh dấu lần xuất hiện tương ứng của từ vựng.
+4. Trường `type` BẮT BUỘC ghi loại từ bằng tiếng Việt đầy đủ, ví dụ: `Danh từ`, `Động từ`, `Tính từ`, `Phó từ`, `Đại từ`, `Lượng từ`, `Trợ từ`, `Cụm từ`, `Liên từ`.
+5. Tuyệt đối không dùng viết tắt hoặc tiếng Anh như `n`, `v`, `adj`, `adv`, `noun`, `verb`, `adjective` hoặc `adverb` trong trường `type`.
+6. Mỗi từ mới phải có `example.hz`, `example.pinyin`, `example.vi` đầy đủ.
+7. Trong `content.hz`, chỉ bọc từ mới chính thức bằng `<hl>...</hl>` nếu từ đó xuất hiện; không bọc tên người nói.
+8. Trong ví dụ từ vựng, BẮT BUỘC dùng `<hl>` trong cả `example.hz`, `example.pinyin` và `example.vi` để đánh dấu lần xuất hiện tương ứng của từ vựng.
 
 ## 5. CÂU VÀ ẢNH
 

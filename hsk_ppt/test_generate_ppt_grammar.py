@@ -60,6 +60,27 @@ class GrammarPPTGenerator:
         self._slide_cursor += 1
         return self.prs.slides[idx]
 
+    def _delete_slide(self, index: int):
+        """Xóa hoàn toàn slide và dọn dẹp toàn bộ mối quan hệ (rels/notesSlide) để tránh làm hỏng OpenXML khi PowerPoint/Canva mở file."""
+        slide = self.prs.slides[index]
+        slide_part = slide.part
+
+        if slide.has_notes_slide:
+            notes_part = slide.notes_slide.part
+            for rId in list(notes_part.rels.keys()):
+                notes_part.drop_rel(rId)
+            for p in list(self.prs.part.package.iter_parts()):
+                for rId, rel in list(p.rels.items()):
+                    if rel.target_part == notes_part:
+                        p.drop_rel(rId)
+
+        for rId in list(slide_part.rels.keys()):
+            slide_part.drop_rel(rId)
+
+        rId_pres = self.prs.slides._sldIdLst[index].rId
+        self.prs.part.drop_rel(rId_pres)
+        del self.prs.slides._sldIdLst[index]
+
     def _get_all_shapes(self, shapes):
         all_shapes = []
         for shape in shapes:
@@ -456,9 +477,7 @@ class GrammarPPTGenerator:
         # Xóa các slide tiêu đề thừa nếu số lượng chủ điểm < MAX_TITLE_SLIDES
         for i in range(self.MAX_TITLE_SLIDES - 1, self.num_topics - 1, -1):
             slide_idx = 2 + i
-            rId = self.prs.slides._sldIdLst[slide_idx].rId
-            self.prs.part.drop_rel(rId)
-            del self.prs.slides._sldIdLst[slide_idx]
+            self._delete_slide(slide_idx)
             
     def add_end_slide(self):
         """Slide Cuối cùng — edit in-place."""
@@ -879,9 +898,7 @@ class GrammarPPTGenerator:
         # 3. Dọn dẹp các slide content thừa (Tương tự code bài khóa)
         last_slide_idx = len(self.prs.slides) - 1
         for i in range(last_slide_idx - 1, self._slide_cursor - 1, -1):
-            rId = self.prs.slides._sldIdLst[i].rId
-            self.prs.part.drop_rel(rId)
-            del self.prs.slides._sldIdLst[i]
+            self._delete_slide(i)
 
         # 4. Sửa slide cuối (Lúc này đã bị dồn lên sát cursor)
         self.add_end_slide()

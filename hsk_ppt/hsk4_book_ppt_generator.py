@@ -1,8 +1,12 @@
+import argparse
 import math
 import os
 import re
+import sys
+from pathlib import Path
 
 from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Cm, Inches, Pt
 
@@ -12,7 +16,6 @@ from hsk_ppt.test_generate_ppt_bk import PPTGenerator
 class HSK4BookPPTGenerator(PPTGenerator):
     """Render HSK4 book units using a fixed 12-slide content layout per unit."""
 
-    BACKGROUND = "F9F6EF"
     FULL_NEW_WORD = "A40400"
     SENTENCE_NEW_WORD = "29741D"
     HAN_FONT = "字由点字云霆楷体"
@@ -29,20 +32,24 @@ class HSK4BookPPTGenerator(PPTGenerator):
     IMAGE_TOP_CM = 19.59
     IMAGE_SIZE_CM = 7.31
     TEXT_IMAGE_GAP_CM = 0.80
+    COVER_TITLE_LEFT_CM = 14.26
+    COVER_TITLE_TOP_CM = 9.47
+    COVER_TITLE_WIDTH_CM = 22.24
+    COVER_TITLE_HEIGHT_CM = 3.51
+    COVER_SUBTITLE_LEFT_CM = 17.85
+    COVER_SUBTITLE_TOP_CM = 15.20
+    COVER_SUBTITLE_WIDTH_CM = 15.10
+    COVER_SUBTITLE_HEIGHT_CM = 3.17
 
     def _add_title(self, slide, text):
-        box = slide.shapes.add_textbox(Cm(15.28), Cm(1.26), Cm(20.14), Cm(2.67))
+        title_width, title_height = Cm(20.14), Cm(2.67)
+        title_left = (self.prs.slide_width - title_width) / 2
+        box = slide.shapes.add_textbox(title_left, Cm(1.26), title_width, title_height)
         box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
         self._set_text_exact_style(
             box, text, font_name="Fraunces", font_size=57,
             color="FCF1D4", bold=False, align="center"
         )
-
-    def _next_slide(self):
-        slide = super()._next_slide()
-        slide.background.fill.solid()
-        slide.background.fill.fore_color.rgb = RGBColor.from_string(self.BACKGROUND)
-        return slide
 
     def _add_image(self, slide, unit):
         local_image_path = unit.get("local_image_path")
@@ -59,6 +66,30 @@ class HSK4BookPPTGenerator(PPTGenerator):
     @staticmethod
     def _plain_text(text):
         return re.sub(r"</?hl>", "", text or "")
+
+    @staticmethod
+    def _normalize_part_of_speech(value):
+        """Convert legacy English/abbreviated POS values to Vietnamese labels."""
+        labels = {
+            "n": "Danh từ",
+            "noun": "Danh từ",
+            "v": "Động từ",
+            "verb": "Động từ",
+            "adj": "Tính từ",
+            "adjective": "Tính từ",
+            "adv": "Phó từ",
+            "adverb": "Phó từ",
+            "pron": "Đại từ",
+            "pronoun": "Đại từ",
+            "mw": "Lượng từ",
+            "measure word": "Lượng từ",
+            "particle": "Trợ từ",
+            "conj": "Liên từ",
+            "conjunction": "Liên từ",
+            "phrase": "Cụm từ",
+        }
+        normalized = str(value or "").strip()
+        return labels.get(normalized.lower(), normalized)
 
     @staticmethod
     def _estimate_lines(text, font_size, width_cm):
@@ -177,7 +208,7 @@ class HSK4BookPPTGenerator(PPTGenerator):
             legacy_vocabulary.append({
                 "hz": item.get("hz", ""),
                 "pinyin": item.get("pinyin", ""),
-                "type": item.get("type", ""),
+                "type": self._normalize_part_of_speech(item.get("type", "")),
                 "vi": ", ".join(item.get("meanings", [])),
                 "example": {
                     "hz": example_hz,
@@ -299,6 +330,92 @@ class HSK4BookPPTGenerator(PPTGenerator):
                 })
         self.add_exercise_slide({"exercise": legacy_exercises})
 
+    def add_cover_slide(self):
+        """Fill cover text, with fallbacks for templates without text placeholders."""
+        lesson = self.data.get("lesson_info", {})
+        slide = self.prs.slides[0]
+        shapes = self._get_all_shapes(slide.shapes)
+
+        title_shape = slide.shapes.add_textbox(
+            Cm(self.COVER_TITLE_LEFT_CM),
+            Cm(self.COVER_TITLE_TOP_CM),
+            Cm(self.COVER_TITLE_WIDTH_CM),
+            Cm(self.COVER_TITLE_HEIGHT_CM),
+        )
+        self._apply_title_styling(
+            title_shape, lesson.get("title_cn", ""), max_font=135, min_font=75
+        )
+
+        subtitle_left = Cm(self.COVER_SUBTITLE_LEFT_CM)
+        subtitle_top = Cm(self.COVER_SUBTITLE_TOP_CM)
+        subtitle_width = Cm(self.COVER_SUBTITLE_WIDTH_CM)
+        subtitle_height = Cm(self.COVER_SUBTITLE_HEIGHT_CM)
+
+        subtitle_background = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            subtitle_left,
+            subtitle_top,
+            subtitle_width,
+            subtitle_height,
+        )
+        subtitle_background.adjustments[0] = 0.5
+        subtitle_background.fill.solid()
+        subtitle_background.fill.fore_color.rgb = RGBColor(0xB5, 0x1F, 0x09)
+        subtitle_background.line.fill.background()
+
+        subtitle = slide.shapes.add_textbox(
+            subtitle_left,
+            subtitle_top,
+            subtitle_width,
+            subtitle_height,
+        )
+        subtitle.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+        self._set_text_exact_style(
+            subtitle,
+            f"Bài Khóa - Bài {lesson.get('lesson_number', lesson.get('number', ''))}",
+            font_name="Fraunces",
+            font_size=50,
+            color="FFFFFF",
+            align="center",
+        )
+        self._bring_to_front(subtitle)
+
+    def add_table_of_content(self):
+        """Fill TOC labels even when the template has only graphic banners."""
+        slide = self.prs.slides[1]
+        shapes = self._get_all_shapes(slide.shapes)
+
+        title_shape = (
+            self._find_shape_by_name(shapes, "TextBox 17")
+            or self._find_shape_by_name(shapes, "TextBox 21")
+        )
+        if title_shape:
+            self._set_text_exact_style(
+                title_shape,
+                "目录",
+                font_name=self.TITLE_FONT,
+                font_size=90,
+                color="B02012",
+            )
+
+        labels = [
+            ("TextBox 16", "01. TỪ VỰNG", Cm(15.2), Cm(6.5)),
+            ("TextBox 18", "02. BÀI KHÓA", Cm(15.2), Cm(13.5)),
+        ]
+        for shape_name, text, left, top in labels:
+            shape = self._find_shape_by_name(shapes, shape_name)
+            if shape:
+                self._set_text_exact_style(
+                    shape, text, font_name="Anton", font_size=56, color="FCF1D4"
+                )
+                continue
+            box = slide.shapes.add_textbox(left, top, Cm(20.4), Cm(2.8))
+            box.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+            self._set_text_exact_style(
+                box, text, font_name="Anton", font_size=56, color="FCF1D4"
+            )
+            self._bring_to_front(box)
+
     def render_unit(self, unit, vocabulary_by_id):
         unit_vocabulary = [
             vocabulary_by_id[item_id]
@@ -352,6 +469,53 @@ class HSK4BookPPTGenerator(PPTGenerator):
         self.add_end_slide()
 
         for index in range(self._end_slide_index - 1, self._slide_cursor - 1, -1):
-            r_id = self.prs.slides._sldIdLst[index].rId
-            self.prs.part.drop_rel(r_id)
-            del self.prs.slides._sldIdLst[index]
+            self._delete_slide(index)
+
+
+def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+    parser = argparse.ArgumentParser(
+        description="Render HSK4 bài khóa JSON thành file PowerPoint."
+    )
+    parser.add_argument("json_path", help="Đường dẫn tới file JSON bài khóa")
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Đường dẫn file PPTX đầu ra; mặc định đặt cạnh file JSON",
+    )
+    parser.add_argument(
+        "--template",
+        default=None,
+        help="Đường dẫn template PPTX; mặc định dùng resources/HSK Bài Khóa template.pptx",
+    )
+    args = parser.parse_args()
+
+    project_root = Path(__file__).resolve().parents[1]
+    json_path = Path(args.json_path).resolve()
+    if args.template:
+        template_path = Path(args.template).resolve()
+    else:
+        template_path = (
+            project_root
+            / "resources"
+            / "ppt_templates"
+            / "HSK Bài Khóa template.pptx"
+        )
+        if not template_path.exists():
+            raise FileNotFoundError(f"Không tìm thấy template: {template_path}")
+    output_path = (
+        Path(args.output).resolve()
+        if args.output
+        else json_path.with_suffix(".pptx")
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    generator = HSK4BookPPTGenerator(str(template_path), str(json_path))
+    generator.build()
+    generator.save(str(output_path))
+
+
+if __name__ == "__main__":
+    main()
