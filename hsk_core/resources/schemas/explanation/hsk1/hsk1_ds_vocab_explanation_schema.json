@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng Đúng/Sai chỉ có từ vựng và hình ảnh.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải ngắn gọn phân tích logic bằng tiếng Việt. Bắt đầu bằng việc giải nghĩa từ vựng, sau đó mô tả hình ảnh và so sánh để kết luận Đúng/Sai.",
+      "example": "猫 (māo) có nghĩa là “mèo”. Hình ảnh cho thấy có 2 chú mèo, đúng với từ đã cho và yêu cầu của đề. Vậy nên, đáp án là: Đúng."
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của từ vựng.",
+      "properties": {
+        "vietnamese_text": {
+          "type": "string",
+          "description": "Bản dịch tiếng Việt của từ vựng.",
+          "example": "Mèo"
+        }
+      },
+      "required": ["vietnamese_text"]
+    }
+  },
+  "required": ["analysis_paragraph", "translation_block"]
+}

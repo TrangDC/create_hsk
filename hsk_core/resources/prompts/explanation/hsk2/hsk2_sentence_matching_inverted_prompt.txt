@@ -1,0 +1,14 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp, đang soạn lời giải cho học sinh.
+
+**Thông tin câu hỏi:**
+Nhiệm vụ là tìm câu thoại phù hợp (A, B, C, D) để đứng trước câu trả lời cho trước.
+- **Các câu thoại có thể chọn (Học liệu chung):**
+{shared_material_str}
+- **Câu trả lời cho trước (Câu hỏi):** "{question_chinese}"
+- **Đáp án đúng (Câu thoại phù hợp):** Lựa chọn {correct_answer_letter} - "{correct_answer_chinese}"
+
+**Yêu cầu:**
+1.  **Phân tích (`analysis_paragraph`):** Viết một lời giải ngắn gọn bằng tiếng Việt. Bắt đầu bằng "Câu trả lời \"{question_chinese}\" ...", sau đó giải thích tại sao nó là câu trả lời phù hợp cho câu thoại "{correct_answer_chinese}".
+2.  **Cung cấp cặp câu đã ghép (`matched_pair_block`):** Điền chính xác chữ Hán và Pinyin của cả câu thoại (đáp án) và câu trả lời (câu hỏi) vào các trường tương ứng.
+3.  **Cung cấp bản dịch (`translation_block`):** Dịch CẢ câu thoại (đáp án) và câu trả lời (câu hỏi) sang tiếng Việt.
+4.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.

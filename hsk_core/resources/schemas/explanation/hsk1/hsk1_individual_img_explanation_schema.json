@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng TN chọn ảnh đúng từ 3 phương án.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải ngắn gọn, phân tích logic bằng tiếng Việt, giải thích tại sao một mô tả ảnh cụ thể lại khớp với script đã cho.",
+      "example": "Hình A là lựa chọn đúng vì nó mô tả một người đang ăn cơm, phù hợp với nội dung của script. Các hình B và C không liên quan đến hành động này."
+    },
+    "context_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa nội dung script gốc của câu hỏi.",
+      "properties": {
+        "chinese_text": {
+          "type": "string",
+          "description": "Nội dung script bằng tiếng Trung."
+        },
+        "pinyin": {
+          "type": "string",
+          "description": "Phiên âm Pinyin cho script."
+        }
+      },
+      "required": ["chinese_text", "pinyin"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của script.",
+      "properties": {
+        "vietnamese_text": {
+          "type": "string",
+          "description": "Bản dịch tiếng Việt của script."
+        }
+      },
+      "required": ["vietnamese_text"]
+    }
+  },
+  "required": ["analysis_paragraph", "context_block", "translation_block"]
+}

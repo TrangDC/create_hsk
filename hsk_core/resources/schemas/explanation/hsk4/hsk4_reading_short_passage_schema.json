@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "explanations": {
+      "type": "array",
+      "description": "Danh sách chứa đúng 2 lời giải cho 2 câu hỏi.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "analysis_paragraph": { 
+            "type": "string",
+            "description": "Lời giải ngắn gọn, phân tích lý do chọn đáp án đúng cho câu hỏi tương ứng." 
+          },
+          "options_list": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "letter": { "type": "string" },
+                "chinese_text": { "type": "string" },
+                "translation": { "type": "string" }
+              },
+              "required": ["letter", "chinese_text", "translation"]
+            }
+          }
+        },
+        "required": ["analysis_paragraph", "options_list"]
+      }
+    },
+    "shared_translation": {
+      "type": "object",
+      "properties": {
+        "script_vietnamese": { "type": "string" },
+        "query_vietnamese_1": { "type": "string" },
+        "query_vietnamese_2": { "type": "string" }
+      },
+      "required": ["script_vietnamese", "query_vietnamese_1", "query_vietnamese_2"]
+    }
+  },
+  "required": ["explanations", "shared_translation"]
+}

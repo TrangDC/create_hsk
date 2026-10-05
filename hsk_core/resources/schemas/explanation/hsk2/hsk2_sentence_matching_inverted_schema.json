@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải cho câu hỏi ghép cặp câu thoại (đảo ngược) của HSK2.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải thích logic ngắn gọn bằng tiếng Việt. Bắt đầu bằng 'Câu trả lời \"[câu trả lời]\" ...', sau đó giải thích ngắn gọn tại sao nó phù hợp với câu thoại \"[câu thoại]\"."
+    },
+    "matched_pair_block": {
+      "type": "object",
+      "description": "Khối chứa cặp câu đã được ghép đúng.",
+      "properties": {
+        "statement_chinese": { "type": "string", "description": "Câu thoại đứng trước (đáp án)." },
+        "statement_pinyin": { "type": "string" },
+        "response_chinese": { "type": "string", "description": "Câu trả lời (câu hỏi)." },
+        "response_pinyin": { "type": "string" }
+      },
+      "required": ["statement_chinese", "statement_pinyin", "response_chinese", "response_pinyin"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối chứa bản dịch tiếng Việt của cặp câu đã ghép.",
+      "properties": {
+        "statement_vietnamese": { "type": "string" },
+        "response_vietnamese": { "type": "string" }
+      },
+      "required": ["statement_vietnamese", "response_vietnamese"]
+    }
+  },
+  "required": ["analysis_paragraph", "matched_pair_block", "translation_block"]
+}

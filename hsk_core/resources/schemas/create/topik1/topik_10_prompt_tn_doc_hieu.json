@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "topik_reading_shared_list": {
+      "type": "array",
+      "description": "Danh sách 10 bài đọc hiểu.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "passage_id": { "type": "integer" },
+          "passage_korean": { "type": "string" },
+          "passage_vietnamese": { "type": "string" },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "question_id": { "type": "integer" },
+                "question_text": { "type": "string" },
+                "question_meaning": { "type": "string" },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "korean": { "type": "string" },
+                      "vietnamese": { "type": "string" }
+                    },
+                    "required": ["korean", "vietnamese"]
+                  }
+                },
+                "correct_index": { "type": "integer", "description": "Chỉ số của đáp án đúng trong mảng options. (4 đáp án ứng với số 1,2,3,4)" },
+                "reasoning_evidence": { "type": "string" },
+                "reasoning_vietnamese": { "type": "string" }
+              },
+              "required": ["question_text", "options", "correct_index", "reasoning_evidence"]
+            }
+          }
+        },
+        "required": ["passage_korean", "questions"]
+      }
+    }
+  },
+  "required": ["topik_reading_shared_list"]
+}

@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải cho câu hỏi phán đoán Đúng/Sai từ một đoạn nghe cho HSK3.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải thích thật ngắn gọn bằng tiếng Việt. So sánh thông tin từ đoạn nghe với câu nhận định để kết luận tại sao đáp án là Đúng hoặc Sai. Không dùng từ script mà thay bằng 'Nội dung nghe'."
+    },
+    "original_texts_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa script gốc và câu nhận định bằng tiếng Trung.",
+      "properties": {
+        "script_chinese": { "type": "string", "description": "Đoạn script thông tin gốc." },
+        "statement_chinese": { "type": "string", "description": "Câu nhận định cần phán đoán." }
+      },
+      "required": ["script_chinese", "statement_chinese"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của script và câu nhận định.",
+      "properties": {
+        "script_vietnamese": { "type": "string" },
+        "statement_vietnamese": { "type": "string" }
+      },
+      "required": ["script_vietnamese", "statement_vietnamese"]
+    }
+  },
+  "required": ["analysis_paragraph", "original_texts_block", "translation_block"]
+}

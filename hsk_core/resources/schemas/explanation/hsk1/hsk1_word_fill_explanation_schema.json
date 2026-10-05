@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng TN điền từ vào chỗ trống.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải súc tích, phân tích logic bằng tiếng Việt, giải thích ngắn gọn tại sao từ vựng đã chọn là phù hợp nhất cho chỗ trống."
+    },
+    "context_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa câu hỏi gốc (câu đơn hoặc hội thoại).",
+      "properties": {
+        "script_lines": {
+          "type": "array",
+          "description": "Danh sách các dòng trong câu hỏi.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "speaker": { "type": "string", "description": "Người nói ('男', '女', 'A', 'B') hoặc chuỗi rỗng." },
+              "chinese_text": { "type": "string", "description": "Nội dung lời thoại bằng tiếng Trung, bao gồm cả chỗ trống được đánh dấu bằng cấu trúc __từ cần điền__. (từ cần điền ở đây là đáp án của câu)" },
+              "pinyin": { "type": "string", "description": "Phiên âm Pinyin cho lời thoại." }
+            },
+            "required": ["speaker", "chinese_text", "pinyin"]
+          }
+        }
+      },
+      "required": ["script_lines"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của câu hỏi đã được điền đẩy đủ. NẾU CÓ HỘI THOẠI, BẢN DỊCH PHẢI NGĂN CÁCH CÁC LỜI THOẠI BẰNG DẤU XUỐNG DÒNG.",
+      "properties": {
+        "vietnamese_text": {
+          "type": "string",
+          "description": "Bản dịch tiếng Việt của toàn bộ câu hỏi. \nVới nhãn người nói ('男', '女'), cần dịch thành 'Nam:', 'Nữ:'. Ví dụ: Nam: Tôi thích ăn cơm.\nNữ: Tôi cũng vậy.\n Với nhãn người nói là A, B, để nguyên như vậy. Ví dụ: A: Bạn tên gì?\nB: Tôi tên là Lý Hoa."
+        }
+      },
+      "required": ["vietnamese_text"]
+    }
+  },
+  "required": ["analysis_paragraph", "context_block", "translation_block"]
+}

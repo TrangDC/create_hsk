@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Đoạn văn phân tích lý do chọn đáp án đúng làm chủ đề chính."
+    },
+    "passage_translation": {
+      "type": "string",
+      "description": "Bản dịch tiếng Việt của toàn bộ đoạn văn."
+    },
+    "options_list_with_translation": {
+      "type": "array",
+      "description": "Danh sách 4 lựa chọn kèm bản dịch tiếng Việt.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "letter": { "type": "string" },
+          "chinese_text": { "type": "string" },
+          "translation": { "type": "string" }
+        },
+        "required": ["letter", "chinese_text", "translation"]
+      }
+    }
+  },
+  "required": ["analysis_paragraph", "passage_translation", "options_list_with_translation"]
+}

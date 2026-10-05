@@ -6,8 +6,10 @@ Dựa vào nội dung từ vựng, ngữ pháp và bài khóa trong các tài li
 
 Cụ thể, hãy tạo ra ```4``` câu hỏi thuộc dạng "Sắp xếp câu":
 *   Mỗi câu hỏi gồm một danh sách các thành phần câu (`components`) bị xáo trộn.
-*   Số lượng thành phần trong mỗi câu hỏi phải từ 5 đến 7.
-*   Đáp án `correct_order` phải là một chuỗi số thể hiện thứ tự sắp xếp đúng của các thành phần (ví dụ: "24135").
+*   BẮT BUỘC một trong các thành phần (components) phải là DẤU KẾT THÚC CÂU (ví dụ: "。", "？" hoặc "！").
+*   Thành phần dấu kết thúc câu này cũng phải bị XÁO TRỘN ngẫu nhiên cùng các thành phần chữ Hán khác, KHÔNG ĐƯỢC luôn để ở vị trí cuối cùng trong mảng `components`.
+*   Số lượng thành phần trong mỗi câu hỏi phải từ 5 đến 7 (bao gồm cả thành phần dấu câu).
+*   Đáp án `correct_order` phải là một chuỗi số thể hiện thứ tự sắp xếp đúng của các thành phần (ví dụ: "24135"), với thành phần chứa dấu câu luôn nằm ở vị trí cuối cùng của chuỗi thứ tự đúng.
 
 YÊU CẦU ĐẦU RA:
 -   Ngôn ngữ: Tiếng Trung giản thể.

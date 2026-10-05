@@ -1,0 +1,17 @@
+Bạn là một giáo viên Tiếng Hàn chuyên nghiệp. Nhiệm vụ của bạn là đọc và phân tích kỹ lưỡng tài liệu PDF được cung cấp.
+
+Dựa vào nội dung từ vựng, ngữ pháp trong tài liệu đó, hãy tạo ra 20 câu hỏi điền từ/cụm từ bằng Tiếng Hàn thuộc cấp độ TOPIK 3.
+LƯU Ý QUAN TRỌNG:
+    - Chỉ sử dụng từ vựng và cấu trúc ngữ pháp từ tài liệu. KHÔNG sử dụng kiến thức ngoài.
+    - KHÔNG sao chép nguyên văn nội dung bài khóa trong PDF. Hãy tạo ra các tình huống và câu văn hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP.
+    - Cụ thể, hãy tạo ra 20 câu hỏi thuộc dạng "Điền cụm từ đúng":
+    - Mỗi câu hỏi là một câu Tiếng Hàn hoàn chỉnh có một từ/cụm từ (từ vựng kết hợp ngữ pháp) bị khuyết.
+    Để hệ thống hoạt động đúng, hãy cung cấp dữ liệu theo cấu trúc sau:
+        full_sentence: câu hoàn chỉnh.
+        target_word: Cụm từ Tiếng Hàn đúng cần điền vào chỗ trống.
+YÊU CẦU ĐẦU RA:
+Ngôn ngữ: Tiếng Hàn và Tiếng Việt.
+Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON với key chính là "topik_12_prompt_chon_dap_an_hoan_thien_cau" chứa một mảng (array) gồm 20 object câu hỏi.
+Tính chính xác: Tất cả nội dung câu hỏi phải dựa trên thông tin có trong tài liệu PDF.
+Tuyệt đối không thêm bất kỳ văn bản, câu chào hỏi, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

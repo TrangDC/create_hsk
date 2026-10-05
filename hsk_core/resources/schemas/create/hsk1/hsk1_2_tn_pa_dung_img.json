@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "properties": {
+    "individual_image_matching": {
+      "type": "array",
+      "description": "Dạng TN phương án đúng (hình ảnh). Gồm 4 câu, mỗi câu có 3 mô tả ảnh và 1 script.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": {
+            "type": "integer"
+          },
+          "do_kho": {
+            "type": "string",
+            "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+          },
+          "image_options": {
+            "type": "array",
+            "description": "Danh sách gồm 3 chuỗi, đánh thứ tự A., B., C., mô tả hình ảnh theo cấu trúc Ảnh: {mô tả} bằng Tiếng Việt.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "script_chinese": {
+            "type": "string",
+            "description": "Script tiếng Trung mô tả 1 trong 3 ảnh."
+          },
+          "script_pinyin": {
+            "type": "string",
+            "description": "Phiên âm Pinyin cho script."
+          },
+          "correct_answer": {
+            "type": "integer",
+            "description": "Đáp án đúng, là số thứ tự của ảnh (1, 2, hoặc 3) trong 'image_options' khớp với script."
+          }
+        },
+        "required": [
+          "question_id",
+          "do_kho",
+          "image_options",
+          "script_chinese",
+          "script_pinyin",
+          "correct_answer"
+        ]
+      }
+    }
+  },
+  "required": [
+    "individual_image_matching"
+  ]
+}

@@ -6,21 +6,90 @@ import random
 import re
 import os
 import urllib.parse
+import json
+from datetime import datetime
 from PIL import Image
 
 # --- CẤU HÌNH TỪ CODE CỦA BẠN ---
-MAX_RETRIES_PER_TEMPLATE = 4  
-RETRY_DELAY = 10               
+MAX_RETRIES_PER_TEMPLATE = 2  
+RETRY_DELAY = 5                
 SEARCH_TEMPLATES = [
     "{}- 生字笔顺展示",           # Ưu tiên 1
     "{}生字笔顺展示",              # Ưu tiên 2
     "{}- 生字笔顺展示- 淘知"       # Ưu tiên 3
 ]
 
+DEFAULT_INPUT_VOCAB_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "resources",
+    "input_vocab.json",
+)
+DEFAULT_FAILURE_LOG_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "output",
+    "flashcards",
+    "gif_download_failures.log",
+)
+
+
+def load_input_vocab(json_path=DEFAULT_INPUT_VOCAB_PATH):
+    """Đọc danh sách từ cần tải GIF từ JSON dạng mảng chuỗi."""
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    if not isinstance(data, list):
+        raise ValueError("input_vocab.json phải có dạng mảng, ví dụ: [\"初中\", \"把\"]")
+
+    words = []
+    seen = set()
+    for item in data:
+        word = item.strip() if isinstance(item, str) else ""
+        if word and word not in seen:
+            words.append(word)
+            seen.add(word)
+
+    if not words:
+        raise ValueError("input_vocab.json không chứa từ hợp lệ")
+
+    return words
+
+
+def convert_txt_to_json(txt_path, json_path=DEFAULT_INPUT_VOCAB_PATH):
+    """Chuyển mỗi dòng trong file TXT thành một word trong JSON."""
+    words = []
+    seen = set()
+
+    with open(txt_path, "r", encoding="utf-8-sig") as f:
+        for line in f:
+            word = line.strip()
+            if word and word not in seen:
+                words.append(word)
+                seen.add(word)
+
+    if not words:
+        raise ValueError(f"Không tìm thấy từ hợp lệ trong file: {txt_path}")
+
+    os.makedirs(os.path.dirname(json_path), exist_ok=True)
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(words, f, ensure_ascii=False, indent=2)
+
+    print(f"Đã chuyển {len(words)} từ vào: {json_path}")
+    return words
+
+
+def log_gif_failure(log_path, word, char, reason):
+    """Ghi lại một chữ không tải được để có thể xử lý lại sau."""
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    reason = reason or "Không tìm thấy GIF hợp lệ"
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(f"[{timestamp}] word={word}\tchar={char}\treason={reason}\n")
+
 class StrokeGifManager:
-    def __init__(self, gif_folder="output/flashcards/raw_gifs", png_folder="output/flashcards/pngs_static"):
+    def __init__(self, gif_folder="output/flashcards/raw_gifs", png_folder="output/flashcards/pngs_static", resource_gif_folder="resources/raw_gifs"):
         self.gif_folder = gif_folder
         self.png_folder = png_folder
+        self.resource_gif_folder = resource_gif_folder
         
         # Tạo folder nếu chưa có
         if not os.path.exists(self.gif_folder): os.makedirs(self.gif_folder)
@@ -99,14 +168,14 @@ class StrokeGifManager:
                         # print(f"    [+] Tìm thấy link: {real_url}")
                         found_taozhi_url = real_url
                         break
-                    time.sleep(0.1)
+                    time.sleep(0.05)
 
                 if not found_taozhi_url:
                     # Nếu không thấy link Taozhi, coi như template này fail ở lần thử này
                     raise Exception("Không tìm thấy kết quả taozhi.cn trên Baidu")
 
                 # --- BƯỚC 3: VÀO TAOZHI LẤY GIF ---
-                time.sleep(random.uniform(1, 1.5))
+                time.sleep(random.uniform(0.2, 0.5))
                 tz_resp = self.session.get(found_taozhi_url, timeout=10)
                 
                 # [QUAN TRỌNG 1] Fix lỗi font chữ (Encoding) để Python đọc được tiếng Trung
@@ -188,12 +257,17 @@ class StrokeGifManager:
 
     def download_char(self, char):
         """
-        Hàm chính được gọi từ bên ngoài.
-        Áp dụng chiến thuật Waterfall: Thử từng template một.
+        Tìm GIF theo thứ tự resources -> output -> crawl.
         """
+        resource_gif_path = os.path.join(self.resource_gif_folder, f"{char}.gif")
         gif_path = os.path.join(self.gif_folder, f"{char}.gif")
         
-        # 1. Check file tồn tại và hợp lệ
+        # 1. Ưu tiên GIF có sẵn trong resources để tránh crawl lại.
+        if os.path.exists(resource_gif_path) and os.path.getsize(resource_gif_path) > 1000:
+            print(f"    [-] Dùng file resource: {char}")
+            return resource_gif_path
+
+        # 2. Nếu không có trong resources, dùng file đã crawl trước đó.
         if os.path.exists(gif_path):
             if os.path.getsize(gif_path) > 1000:
                 print(f"    [-] Đã có file: {char}")
@@ -204,7 +278,7 @@ class StrokeGifManager:
 
         print(f"    [Processing] Đang xử lý chữ: '{char}'")
 
-        # 2. Chạy vòng lặp Template (Chiến thuật)
+        # 3. Chỉ crawl khi cả resources và output đều không có GIF hợp lệ.
         for idx, template in enumerate(SEARCH_TEMPLATES):
             # print(f"    ... Thử chiến thuật {idx+1}: {template.format(char)}")
             success, content = self._download_attempt(char, template)
@@ -224,89 +298,26 @@ class StrokeGifManager:
                     os.remove(gif_path)
             
             # Nếu thất bại template này, vòng lặp for sẽ tự nhảy sang template tiếp theo
-            time.sleep(1)
+            time.sleep(0.2)
 
         print(f"    [X] Thất bại toàn tập với chữ: '{char}'")
         return None
     
 def main():
-
-    # --- DỮ LIỆU INPUT ---
-    input_vocab = [
-  { "word": "可以", "meaning": "Có thể", "example": "我可以去吗？" },
-  { "word": "再", "meaning": "Lại / Nữa", "example": "再见。" },
-  { "word": "问题", "meaning": "Vấn đề / Câu hỏi", "example": "没问题。" },
-  { "word": "卖", "meaning": "Bán", "example": "卖书。" },
-  { "word": "打电话", "meaning": "Gọi điện thoại", "example": "我在打电话。" },
-  { "word": "一下", "meaning": "Một lát / Thử xem", "example": "看一下。" },
-  { "word": "服务员", "meaning": "Người phục vụ", "example": "服务员，点菜。" },
-  { "word": "女士", "meaning": "Quý cô / Bà", "example": "女士们，先生们。" },
-  { "word": "请", "meaning": "Mời / Xin", "example": "请进。" },
-  { "word": "坐", "meaning": "Ngồi", "example": "请坐。" },
-  { "word": "给", "meaning": "Đưa cho / Cho", "example": "给我那本书。" },
-  { "word": "杯", "meaning": "Cốc / Ly (lượng từ)", "example": "一杯茶。" },
-  { "word": "要", "meaning": "Muốn / Cần", "example": "我要咖啡。" },
-  { "word": "早饭", "meaning": "Bữa sáng", "example": "吃早饭。" },
-  { "word": "这个", "meaning": "Cái này", "example": "我要这个。" },
-  { "word": "面包", "meaning": "Bánh mì", "example": "买面包。" },
-  { "word": "鸡蛋", "meaning": "Trứng gà", "example": "吃鸡蛋。" },
-  { "word": "先生", "meaning": "Ông / Ngài", "example": "王先生。" },
-  { "word": "一半", "meaning": "Một nửa", "example": "给我一半。" },
-  { "word": "茶", "meaning": "Trà", "example": "喝茶。" },
-  { "word": "上", "meaning": "Trên / Lên", "example": "上车。" },
-  { "word": "火车", "meaning": "Tàu hỏa", "example": "坐火车。" },
-  { "word": "中午", "meaning": "Buổi trưa", "example": "中午好。" },
-  { "word": "开", "meaning": "Mở / Lái (xe)", "example": "开门。" },
-  { "word": "有些", "meaning": "Có một số / Có vài", "example": "有些人。" },
-  { "word": "有的", "meaning": "Có cái / Có người", "example": "有的书很有趣。" },
-  { "word": "了", "meaning": "Rồi (trợ từ)", "example": "太好了。" },
-  { "word": "写", "meaning": "Viết", "example": "写汉字。" },
-  { "word": "都", "meaning": "Đều", "example": "我们都去。" },
-  { "word": "听见", "meaning": "Nghe thấy", "example": "我听见了。" },
-  { "word": "不要", "meaning": "Đừng / Không muốn", "example": "不要说话。" },
-  { "word": "说话", "meaning": "Nói chuyện", "example": "他在说话。" },
-  { "word": "听", "meaning": "Nghe", "example": "听音乐。" },
-  { "word": "哪些", "meaning": "Những cái nào", "example": "哪些书？" },
-  { "word": "字", "meaning": "Chữ", "example": "写字。" },
-  { "word": "汉语", "meaning": "Tiếng Trung", "example": "学汉语。" },
-  { "word": "汉字", "meaning": "Chữ Hán", "example": "汉字很难。" },
-  { "word": "明年", "meaning": "Năm sau", "example": "明年见。" },
-  { "word": "上", "meaning": "Đi học / Lên (lớp)", "example": "上学。" },
-  { "word": "中学", "meaning": "Trường trung học", "example": "他在中学。" },
-  { "word": "小学", "meaning": "Trường tiểu học", "example": "去小学。" },
-  { "word": "中学生", "meaning": "Học sinh trung học", "example": "我是中学生。" },
-  { "word": "小学生", "meaning": "Học sinh tiểu học", "example": "他是小学生。" },
-  { "word": "上学", "meaning": "Đi học", "example": "每天上学。" },
-  { "word": "他们", "meaning": "Họ / Các anh ấy", "example": "他们来了。" },
-  { "word": "她们", "meaning": "Họ / Các cô ấy", "example": "她们很漂亮。" },
-  { "word": "它们", "meaning": "Chúng nó (vật/động vật)", "example": "它们是猫。" },
-  { "word": "晚", "meaning": "Muộn / Tối", "example": "太晚了。" },
-  { "word": "爱", "meaning": "Yêu", "example": "我爱你。" },
-  { "word": "哪个", "meaning": "Cái nào", "example": "哪个好？" },
-  { "word": "去年", "meaning": "Năm ngoái", "example": "去年我去过。" },
-  { "word": "男朋友", "meaning": "Bạn trai", "example": "我的男朋友。" },
-  { "word": "几", "meaning": "Mấy / Vài", "example": "几个人？" },
-  { "word": "年", "meaning": "Năm", "example": "一年。" },
-  { "word": "好玩儿", "meaning": "Vui / Thú vị", "example": "真好玩儿。" },
-  { "word": "飞机", "meaning": "Máy bay", "example": "坐飞机。" },
-  { "word": "要", "meaning": "Sắp / Phải", "example": "要下雨了。" },
-  { "word": "小时", "meaning": "Tiếng / Giờ (đồng hồ)", "example": "两个小时。" },
-  { "word": "家人", "meaning": "Người nhà", "example": "我的家人。" },
-  { "word": "时间", "meaning": "Thời gian", "example": "没时间。" },
-  { "word": "机场", "meaning": "Sân bay", "example": "去机场。" },
-  { "word": "接", "meaning": "Đón / Nhận", "example": "接电话。" },
-  { "word": "住", "meaning": "Sống / Ở", "example": "你住哪儿？" },
-  { "word": "早", "meaning": "Sớm", "example": "很早。" },
-  { "word": "那", "meaning": "Kia / Đó", "example": "那是什么？" }
-]
+    input_vocab = load_input_vocab()
 
     # Cấu hình thư mục output theo yêu cầu
     GIF_OUTPUT = "output/flashcards/raw_gifs"
     PNG_OUTPUT = "output/flashcards/pngs_static" # Mặc dù chỉ cần GIF, nhưng class thường tạo cả PNG
+    failure_log_path = DEFAULT_FAILURE_LOG_PATH
+    os.makedirs(os.path.dirname(failure_log_path), exist_ok=True)
+    with open(failure_log_path, "a", encoding="utf-8") as f:
+        f.write(f"\n=== Bắt đầu lượt tải {datetime.now():%Y-%m-%d %H:%M:%S} ===\n")
     
     print("="*60)
     print("🚀 BẮT ĐẦU TOOL DOWNLOAD GIF (TEST MODE)")
     print(f"📁 Thư mục lưu GIF: {GIF_OUTPUT}")
+    print(f"📝 Log GIF lỗi: {failure_log_path}")
     print("="*60)
 
     try:
@@ -321,8 +332,8 @@ def main():
     # Thống kê sơ bộ
     total_chars = 0
     unique_chars = set()
-    for item in input_vocab:
-        for char in item['word']:
+    for word in input_vocab:
+        for char in word:
             unique_chars.add(char)
             total_chars += 1
             
@@ -334,11 +345,8 @@ def main():
     fail_count = 0
     
     # Bắt đầu vòng lặp
-    for idx, item in enumerate(input_vocab):
-        word = item['word']
-        meaning = item['meaning']
-        
-        print(f"\n🔹 [{idx+1}/{len(input_vocab)}] Đang xử lý từ: {word} ({meaning})")
+    for idx, word in enumerate(input_vocab):
+        print(f"\n🔹 [{idx+1}/{len(input_vocab)}] Đang xử lý từ: {word}")
         
         for char in word:
             # Chỉ xử lý chữ Hán (UTF-8 range cơ bản)
@@ -356,10 +364,12 @@ def main():
                     success_count += 1
                 else:
                     print(f"    ❌ '{char}': THẤT BẠI (Không tìm thấy hoặc lỗi)")
+                    log_gif_failure(failure_log_path, word, char, "Không tìm thấy GIF hợp lệ")
                     fail_count += 1
             
             except Exception as e:
                 print(f"    ❌ '{char}': Lỗi ngoại lệ - {e}")
+                log_gif_failure(failure_log_path, word, char, str(e))
                 fail_count += 1
             
             # Delay nhẹ giữa các chữ để tránh spam request quá gắt

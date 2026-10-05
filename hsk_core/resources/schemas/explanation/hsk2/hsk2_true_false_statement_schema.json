@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải cho câu hỏi phán đoán Đúng/Sai từ một nhận định cho HSK2.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải thích ngắn gọn, logic bằng tiếng Việt. Luôn bắt đầu bằng 'Trong câu nói \"[câu gốc]\", ...' và giải thích tại sao nhận định là Đúng hoặc Sai."
+    },
+    "original_texts_block": {
+      "type": "object",
+      "description": "Khối chứa câu gốc và câu nhận định bằng tiếng Trung.",
+      "properties": {
+        "script_chinese": { "type": "string", "description": "Câu thông tin gốc." },
+        "statement_chinese": { "type": "string", "description": "Câu nhận định cần phán đoán." }
+      },
+      "required": ["script_chinese", "statement_chinese"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối chứa bản dịch tiếng Việt của câu gốc và câu nhận định.",
+      "properties": {
+        "script_vietnamese": { "type": "string" },
+        "statement_vietnamese": { "type": "string" }
+      },
+      "required": ["script_vietnamese", "statement_vietnamese"]
+    }
+  },
+  "required": ["analysis_paragraph", "original_texts_block", "translation_block"]
+}

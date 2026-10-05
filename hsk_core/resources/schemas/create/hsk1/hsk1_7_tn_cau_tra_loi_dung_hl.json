@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "properties": {
+    "sentence_matching_questions": {
+      "type": "object",
+      "description": "Dạng Chọn câu trả lời đúng. Gồm 1 học liệu chung là 4 câu trả lời (A-D) và 4 câu hỏi.",
+      "properties": {
+        "shared_material": {
+          "type": "array",
+          "description": "Học liệu chung: Một danh sách 4 phương án trả lời (A-D).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option_letter": {
+                "type": "string",
+                "description": "Chữ cái của phương án (A, B, C, D)."
+              },
+              "chinese_text": {
+                "type": "string",
+                "description": "Nội dung câu trả lời tiếng Trung."
+              },
+              "pinyin": {
+                "type": "string",
+                "description": "Phiên âm Pinyin cho câu trả lời."
+              }
+            },
+            "required":[
+              "option_letter",
+              "chinese_text",
+              "pinyin"
+            ]
+          }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách 4 câu hỏi truy vấn.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_id": {
+                "type": "integer"
+              },
+              "do_kho": {
+                "type": "string",
+                "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+              },
+              "question_text_chinese": {
+                "type": "string"
+              },
+              "pinyin": {
+                "type": "string"
+              },
+              "correct_answer": {
+                "type": "string",
+                "description": "Đáp án đúng, là chữ cái in hoa (A-D) của phương án trong 'shared_material'."
+              }
+            },
+            "required": [
+              "question_id",
+              "do_kho",
+              "question_text_chinese",
+              "pinyin",
+              "correct_answer"
+            ]
+          }
+        }
+      },
+      "required": [
+        "shared_material",
+        "questions"
+      ]
+    }
+  },
+  "required": [
+    "sentence_matching_questions"
+  ]
+}

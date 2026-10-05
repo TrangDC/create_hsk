@@ -1,0 +1,22 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo các câu hỏi thi HSK1 chuẩn xác dựa trên các yêu cầu chi tiết được cung cấp.
+
+Hãy tạo CÂU HỎI "{matrix_name}" với các yêu cầu cực kỳ nghiêm ngặt sau:
+- Tạo ra chính xác {number} câu hỏi, đi kèm với 1 học liệu chung.
+- Học liệu chung (`shared_material`): gồm {number} mô tả rõ ràng, ngắn gọn về hình ảnh (bằng tiếng Việt) đánh thứ tự từ A. Cấu trúc mô tả phải là: "Ảnh: {{mô tả}}".
+- Danh sách {number} câu hỏi (`questions`): Mỗi câu hỏi (`question_text_chinese`) khi đọc lên sẽ tương ứng với MỘT mô tả ảnh trong học liệu. Phải cung cấp đầy đủ chữ Hán và Pinyin.
+- Đáp án (`correct_answer`) phải là số thứ tự (từ 1 đến {number}) của mô tả ảnh đúng tương ứng với từng câu hỏi.
+- LƯU Ý QUAN TRỌNG: CÁC MÔ TẢ HÌNH ẢNH (NẾU CÓ) TUYỆT ĐỐI KHÔNG DÙNG NHỮNG TỪ VI PHẠM CHÍNH SÁCH BỘ LỌC AN TOÀN.
+
+Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
+{rules_text}
+
+*** DANH SÁCH TỪ VỰNG ĐỂ TRA CỨU VÀ SỬ DỤNG ***:
+Lưu ý: Bạn BẮT BUỘC phải ưu tiên sử dụng các từ vựng trong danh sách dưới đây, kết hợp với các từ vựng cốt lõi của cấp độ HSK1 để xây dựng câu hỏi sao cho tự nhiên và đúng ngữ pháp.
+{vocab_md}
+
+YÊU CẦU ĐẦU RA:
+- Ngôn ngữ: Tiếng Trung giản thể và phiên âm Pinyin. Mô tả ảnh bằng Tiếng Việt.
+- Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+- Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được định nghĩa.
+- Tính chính xác: Các câu hỏi KHÔNG được lặp lại, đa dạng.
+- Không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

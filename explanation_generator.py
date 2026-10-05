@@ -130,7 +130,9 @@ def flatten_question_data(data_map: dict, hsk_level: str) -> list:
                         flat_list.append(task)
 
         elif data_type == "array":
-            for question in data:
+            # Xử lý cả 2 format: {"questions": [...]} và [...]
+            questions_list = data.get('questions', []) if isinstance(data, dict) else data
+            for question in questions_list:
                 flat_list.append({ "prompt_name": prompt_name, "question_type": question.get('kind'), "data": question })
 
     print(f"✅ Đã tìm thấy tổng cộng {len(flat_list)} task.") # Chú ý, đây là số task, không phải câu hỏi
@@ -168,7 +170,8 @@ def generate_explanations_concurrently(flat_question_list: list, hsk_level: str)
                         generate_content,
                         text_content="", # Cung cấp text_content rỗng thay vì pdf_file_paths
                         prompt_file_path=temp_prompt_filename,
-                        schema_file_path=config['schema_path']
+                        schema_file_path=config['schema_path'],
+                        service_tier="flex"
                     )
                     future_to_task[future] = (task, temp_prompt_filename)
 

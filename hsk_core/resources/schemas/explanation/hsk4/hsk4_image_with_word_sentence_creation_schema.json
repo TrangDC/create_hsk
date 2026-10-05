@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "sample_sentence_translation": {
+      "type": "string",
+      "description": "Bản dịch tiếng Việt của câu trả lời mẫu."
+    },
+    "explanation_paragraph": {
+      "type": "string",
+      "description": "Lời giải thích tại sao câu trả lời mẫu lại phù hợp."
+    }
+  },
+  "required": ["sample_sentence_translation", "explanation_paragraph"]
+}

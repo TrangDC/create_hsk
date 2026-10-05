@@ -1,8 +1,8 @@
 Bạn là chuyên gia ngôn ngữ Trung-Việt và Art Director.
-Input: Từ '{word}', Nghĩa '{meaning}', Ví dụ '{example}'.
+Input: Từ '{word}', Phiên âm '{pinyin}', Nghĩa '{meaning}', Ví dụ '{example}'.
 
 Nhiệm vụ:
-1. Xác định Pinyin chuẩn.
+1. Lấy Pinyin chuẩn từ input. Không tự tạo pinyin khác, trừ phi input đầu vào không cung cấp.
 2. Xác định **DUY NHẤT 01** Từ loại (Part of Speech) dựa trên ngữ cảnh ví dụ.
 3. Tạo Pinyin và dịch nghĩa cho câu ví dụ.
 4. Quyết định 'use_mascot' (True/False):
@@ -17,6 +17,7 @@ Nhiệm vụ:
     - Yêu cầu bắt buộc: 
         + Phong cách: Flat illustration, 2D vector, hoạt hình, màu sắc tươi sáng, nét vẽ rõ ràng.
         + Nền: PHẢI LÀ NỀN TRẮNG TINH (Pure white background).
+        + TUYỆT ĐỐI KHÔNG CÓ CHỮ, KÝ TỰ, SỐ, PINYIN, PHỤ ĐỀ, LOGO HOẶC WATERMARK TRÊN ẢNH. Chỉ được có hình minh họa.
         + Nghĩa: prompt phải chỉ rõ việc vẽ ảnh mô tả đúng nội dung câu, nghĩa của từ, người ngoài nhìn là hình dung được từ đang muốn nói đến trong flashcard.
         + Bối cảnh: Đảm bảo toàn bộ vật thể đều được vẽ trong khuôn ảnh. Ưu tiên một vật thể nếu nó đủ mô tả cho từ vựng hay câu ví dụ.
         Nếu trong câu hay nghĩa của từ, của câu cần nhiều vật thể để mô tả thì vẽ nhiều vật thể, nhưng đảm bảo tất cả vật thể nằm trong nền trắng, không tạo background khác cho chúng.

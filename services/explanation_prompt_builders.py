@@ -1,29 +1,6 @@
 # services/explanation_prompt_builders.py
 
 # Mỗi hàm nhận vào task và prompt_template, trả về chuỗi prompt đã được format.
-
-def build_script_hinh_anh_prompt(task: dict, prompt_template: str) -> str:
-    q_data = task['data']
-    answer_text = "Đúng" if q_data.get('correct_answer') == 1 else "Sai"
-    return prompt_template.format(
-        image_description=q_data.get('image_des', ''),
-        script_chinese=q_data.get('script', ''),
-        script_pinyin=q_data.get('pinyin', ''),
-        script_translation=q_data.get('translation', ''),
-        correct_answer_text=answer_text
-    )
-
-def build_tuvung_hinh_anh_prompt(task: dict, prompt_template: str) -> str:
-    q_data = task['data']
-    answer_text = "Đúng" if q_data.get('correct_answer') == 1 else "Sai"
-    return prompt_template.format(
-        image_description=q_data.get('image_des', ''),
-        word_chinese=q_data.get('script', ''),
-        word_pinyin=q_data.get('pinyin', ''),
-        word_translation=q_data.get('translation', ''),
-        correct_answer_text=answer_text
-    )
-
 def build_individual_image_matching_prompt(task: dict, prompt_template: str) -> str:
     q_data = task['data']
     image_options = q_data.get('image_options', [])

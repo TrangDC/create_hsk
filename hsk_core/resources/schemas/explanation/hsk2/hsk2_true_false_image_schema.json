@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải cho câu hỏi Đúng/Sai dựa trên hình ảnh của HSK2.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải thích ngắn gọn bằng tiếng Việt, so sánh nội dung mô tả hình ảnh với nội dung câu script để kết luận tại sao đáp án là Đúng hoặc Sai."
+    },
+    "script_block": {
+      "type": "object",
+      "description": "Khối 'Phụ đề' chứa script gốc của câu hỏi.",
+      "properties": {
+        "chinese_text": { "type": "string" },
+        "pinyin": { "type": "string" }
+      },
+      "required": ["chinese_text", "pinyin"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của script.",
+      "properties": {
+        "vietnamese_text": { "type": "string" }
+      },
+      "required": ["vietnamese_text"]
+    }
+  },
+  "required": ["analysis_paragraph", "script_block", "translation_block"]
+}

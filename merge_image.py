@@ -85,7 +85,7 @@ class ImageMerger:
     def load_image(self, image_name):
         """Tải ảnh từ thư mục"""
         # Thử các extension phổ biến
-        extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif']
+        extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.webp']
         
         for ext in extensions:
             image_path = self.images_folder / f"{image_name}{ext}"

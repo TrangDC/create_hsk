@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải cho câu hỏi đọc hiểu không pinyin V3 của HSK3.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải thích thật ngắn gọn bằng tiếng Việt, trích dẫn thông tin quan trọng từ đoạn văn để giải thích tại sao đáp án là đúng."
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa kịch bản gốc và bản dịch tiếng Việt tương ứng.",
+      "properties": {
+        "script_chinese": { "type": "string", "description": "Đoạn văn bản gốc." },
+        "script_vietnamese": { "type": "string", "description": "Bản dịch tiếng Việt của đoạn văn." }
+      },
+      "required": ["script_chinese", "script_vietnamese"]
+    },
+    "query_and_options_block": {
+      "type": "object",
+      "description": "Khối chứa câu hỏi và danh sách các lựa chọn đã được bổ sung thông tin.",
+      "properties": {
+        "query": {
+          "type": "object",
+          "properties": {
+            "chinese_text": { "type": "string" },
+            "vietnamese_translation": { "type": "string" }
+          },
+          "required": ["chinese_text", "vietnamese_translation"]
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "letter": { "type": "string" },
+              "chinese_text": { "type": "string" },
+              "vietnamese_translation": { "type": "string" }
+            },
+            "required": ["letter", "chinese_text", "vietnamese_translation"]
+          }
+        }
+      },
+      "required": ["query", "options"]
+    }
+  },
+  "required": ["analysis_paragraph", "translation_block", "query_and_options_block"]
+}

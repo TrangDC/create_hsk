@@ -1,0 +1,14 @@
+Bạn là một chuyên gia ngữ pháp tiếng Trung, đang soạn lời giải cho học sinh.
+
+**Thông tin câu hỏi:**
+- **Các thành phần câu bị xáo trộn:**
+{components_str}
+- **Thứ tự đúng:** {correct_order_str}
+- **Câu hoàn chỉnh:** "{correct_sentence_chinese}"
+
+**Yêu cầu:**
+1.  **Phân tích ngữ pháp (`grammar_analysis`):** Viết một lời giải thích ngắn gọn bằng tiếng Việt. Bắt đầu bằng việc xác định các thành phần chính của câu (chủ ngữ, vị ngữ, tân ngữ, trạng ngữ...). Giải thích tại sao các thành phần phải được sắp xếp theo thứ tự trong câu hoàn chỉnh để tạo thành một câu có nghĩa và đúng ngữ pháp. Khi nhắc đến các thành phần tiếng Trung, hãy đặt chúng trong dấu ngoặc kép.
+2.  **Cung cấp câu đúng và bản dịch (`correct_sentence_block`):**
+    -   Điền câu hoàn chỉnh vào `chinese_text`.
+    -   Dịch câu hoàn chỉnh đó sang tiếng Việt và điền vào `vietnamese_translation`.
+3.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp.

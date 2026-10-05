@@ -27,10 +27,10 @@ def populate_individual_image_matching(worksheet, data: list):
     print(f"   ✅ Hoàn thành điền {len(data)} câu hỏi.")
 
 # Sheet ĐS (img) HSK1 và ĐS Ko phụ đề (img) HSK1
-def populate_true_false_from_array(workbook, data: list):
+def populate_true_false_from_array(workbook, data):
     """
     Điền dữ liệu cho 2 sheet Đúng/Sai từ một mảng JSON phẳng.
-    Key JSON: (không có, xử lý toàn bộ mảng)
+    Key JSON: (không có, xử lý toàn bộ mảng hoặc object có property 'questions')
     """
     print(f"   -> Đang phân phối dữ liệu Đúng/Sai vào các sheet...")
     # Lấy các sheet cần điền
@@ -41,6 +41,15 @@ def populate_true_false_from_array(workbook, data: list):
         print(f"   ❌ Lỗi: Không tìm thấy sheet cần thiết: {e}. Bỏ qua.")
         return
 
+    # Xử lý cả 2 format: {"questions": [...]} và [...]
+    if isinstance(data, dict) and "questions" in data:
+        questions_list = data["questions"]
+    elif isinstance(data, list):
+        questions_list = data
+    else:
+        print(f"   ❌ Lỗi: Format dữ liệu không hợp lệ. Bỏ qua.")
+        return
+
     # Khởi tạo bộ đếm hàng cho mỗi sheet
     row_counters = {
         "ĐS (img) HSK1": 2,
@@ -48,7 +57,7 @@ def populate_true_false_from_array(workbook, data: list):
     }
 
     # Lặp qua từng câu hỏi trong mảng dữ liệu
-    for item in data:
+    for item in questions_list:
         kind = item.get("kind")
         sheet_to_populate = None
         if kind == "script_hinh_anh":
@@ -495,9 +504,9 @@ def populate_sentence_reordering(worksheet, data: list):
     print(f"   -> Đang điền dữ liệu vào sheet: {worksheet.title}")
     start_row = 2
     for i, question in enumerate(data, start=start_row):
-        # Cột G: Các thành phần câu
+        # Cột F: Các thành phần câu
         components = question.get('components', [])
-        worksheet[f'G{i}'] = "; ".join(components)
+        worksheet[f'F{i}'] = "; ".join(components)
         
         # Cột H: Đáp án đúng
         worksheet[f'H{i}'] = question.get('correct_order')

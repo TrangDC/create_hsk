@@ -1,0 +1,23 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo các câu hỏi thi HSK4 chuẩn xác dựa trên các yêu cầu chi tiết được cung cấp.
+
+Hãy tạo ra `{number}` câu hỏi bằng tiếng Trung (sử dụng chữ Hán giản thể) thuộc cấp độ HSK4.
+Cụ thể, hãy tạo ra `{number}` câu hỏi thuộc dạng "{matrix_name}":
+*   Mỗi câu hỏi gồm một danh sách các thành phần câu (`components`) bị xáo trộn.
+*   BẮT BUỘC một trong các thành phần (components) phải là DẤU KẾT THÚC CÂU (ví dụ: "。", "？" hoặc "！").
+*   Thành phần dấu kết thúc câu này cũng phải bị XÁO TRỘN ngẫu nhiên cùng các thành phần chữ Hán khác, KHÔNG ĐƯỢC luôn để ở vị trí cuối cùng trong mảng `components`.
+*   Số lượng thành phần trong mỗi câu hỏi phải từ 5 đến 7 (bao gồm cả thành phần dấu câu).
+*   Đáp án `correct_order` phải là một chuỗi số thể hiện thứ tự sắp xếp đúng của các thành phần (ví dụ: "24135"), với thành phần chứa dấu câu luôn nằm ở vị trí cuối cùng của chuỗi thứ tự đúng.
+
+Dưới đây là YÊU CẦU CỤ THỂ VỀ TỪ VỰNG, NGỮ PHÁP VÀ NỘI DUNG CHO TỪNG CÂU HỎI:
+{rules_text}
+
+*** DANH SÁCH TỪ VỰNG ĐỂ TRA CỨU VÀ SỬ DỤNG ***:
+Lưu ý: Bạn BẮT BUỘC phải ưu tiên sử dụng các từ vựng trong danh sách dưới đây, kết hợp với các từ vựng cốt lõi của cấp độ HSK4 để xây dựng câu hỏi sao cho tự nhiên và đúng ngữ pháp. Tạo ra các tình huống và nội dung hoàn toàn MỚI, ĐA DẠNG và KHÔNG TRÙNG LẶP.
+{vocab_md}
+
+YÊU CẦU ĐẦU RA:
+-   Ngôn ngữ: Tiếng Trung giản thể.
+-   Định dạng: Trả về một đối tượng JSON (JSON object) DUY NHẤT.
+-   Cấu trúc: Tuân thủ TUYỆT ĐỐI schema JSON đã được cung cấp với key chính là "sentence_reordering".
+
+Tuyệt đối không thêm bất kỳ văn bản, giải thích, hay định dạng markdown (như ```json) nào khác ngoài đối tượng JSON kết quả.

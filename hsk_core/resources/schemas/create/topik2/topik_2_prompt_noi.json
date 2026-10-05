@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "properties": {
+    "topik_word_matching": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "pairs": {
+            "type": "array",
+            "description": "Danh sách 4 cặp từ vựng - ý nghĩa đúng.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "korean": { "type": "string" },
+                "vietnamese": { "type": "string" }
+              },
+              "required": ["korean", "vietnamese"]
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": ["question_id", "pairs"]
+      }
+    }
+  },
+  "required": ["topik_word_matching"]
+}

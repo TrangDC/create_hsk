@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "description": "Cấu trúc lời giải chi tiết cho câu hỏi dạng TN chọn câu trả lời đúng từ học liệu chung.",
+  "properties": {
+    "analysis_paragraph": {
+      "type": "string",
+      "description": "Lời giải phân tích ngắn gọn logic bằng tiếng Việt, giải thích tại sao câu hỏi lại được trả lời một cách phù hợp bởi câu trả lời đã chọn trong học liệu chung."
+    },
+    "context_block": {
+      "type": "object",
+      "description": "Khối chứa nội dung câu hỏi gốc.",
+      "properties": {
+        "chinese_text": {
+          "type": "string",
+          "description": "Nội dung câu hỏi bằng tiếng Trung."
+        },
+        "pinyin": {
+          "type": "string",
+          "description": "Phiên âm Pinyin cho câu hỏi."
+        }
+      },
+      "required": ["chinese_text", "pinyin"]
+    },
+    "translation_block": {
+      "type": "object",
+      "description": "Khối 'Tạm dịch' chứa bản dịch tiếng Việt của câu hỏi.",
+      "properties": {
+        "vietnamese_text": {
+          "type": "string",
+          "description": "Bản dịch tiếng Việt của câu hỏi."
+        }
+      },
+      "required": ["vietnamese_text"]
+    }
+  },
+  "required": ["analysis_paragraph", "context_block", "translation_block"]
+}

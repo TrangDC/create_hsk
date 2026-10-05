@@ -37,7 +37,14 @@ class InputDataManager:
             'type': ['loại từ', 'từ loại', 'type', 'pos'],
             'meaning': ['nghĩa', 'ý nghĩa', 'meaning', 'vietnamese'],
             'example': ['ví dụ', 'câu ví dụ', 'example', 'sentence'],
-            'ex_pinyin': ['phiên âm ví dụ', 'phiên âm câu'],
+            'ex_pinyin': [
+                'phiên âm ví dụ',
+                'phiên âm câu',
+                'pinyin ví dụ',
+                'pinyin câu',
+                'example pinyin',
+                'example_pinyin',
+            ],
             'ex_meaning': ['nghĩa ví dụ', 'dịch câu', 'dịch ví dụ'],
             'topic': ['tên chủ đề', 'chủ đề', 'topic'],
             'lesson': ['stt bài', 'bài', 'lesson', 'unit'],
@@ -73,9 +80,22 @@ class InputDataManager:
             exist_thumb = get_val('thumbnail')
             exist_audio1 = get_val('audio1')
             exist_audio2 = get_val('audio2')
+            pinyin = get_val('pinyin')
+            word_type = get_val('type')
+            meaning = get_val('meaning')
+            example = get_val('example')
+            ex_pinyin = get_val('ex_pinyin')
+            ex_meaning = get_val('ex_meaning')
 
-            # Đánh dấu dòng này có cần xử lý AI/Media hay không
-            needs_processing = not (exist_thumb and exist_audio1 and exist_audio2)
+            # Chạy enrichment nếu thiếu media hoặc thiếu text cần điền từ AI/cache.
+            missing_text = (
+                not (pinyin and word_type and meaning)
+                or bool(example and (not ex_pinyin or not ex_meaning))
+            )
+            needs_processing = (
+                not (exist_thumb and exist_audio1 and exist_audio2)
+                or missing_text
+            )
 
             stt = get_val('stt') or str(idx + 1)
             if stt.endswith('.0'): stt = stt[:-2]
@@ -84,15 +104,16 @@ class InputDataManager:
             topic = get_val('topic') or "General"
 
             item = {
+                "excel_row": idx + 2,
                 "needs_processing": needs_processing, # Biến quan trọng
                 "raw_stt": stt,
                 "word": str(word).strip(),
-                "pinyin": get_val('pinyin'),
-                "type": get_val('type'),
-                "meaning": get_val('meaning'),
-                "example": get_val('example'),
-                "ex_pinyin": get_val('ex_pinyin'),
-                "ex_meaning": get_val('ex_meaning'),
+                "pinyin": pinyin,
+                "type": word_type,
+                "meaning": meaning,
+                "example": example,
+                "ex_pinyin": ex_pinyin,
+                "ex_meaning": ex_meaning,
                 # Trả về dữ liệu cũ nếu có
                 "exist_thumb": exist_thumb,
                 "exist_audio1": exist_audio1,
@@ -101,7 +122,7 @@ class InputDataManager:
                 "final_title": f"H{hsk_num}_B{lesson}_{topic}",
                 "filename_audio_word": f"H{hsk_num}_B{lesson}_{stt}.mp3",
                 "filename_audio_ex": f"H{hsk_num}_B{lesson}_VD_{stt}.mp3",
-                "filename_image": f"H{hsk_num}_B{lesson}_BG_{stt}.gif"
+                "filename_image": f"H{hsk_num}_B{lesson}_BG_{stt}.{'png' if hsk_num in ('4', '5') else 'gif'}"
             }
             processed_data.append(item)
             

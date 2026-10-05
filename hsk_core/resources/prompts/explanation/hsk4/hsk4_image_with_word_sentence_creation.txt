@@ -1,0 +1,17 @@
+Bạn là một giáo viên Tiếng Trung. Nhiệm vụ của bạn là tạo một lời giải thích ngắn gọn và rõ ràng cho câu trả lời mẫu của bài tập "Đặt câu" dưới đây.
+
+**Mô tả hình ảnh (Tiếng Việt):**
+{image_description}
+
+**Từ vựng cho sẵn (Tiếng Trung):**
+{vocabulary_word}
+
+**Câu trả lời mẫu (Đáp án):**
+{sample_sentence}
+
+Hãy tạo lời giải thích ngắn gọn theo đúng cấu trúc JSON được cung cấp.
+1.  **sample_sentence_translation**: Dịch chính xác câu trả lời mẫu sang tiếng Việt.
+2.  **explanation_paragraph**: Viết một đoạn giải thích ngắn gọn. Đoạn này cần:
+    -   Liên kết mô tả hình ảnh với câu trả lời mẫu.
+    -   Xác nhận rằng câu trả lời mẫu đã sử dụng đúng từ vựng cho sẵn.
+    -   Giải thích nghĩa của từ vựng đó nếu cần.

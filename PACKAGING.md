@@ -31,7 +31,7 @@ datas = [
 - Dùng spec (giữ config trong file):
 
 ```powershell
-pyinstaller --clean HSK_TOPIK_Creator.spec
+python -m PyInstaller --clean HSK_TOPIK_Creator.spec
 ```
 
 - One-file executable (không dùng spec):
@@ -57,5 +57,5 @@ Lưu ý: trên Windows, `--add-data` dùng định dạng `src;dest`.
 ```powershell
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt pyinstaller
-pyinstaller --clean HSK_TOPIK_Creator.spec
+python -m PyInstaller --clean HSK_TOPIK_Creator.spec
 ```

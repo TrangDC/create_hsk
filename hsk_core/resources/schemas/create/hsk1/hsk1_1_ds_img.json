@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "ds_img_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "kind": { 
+            "type": "string",
+            "description": "Phân loại câu hỏi, ở đây luôn là 'script_hinh_anh' cho HSK1.",
+            "enum": ["script_hinh_anh"]
+          },
+          "do_kho": {
+            "type": "string",
+            "description": "Độ khó của câu hỏi, ví dụ 'NB', 'TH', 'VD'."
+          },
+          "script": { "type": "string" },
+          "pinyin": { "type": "string" },
+          "translation": { "type": "string" },
+          "image_des": { "type": "string" },
+          "correct_answer": { "type": "integer",
+            "description": "Đáp án: 1 cho Đúng, 0 cho Sai."
+          },
+          "explanation": { "type": "string" }
+        },
+        "required": ["id", "kind", "script", "pinyin", "translation", "image_des", "correct_answer", "explanation"]
+      }
+    }
+  },
+  "required": ["ds_img_data"]
+}

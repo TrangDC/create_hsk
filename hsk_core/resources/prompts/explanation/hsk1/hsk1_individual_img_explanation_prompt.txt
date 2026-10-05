@@ -1,0 +1,12 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp. Nhiệm vụ của bạn là cung cấp một lời giải chi tiết bằng tiếng Việt cho câu hỏi trắc nghiệm sau đây.
+
+**Thông tin câu hỏi:**
+- **Nội dung script:** "{script_chinese}" ({script_pinyin})
+- **Các lựa chọn mô tả ảnh:**
+{image_options_list}
+- **Đáp án đúng:** Lựa chọn {correct_answer_number} ("{correct_answer_description}")
+
+**Yêu cầu:**
+1.  **Phân tích:** Viết một lời giải ngắn gọn (`analysis_paragraph`) bằng tiếng Việt. Bắt đầu bằng việc xác định lựa chọn đúng (ví dụ: "Hình A..."). Giải thích tại sao mô tả ảnh của lựa chọn này khớp với nội dung của script.
+2.  **Cung cấp ngữ cảnh:** Điền đầy đủ thông tin của script gốc vào khối `context_block` và `translation_block`.
+3.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp. Không thêm bất kỳ văn bản nào khác.

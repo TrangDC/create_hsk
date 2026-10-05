@@ -1,0 +1,13 @@
+Bạn là một giáo viên tiếng Trung chuyên nghiệp. Nhiệm vụ của bạn là cung cấp một lời giải chi tiết bằng tiếng Việt cho câu hỏi Đúng/Sai sau đây.
+
+**Thông tin câu hỏi:**
+- **Mô tả hình ảnh:** {image_description}
+- **Từ vựng cho sẵn:** {word_chinese}
+- **Phiên âm:** {word_pinyin}
+- **Bản dịch:** {word_translation}
+- **Đáp án đúng:** {correct_answer_text}
+
+**Yêu cầu:**
+1.  **Phân tích:** Viết một lời giải ngắn gọn (`analysis_paragraph`) bằng tiếng Việt. Bắt đầu bằng việc giải thích nghĩa của từ vựng "{word_chinese}" ({word_pinyin}). Sau đó, mô tả ngắn gọn những gì có trong hình ảnh. Cuối cùng, so sánh hai yếu tố này để kết luận tại sao đáp án là "{correct_answer_text}".
+2.  **Cung cấp bản dịch:** Điền đầy đủ thông tin vào khối `translation_block`.
+3.  **Định dạng:** Trả về kết quả dưới dạng một đối tượng JSON DUY NHẤT, tuân thủ nghiêm ngặt schema đã được cung cấp. Không thêm bất kỳ văn bản nào khác.

@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "topik_listening_fill": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "full_sentence": { "type": "string", "description": "Câu hoàn chỉnh tiếng Hàn." },
+          "target_word": { "type": "string", "description": "Từ cần đục lỗ." },
+          "target_meaning": { "type": "string", "description": "Nghĩa tiếng Việt của từ." },
+          "sentence_translation": { "type": "string", "description": "Dịch nghĩa cả câu." }
+        },
+        "required": ["question_id", "full_sentence", "target_word", "target_meaning", "sentence_translation"]
+      }
+    }
+  },
+  "required": ["topik_listening_fill"]
+}

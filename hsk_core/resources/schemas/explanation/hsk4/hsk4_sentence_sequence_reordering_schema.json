@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "logical_steps": {
+      "type": "array",
+      "description": "Danh sách 3 bước giải thích logic tương ứng với thứ tự đúng.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Nhãn của câu (A, B, hoặc C) ở bước này."
+          },
+          "translation": {
+            "type": "string",
+            "description": "Bản dịch tiếng Việt của câu văn tương ứng."
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Giải thích ngắn gọn lý do tại sao câu này được đặt ở vị trí này trong trình tự."
+          }
+        },
+        "required": ["label", "translation", "explanation"]
+      }
+    },
+    "full_passage_translation": {
+      "type": "string",
+      "description": "Bản dịch tiếng Việt của toàn bộ đoạn văn sau khi đã sắp xếp đúng."
+    }
+  },
+  "required": ["logical_steps", "full_passage_translation"]
+}

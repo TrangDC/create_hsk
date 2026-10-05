@@ -27,7 +27,7 @@ pip install pyinstaller
 Giao diện chính là `gui.py`. Sau khi cài xong dependencies:
 
 ```powershell
-python gui.py
+.\.venv\Scripts\python.exe .\gui.py
 ```
 
 Ứng dụng sẽ mở cửa sổ PyQt5 để bạn chọn thư mục PDF input, cấp độ HSK/TOPIK và thực thi pipeline.

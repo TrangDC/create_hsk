@@ -10,6 +10,83 @@ from call_vertexai import generate_content, extract_structured_data_from_pdf
 import shutil
 from config.hsk_question_configs import get_prompt_config
 import sys
+import re
+
+
+def load_old_generated_data(old_output_folder: Optional[str]) -> dict:
+    """Đọc file generated_question_data.json từ thư mục output cũ nếu có."""
+    if not old_output_folder:
+        return {}
+
+    old_json_path = os.path.join(old_output_folder, "generated_question_data.json")
+    if not os.path.isfile(old_json_path):
+        print(f"⚠️ Không tìm thấy file generated_question_data.json trong '{old_output_folder}'. Bỏ qua dữ liệu cũ.")
+        return {}
+
+    try:
+        with open(old_json_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        if isinstance(data, dict):
+            print(f"✅ Đã nạp dữ liệu câu hỏi cũ từ '{old_json_path}'.")
+            return data
+        print(f"⚠️ File JSON cũ không có định dạng object hợp lệ: '{old_json_path}'. Bỏ qua dữ liệu cũ.")
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"⚠️ Không thể đọc dữ liệu câu hỏi cũ từ '{old_json_path}': {exc}. Bỏ qua dữ liệu cũ.")
+
+    return {}
+
+
+def build_old_questions_context(prompt_name: str, old_generated_data: dict) -> Optional[str]:
+    """Tạo khối context nhắc AI tránh lặp từ dữ liệu cũ cùng prompt_name."""
+    if not old_generated_data:
+        return None
+
+    old_prompt_data = old_generated_data.get(prompt_name)
+    if old_prompt_data is None:
+        return None
+
+    def collect_string_values(value: Any, bucket: list[str]):
+        if isinstance(value, str):
+            cleaned = " ".join(value.split())
+            if cleaned:
+                bucket.append(cleaned)
+            return
+        if isinstance(value, list):
+            for item in value:
+                collect_string_values(item, bucket)
+            return
+        if isinstance(value, dict):
+            for item in value.values():
+                collect_string_values(item, bucket)
+
+    def unique_keep_order(items: list[str]) -> list[str]:
+        seen = set()
+        result = []
+        for item in items:
+            if item not in seen:
+                seen.add(item)
+                result.append(item)
+        return result
+
+    raw_strings: list[str] = []
+    collect_string_values(old_prompt_data, raw_strings)
+    unique_strings = unique_keep_order(raw_strings)
+
+    serialized = json.dumps(old_prompt_data, ensure_ascii=False, indent=2)
+
+    return (
+        "RÀNG BUỘC BỔ SUNG BẮT BUỘC ĐỂ TRÁNH LẶP VỚI CÂU HỎI CŨ:\n"
+        f"- prompt_name hiện tại: {prompt_name}\n"
+        "- Đây là yêu cầu ưu tiên cao. Khi có xung đột nhẹ với ví dụ quen thuộc, hãy ưu tiên tạo nội dung khác với dữ liệu cũ.\n"
+        "- Không được lặp lại hoặc chỉ thay rất ít chữ đối với: từ vựng trung tâm, mốc thời gian, địa điểm, hành động, nhân vật, chủ đề giao tiếp, học liệu chung, phương án nhiễu.\n"
+        "- Tự động chọn các từ vựng khác trong danh sách từ vựng để tạo câu hỏi, ví dụ. Chỉ dùng lại từ cũ khi đó là từ bắt buộc hoặc không còn lựa chọn hợp lệ trong phạm vi bài.\n"
+        "- Phải tạo bối cảnh mới rõ ràng, tránh toàn bộ mô típ đã xuất hiện ở trong các câu hỏi cũ như cùng khung giờ, cùng địa điểm, cùng chuỗi hành động, cùng kiểu hỏi đáp.\n"
+        "- Trước khi trả kết quả, hãy tự đối chiếu với dữ liệu cũ và thay thế mọi câu nào còn quá giống.\n"
+        "- Mục tiêu là bộ câu hỏi mới phải khác rõ về từ vựng sử dụng, từ khóa chính và khác rõ về tình huống sử dụng ngôn ngữ.\n\n"
+        "CÁC CÂU/TỪ/NGỮ CẢNH CŨ ĐÃ XUẤT HIỆN, CẦN TRÁNH LẶP LẠI GẦN NGUYÊN VẸN.\n"
+        "DỮ LIỆU THAM CHIẾU ĐẦY ĐỦ TỪ LẦN TẠO CŨ:\n"
+        f"{serialized}"
+    )
 
 def get_resource_path(relative_path):
     """
@@ -81,7 +158,13 @@ def format_structured_data_for_prompt(structured_data: Dict[str, Any], mode: int
     return "\n".join(content_parts)
 
 # --- HÀM ĐIỀU PHỐI CHÍNH CỦA MODULE ---
-def run_question_generation(level: str, pdf_folder_path: str, output_folder_path: str, preproc_mode: int = 0):
+def run_question_generation(
+    level: str,
+    pdf_path: str,
+    output_folder_path: str,
+    preproc_mode: int = 0,
+    old_output_folder: Optional[str] = None
+):
     """
     Thực hiện toàn bộ quy trình tạo câu hỏi.
     Returns:
@@ -116,54 +199,42 @@ def run_question_generation(level: str, pdf_folder_path: str, output_folder_path
     EXCEL_TEMPLATE_PATH = os.path.join(RESOURCES_DIR, "sheet", f"{level}.xlsx")
 
     # --- 2. CHUẨN BỊ MÔI TRƯỜNG ---
-    # Quét file PDF
-    try:
-        pdf_files = [os.path.join(pdf_folder_path, f) for f in os.listdir(pdf_folder_path) if f.lower().endswith('.pdf')]
-        if not pdf_files:
-            print(f"❌ Lỗi: Không tìm thấy file PDF nào trong '{pdf_folder_path}'.")
-            return None, None
-        print(f"✅ Tìm thấy {len(pdf_files)} file PDF.")
-    except FileNotFoundError:
-        print(f"❌ Lỗi: Thư mục PDF '{pdf_folder_path}' không tồn tại.")
+    if not pdf_path or not os.path.isfile(pdf_path):
+        print(f"❌ Lỗi: Không tìm thấy file PDF tại '{pdf_path}'.")
         return None, None
+    print("✅ Đã nhận file PDF đầu vào.")
+
+    pdf_files = [pdf_path]
     if level in ["topik1", "topik2", "topik3"]:
-        # Ưu tiên tìm file có chữ "Bài"
-        candidate_files = [f for f in pdf_files if "Bài" in os.path.basename(f)]
-        if candidate_files:
-            chosen_pdf = candidate_files[0]
-        else:
-            # Nếu không có file nào chứa chữ "Bài", lấy file đầu tiên bất kỳ
-            chosen_pdf = pdf_files[0]
-        # Lấy tên file gốc bỏ đuôi .pdf
-        base_name = os.path.splitext(os.path.basename(chosen_pdf))[0]
+        base_name = os.path.splitext(os.path.basename(pdf_path))[0]
         output_filename = f"{base_name}_{level}.xlsx"    
     else:
         output_filename = f"{level}_output.xlsx"
     OUTPUT_EXCEL_PATH = os.path.join(output_folder_path, output_filename)
     INTERMEDIATE_DATA_FILE = os.path.join(output_folder_path, "generated_question_data.json")
+    old_generated_data = load_old_generated_data(old_output_folder)
     
     # --- (LOGIC MỚI) BƯỚC TIỀN XỬ LÝ ĐỘNG ---
     preprocessed_text_content: Optional[str] = None
     # Điều kiện: chỉ có 1 file và tên chứa "bài khóa" (không phân biệt hoa thường)
-    if len(pdf_files) == 1 or "bài khóa" in os.path.basename(pdf_files[0]).lower():
-        if level in ["hsk1", "hsk4", "hsk5", "hsk2", "hsk3"]:
-            print("\n--- Phát hiện file 'bài khóa' duy nhất. Bắt đầu quy trình tiền xử lý. ---")
-            try:
-                structured_data = extract_structured_data_from_pdf(
-                    pdf_path=pdf_files[0],
-                    prompt_file_path=PREPROCESSING_PROMPT_PATH,
-                    schema_file_path=PREPROCESSING_SCHEMA_PATH
-                )
-                preprocessed_text_content = format_structured_data_for_prompt(structured_data)
-                print("--- ✅ Tiền xử lý thành công. Sử dụng dữ liệu đã bóc tách để tạo câu hỏi. ---")
-                # Lưu lại file text đã bóc tách để debug
-                with open(os.path.join(output_folder_path, "preprocessed_content.txt"), 'w', encoding='utf-8') as f:
-                    f.write(preprocessed_text_content)
+    if level in ["hsk1", "hsk4", "hsk5", "hsk2", "hsk3"]:
+        print("\n--- Phát hiện file bài học đơn lẻ. Bắt đầu quy trình tiền xử lý. ---")
+        try:
+            structured_data = extract_structured_data_from_pdf(
+                pdf_path=pdf_path,
+                prompt_file_path=PREPROCESSING_PROMPT_PATH,
+                schema_file_path=PREPROCESSING_SCHEMA_PATH,
+                service_tier="flex"
+            )
+            preprocessed_text_content = format_structured_data_for_prompt(structured_data, preproc_mode)
+            print("--- ✅ Tiền xử lý thành công. Sử dụng dữ liệu đã bóc tách để tạo câu hỏi. ---")
+            with open(os.path.join(output_folder_path, "preprocessed_content.txt"), 'w', encoding='utf-8') as f:
+                f.write(preprocessed_text_content)
 
-            except Exception as e:
-                print(f"❌ Lỗi trong quá trình tiền xử lý: {e}.")
-                print("--- ⚠️ Sẽ tiếp tục tạo câu hỏi bằng file PDF gốc. Kết quả có thể không chính xác. ---")
-                preprocessed_text_content = None # Đảm bảo quay về trạng thái null nếu lỗi
+        except Exception as e:
+            print(f"❌ Lỗi trong quá trình tiền xử lý: {e}.")
+            print("--- ⚠️ Sẽ tiếp tục tạo câu hỏi bằng file PDF gốc. Kết quả có thể không chính xác. ---")
+            preprocessed_text_content = None
 
     # Tạo bản sao file Excel
     try:
@@ -180,8 +251,12 @@ def run_question_generation(level: str, pdf_folder_path: str, output_folder_path
         for p_name in PROMPT_CONFIGS.keys():
             api_kwargs = {
                 'prompt_file_path': os.path.join(PROMPTS_FOLDER, f"{p_name}.txt"),
-                'schema_file_path': os.path.join(SCHEMAS_FOLDER, f"{p_name}.json")
+                'schema_file_path': os.path.join(SCHEMAS_FOLDER, f"{p_name}.json"),
+                'service_tier': 'flex'
             }
+            old_questions_context = build_old_questions_context(p_name, old_generated_data)
+            if old_questions_context:
+                api_kwargs['extra_context_text'] = old_questions_context
             # (LOGIC MỚI) Quyết định nguồn dữ liệu đầu vào
             if preprocessed_text_content:
                 api_kwargs['text_content'] = preprocessed_text_content

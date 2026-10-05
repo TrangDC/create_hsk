@@ -1,0 +1,18 @@
+Bạn là giáo viên Tiếng Hàn. Hãy tìm trong mục "Từ mới" (New Words) của file PDF để tạo ra **20 câu hỏi** trắc nghiệm từ vựng  cấp độ TOPIK III.
+
+CẤU TRÚC ĐỀ BÀI (Bắt buộc):
+
+Cấp độ bắt buộc phải trong phạm vi TOPIK3.
+Cấp độ ngữ pháp, từ vựng: Bắt buộc nằm trong phạm vi bài pdf. Không vượt quá.
+Dạng bài: Chọn câu dịch đúng (Dịch một câu Tiếng Việt sang Tiếng Hàn).
+Phạm vi kiến thức: Từ vựng và ngữ pháp để tạo câu BẮT BUỘC phải nằm trong phạm vi bài học của file PDF. Tuyệt đối không sử dụng từ vựng/ngữ pháp ngoài (vượt quá trình độ TOPIK 3 hoặc không có trong bài).
+Nội dung câu hỏi: Mỗi câu hỏi đưa ra 1 câu hoàn chỉnh bằng Tiếng Việt liên quan đến chủ đề của file PDF.
+Phương án trả lời (4 đáp án):
+1 đáp án dịch Tiếng Hàn chuẩn xác hoàn toàn (về từ vựng, ngữ pháp, kính ngữ).
+3 đáp án nhiễu (sai). Các đáp án sai có thể được tạo ra bằng cách: Dùng sai tiểu từ (이/가, 은/는, 을/를...), sai đuôi câu, sai thì, hoặc dùng sai từ vựng nhưng vẫn phải là từ vựng có trong bài để gây nhầm lẫn.
+Giải thích: Bắt buộc giải thích chi tiết tại sao đáp án đó đúng và tại sao 3 đáp án còn lại sai.
+
+ĐẦU RA:
+- Trả về JSON object duy nhất theo schema.
+- Key chính: "topik_11_prompt_chon_dap_an_dich_dung".
+- Đảm bảo đủ 20 câu hỏi (10 câu đầu loại 1, 10 câu sau loại 2).
