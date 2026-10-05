@@ -1143,13 +1143,13 @@ class PPTGenerator:
             self._set_text_exact_style(right_shape, "02. BÀI KHÓA", "Anton", font_size=56, color="FCF1D4")
 
     def add_end_slide(self):
-        """Slide cuối cùng — edit in-place."""
+        """Slide cuối cùng — edit in-place (with fallbacks if shape placeholders do not exist)."""
         lesson = self.data.get("lesson_info", {})
         slide  = self.prs.slides[self._end_slide_index]
         shapes = self._get_all_shapes(slide.shapes)
 
-        title_shape    = self._find_shape_by_name(shapes, "TextBox 10")
-        subtitle_shape = self._find_shape_by_name(shapes, "TextBox 21")
+        title_shape    = self._find_shape_by_name(shapes, "TextBox 10") or self._find_shape_by_name(shapes, "TextBox 18")
+        subtitle_shape = self._find_shape_by_name(shapes, "TextBox 21") or self._find_shape_by_name(shapes, "TextBox 30")
 
         if title_shape:
             # Tương tự như slide cover, sử dụng min_font là 75
@@ -1157,12 +1157,50 @@ class PPTGenerator:
                 title_shape, lesson.get("title_cn", ""),
                 max_font=126, min_font=75
             )
+        else:
+            title_shape = slide.shapes.add_textbox(
+                Inches(5.61), Inches(3.73), Inches(8.75), Inches(1.38)
+            )
+            self._apply_title_styling(
+                title_shape, lesson.get("title_cn", ""),
+                max_font=126, min_font=75
+            )
+
+        subtitle_text = f"Bài Khóa - Bài {lesson.get('lesson_number', lesson.get('number', ''))}"
         if subtitle_shape:
             self._replace_subtitle_with_rounded_rect(
                 slide, subtitle_shape,
-                f"Bài Khóa - Bài {lesson.get('lesson_number', lesson.get('number', ''))}",
+                subtitle_text,
                 font_size=50
             )
+        else:
+            subtitle_left = Inches(7.02)
+            subtitle_top = Inches(5.98)
+            subtitle_width = Inches(5.94)
+            subtitle_height = Inches(1.25)
+
+            subtitle_background = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE,
+                subtitle_left, subtitle_top, subtitle_width, subtitle_height
+            )
+            subtitle_background.adjustments[0] = 0.5
+            subtitle_background.fill.solid()
+            subtitle_background.fill.fore_color.rgb = RGBColor(0xB5, 0x1F, 0x09)
+            subtitle_background.line.fill.background()
+
+            subtitle = slide.shapes.add_textbox(
+                subtitle_left, subtitle_top, subtitle_width, subtitle_height
+            )
+            subtitle.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+            self._set_text_exact_style(
+                subtitle,
+                subtitle_text,
+                font_name="Fraunces",
+                font_size=50,
+                color="FFFFFF",
+                align="center"
+            )
+            self._bring_to_front(subtitle)
 
     # ================================================================
     # CONTENT SLIDES — Lập trình các hàm chèn nội dung vào đây
@@ -1856,7 +1894,7 @@ class PPTGenerator:
 if __name__ == "__main__":
     import sys; base_dir = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     template_path = os.path.join(base_dir, "resources", "ppt_templates", "HSK Bài Khóa template.pptx")
-    json_path     = "D:\Edmicro\Tools\create_hsk\hsk_ppt\draft\Bài 9_我去买杯奶茶_bk.json"
+    json_path     = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\draft\Bài 9_我去买杯奶茶_bk.json"
     # template_path = r"D:\Edmicro\Tools\create_hsk\dist\resources\ppt_templates\HSK Bài Khóa template.pptx"
     # json_path = r"D:\Edmicro\Tools\create_hsk\hsk_ppt\Bài 5 这样的照片才好看_bk.json"
     output_path   = os.path.join(base_dir, "hsk_ppt", "HSK2_BK_test_output.pptx")

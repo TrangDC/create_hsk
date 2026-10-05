@@ -416,6 +416,77 @@ class HSK4BookPPTGenerator(PPTGenerator):
             )
             self._bring_to_front(box)
 
+    def add_end_slide(self):
+        """Fill end slide text (title & rounded rectangle subtitle), with fallbacks for templates without text placeholders."""
+        lesson = self.data.get("lesson_info", {})
+        last_idx = len(self.prs.slides) - 1
+        slide = self.prs.slides[last_idx]
+        shapes = self._get_all_shapes(slide.shapes)
+
+        title_shape = (
+            self._find_shape_by_name(shapes, "TextBox 10")
+            or self._find_shape_by_name(shapes, "TextBox 18")
+        )
+        if title_shape:
+            self._apply_title_styling(
+                title_shape, lesson.get("title_cn", ""), max_font=126, min_font=75
+            )
+        else:
+            title_shape = slide.shapes.add_textbox(
+                Cm(self.COVER_TITLE_LEFT_CM),
+                Cm(self.COVER_TITLE_TOP_CM),
+                Cm(self.COVER_TITLE_WIDTH_CM),
+                Cm(self.COVER_TITLE_HEIGHT_CM),
+            )
+            self._apply_title_styling(
+                title_shape, lesson.get("title_cn", ""), max_font=126, min_font=75
+            )
+
+        subtitle_shape = (
+            self._find_shape_by_name(shapes, "TextBox 21")
+            or self._find_shape_by_name(shapes, "TextBox 30")
+        )
+        subtitle_text = f"Bài Khóa - Bài {lesson.get('lesson_number', lesson.get('number', ''))}"
+
+        if subtitle_shape:
+            self._replace_subtitle_with_rounded_rect(
+                slide, subtitle_shape, subtitle_text, font_size=50
+            )
+        else:
+            subtitle_left = Cm(self.COVER_SUBTITLE_LEFT_CM)
+            subtitle_top = Cm(self.COVER_SUBTITLE_TOP_CM)
+            subtitle_width = Cm(self.COVER_SUBTITLE_WIDTH_CM)
+            subtitle_height = Cm(self.COVER_SUBTITLE_HEIGHT_CM)
+
+            subtitle_background = slide.shapes.add_shape(
+                MSO_SHAPE.ROUNDED_RECTANGLE,
+                subtitle_left,
+                subtitle_top,
+                subtitle_width,
+                subtitle_height,
+            )
+            subtitle_background.adjustments[0] = 0.5
+            subtitle_background.fill.solid()
+            subtitle_background.fill.fore_color.rgb = RGBColor(0xB5, 0x1F, 0x09)
+            subtitle_background.line.fill.background()
+
+            subtitle = slide.shapes.add_textbox(
+                subtitle_left,
+                subtitle_top,
+                subtitle_width,
+                subtitle_height,
+            )
+            subtitle.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+            self._set_text_exact_style(
+                subtitle,
+                subtitle_text,
+                font_name="Fraunces",
+                font_size=50,
+                color="FFFFFF",
+                align="center",
+            )
+            self._bring_to_front(subtitle)
+
     def render_unit(self, unit, vocabulary_by_id):
         unit_vocabulary = [
             vocabulary_by_id[item_id]
